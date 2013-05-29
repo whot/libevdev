@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 #include "libevdev.h"
 #include "libevdev-int.h"
@@ -134,6 +135,21 @@ init_event_queue(struct libevdev *dev)
 	return 0;
 }
 
+static void
+_libevdev_log(struct libevdev *dev, const char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	dev->log(format, args);
+	va_end(args);
+}
+
+static void
+libevdev_noop_log_func(const char *format, va_list args)
+{
+}
+
 struct libevdev*
 libevdev_new(int fd)
 {
@@ -141,6 +157,7 @@ libevdev_new(int fd)
 
 	dev = calloc(1, sizeof(*dev));
 	dev->num_slots = -1;
+	dev->log = libevdev_noop_log_func;
 
 	if (fd >= 0)
 		libevdev_set_fd(dev, fd);
@@ -153,6 +170,12 @@ void
 libevdev_free(struct libevdev *dev)
 {
 	free(dev);
+}
+
+void
+libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc)
+{
+	dev->log = logfunc ? logfunc : libevdev_noop_log_func;
 }
 
 int
@@ -171,6 +194,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	int i;
 
 	if (dev->fd == -1) {
+		libevdev_log_func_t log;
 		libevdev_callback_proc cb, scb;
 		void *userdata;
 
@@ -178,6 +202,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 		cb = dev->callback;
 		scb = dev->sync_callback;
 		userdata = dev->userdata;
+		log = dev->log;
 
 		memset(dev, 0, sizeof(*dev));
 
@@ -185,6 +210,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 		dev->callback = cb;
 		dev->sync_callback = scb;
 		dev->userdata = userdata;
+		dev->log = log;
 	}
 
 	rc = ioctl(fd, EVIOCGBIT(0, sizeof(dev->bits)), dev->bits);

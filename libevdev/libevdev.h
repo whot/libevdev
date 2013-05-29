@@ -53,6 +53,24 @@ struct libevdev* libevdev_new(int fd);
 void libevdev_free(struct libevdev *dev);
 
 /**
+ * Logging function called by library-internal logging.
+ * This function is expected to treat it's input like printf would.
+ *
+ * @param format printf-style format string
+ * @param args List of arguments
+ *
+ * @see libevdev_set_log_handler
+ */
+typedef void (*libevdev_log_func_t)(const char *format, va_list args);
+
+/**
+ * Set a printf-style logging handler for library-internal logging.
+ *
+ * @note This function may be called before libevdev_set_fd.
+ */
+void libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc);
+
+/**
  * Grab or ungrab the device through a kernel EVIOCGRAB. This prevents other
  * clients (including kernel-internal ones such as rfkill) from receiving
  * events from this device.

@@ -41,6 +41,8 @@ struct libevdev {
 	libevdev_callback_proc sync_callback;
 	void *userdata;
 
+	libevdev_log_func_t log;
+
 	char name[MAX_NAME];
 	struct input_id ids;
 	unsigned long bits[NLONGS(EV_CNT)];
