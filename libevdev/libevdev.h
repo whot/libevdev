@@ -309,6 +309,17 @@ int libevdev_fetch_slot_value(const struct libevdev *dev, unsigned int slot, uns
 int libevdev_get_num_slots(const struct libevdev *dev);
 
 /**
+ * Get the currently active slot. This may differ from the value
+ * an ioctl may return at this time as events may have been read off the fd
+ * since changing the slot value but those events are still in the buffer
+ * waiting to be processed. The returned value is the value a caller would
+ * see if it were to process events manually one-by-one.
+ *
+ * @return the currently active slot (logically)
+ */
+int libevdev_get_current_slot(const struct libevdev *dev);
+
+/**
  * Forcibly enable an event type on this device, even if the underlying
  * device does not support it. While this cannot make the device actually
  * report such events, it will now return true for libevdev_has_event_type.

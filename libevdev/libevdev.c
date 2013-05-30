@@ -677,6 +677,12 @@ libevdev_get_num_slots(const struct libevdev *dev)
 	return dev->num_slots;
 }
 
+int
+libevdev_get_current_slot(const struct libevdev *dev)
+{
+	return dev->current_slot;
+}
+
 const struct input_absinfo*
 libevdev_get_abs_info(const struct libevdev *dev, unsigned int code)
 {
