@@ -512,10 +512,8 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 			if (rc != 0)
 				return rc;
 		}
-	} else if (dev->need_sync) {
-		/* FIXME: if a client decides not to sync, drop all sync events */
-		return 1;
-	}
+	} else if (dev->need_sync)
+		queue_shift_multiple(dev, dev->queue_nsync, NULL);
 
 	/* Always read in some more events. Best case this smoothes over a potential SYN_DROPPED,
 	   worst case we don't read fast enough and end up with SYN_DROPPED anyway */
