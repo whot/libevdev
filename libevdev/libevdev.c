@@ -150,6 +150,7 @@ libevdev_new(int fd)
 
 	dev = calloc(1, sizeof(*dev));
 	dev->num_slots = -1;
+	dev->current_slot = -1;
 	dev->log = libevdev_noop_log_func;
 
 	if (fd >= 0)
@@ -237,8 +238,10 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 			if (rc < 0)
 				goto out;
 
-			if (i == ABS_MT_SLOT)
+			if (i == ABS_MT_SLOT) {
 				dev->num_slots = abs_info.maximum + 1; /* FIXME: non-zero min? */
+				dev->current_slot = abs_info.value;
+			}
 
 		}
 	}
@@ -439,6 +442,20 @@ update_key_state(struct libevdev *dev, const struct input_event *e)
 }
 
 static int
+update_mt_state(struct libevdev *dev, const struct input_event *e)
+{
+	if (e->code == ABS_MT_SLOT) {
+		dev->current_slot = e->value;
+		return 0;
+	} else if (dev->current_slot == -1)
+		return 1;
+
+	dev->mt_slot_vals[dev->current_slot][e->code - ABS_MT_MIN] = e->value;
+
+	return 0;
+}
+
+static int
 update_abs_state(struct libevdev *dev, const struct input_event *e)
 {
 	if (!libevdev_has_event_type(dev, EV_ABS))
@@ -446,6 +463,9 @@ update_abs_state(struct libevdev *dev, const struct input_event *e)
 
 	if (e->code > ABS_MAX)
 		return 1;
+
+	if (e->code >= ABS_MT_MIN && e->code <= ABS_MT_MAX)
+		return update_mt_state(dev, e);
 
 	dev->abs_info[e->code].value = e->value;
 

@@ -64,6 +64,7 @@ struct libevdev {
 	struct input_absinfo abs_info[ABS_CNT];
 	unsigned int mt_slot_vals[MAX_SLOTS][ABS_MT_CNT];
 	int num_slots; /**< valid slots in mt_slot_vals */
+	int current_slot;
 
 	int need_sync;
 	int grabbed;
