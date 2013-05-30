@@ -129,70 +129,31 @@ int libevdev_change_fd(struct libevdev* dev, int fd);
 int libevdev_get_fd(const struct libevdev* dev);
 
 /**
- * Event callback used to report events back to the client.
+ * Get the next event from the device.
  *
- * If this function returns -1, event processing is interrupted and returned
- * to the caller of libevdev_read_events. A future call to
- * libevdev_read_events will continue with the next event in the queue.
+ * In normal mode, this function returns 0 and returns the event in the
+ * parameter ev. If no events are available at this time, it returns -EAGAIN
+ * and ev is undefined.
  *
- * @param dev The device this callback was invoked on
- * @param ev The event read from the kernel
- * @param userdata Previously assigned caller-specific data
+ * If a SYN_DROPPED is read from the device, this function returns 1. The
+ * caller should now call this function with the ER_SYNC flag set, to get
+ * the set of events that make up the device state diff. This function
+ * returns 1 for each event part of that diff, until it returns -EAGAIN once
+ * all events have been synced.
  *
- * @return 0 on success, or -1 on failure.
- *
- * @see libevdev_read_events
- */
-typedef int (*libevdev_callback_proc)(struct libevdev *dev, struct input_event *ev, void *userdata);
-
-/**
- * Set the callbacks to be used when reading events off the fd.
- * Two callbacks are used, one for reporting events during normal operation, one for
- * reporting events during an event sync. If either is NULL, no events are
- * reported for that mode.
- *
- * @param callback Callback used for regular events when read off the fd
- * @param sync_callback Callback used for events while re-syncing after a
- * SYN_DROPPED event.
- * @param userdata Caller-specific data, passed back through the callbacks.
- *
- * @return zero on success, -1 on failure
- *
- * @see libevdev_read_events
- * @note This function may be called before libevdev_set_fd.
- */
-int libevdev_set_callbacks(struct libevdev *dev,
-			   libevdev_callback_proc callback,
-			   libevdev_callback_proc sync_callback,
-			    void *userdata);
-
-/**
- * Read events off the fd and call the matching callback.
- *
- * Depending on the flags, the behaviour changes as follows:
- * - ER_SINGLE: read a single event off the fd (i.e. up to the next EV_SYN).
- *   This should only be used if the caller is time-sensitive and event
- *   processing of multiple events may prevent other computation.
- * - ER_ALL: read all the events off the fd until a read would block or
- *   an SYN_DROPPED event is read.
- * - ER_SYNC: switch to sync mode and report all events that are required to
- *   bring the device state back in sync with the kernel device state.
- *
- * @param fd The file descriptor previously set, open in non-blocking mode. If
- * the file descriptor differs from the previous one, -EBADF is returned.
- * @param flags The set of flags to decide how to handle events.
+ * If a device needs to be synced by the caller but the caller does not call
+ * with the ER_SYNC flag set, all events from the diff are dropped and event
+ * processing continues as normal.
  *
  * @return On failure, a negative errno is returned.
- * @retval 0 One or more events where read of the fd
- * @retval -EAGAIN No events are currently on the fd
- * @retval -ECANCELLED The callback returned non-zero
- * @retval 1 A SYN_DROPPED event was received
- *
- * @see libevdev_set_callbacks
+ * @retval 0 One or more events where read of the device
+ * @retval -EAGAIN No events are currently available on the device
+ * @retval 1 A SYN_DROPPED event was received, or a synced event was
+ * returned.
  *
  * @note This function is signal-safe.
  */
-int libevdev_read_events(struct libevdev *dev, unsigned int flags);
+int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event *ev);
 
 /**
  * @return The device name as read off the kernel device

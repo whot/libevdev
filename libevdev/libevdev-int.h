@@ -37,10 +37,6 @@
 
 struct libevdev {
 	int fd;
-	libevdev_callback_proc callback;
-	libevdev_callback_proc sync_callback;
-	void *userdata;
-
 	libevdev_log_func_t log;
 
 	char name[MAX_NAME];
@@ -62,6 +58,7 @@ struct libevdev {
 	struct input_event *queue;
 	size_t queue_size; /**< size of queue in elements */
 	size_t queue_next; /**< next event index */
+	size_t queue_nsync; /**< number of sync events */
 };
 
 #endif

@@ -46,7 +46,7 @@ print_code_bits(struct libevdev *dev, unsigned int type, unsigned int max)
 	}
 }
 
-int callback(struct libevdev *dev, struct input_event *ev, void *userdata)
+int print_event(struct input_event *ev)
 {
 	if (ev->type == EV_SYN)
 		printf("Event: time %ld.%06ld, ++++++++++++++++++++ %s +++++++++++++++\n",
@@ -65,10 +65,10 @@ int callback(struct libevdev *dev, struct input_event *ev, void *userdata)
 	return 0;
 }
 
-int sync_callback(struct libevdev *dev, struct input_event *ev, void *userdata)
+int print_sync_event(struct input_event *ev)
 {
 	printf("SYNC: ");
-	callback(dev, ev, userdata);
+	print_event(ev);
 	return 0;
 }
 
@@ -96,17 +96,18 @@ main(int argc, char **argv)
 		goto out;
 	}
 
-	if (libevdev_set_callbacks(dev, &callback, &sync_callback, NULL) != 0) {
-		fprintf(stderr, "Failed to set callbacks");
-		goto out;
-	}
-
 	do {
-		rc = libevdev_read_events(dev, ER_ALL);
+		struct input_event ev;
+		rc = libevdev_next_event(dev, 0, &ev);
 		if (rc == 1) {
 			printf("::::::::::::::::::::: dropped ::::::::::::::::::::::\n");
-			rc = libevdev_read_events(dev, ER_ALL | ER_SYNC);
-		}
+			while (rc == 1) {
+				print_sync_event(&ev);
+				rc = libevdev_next_event(dev, ER_SYNC, &ev);
+			}
+			printf("::::::::::::::::::::: re-synced ::::::::::::::::::::::\n");
+		} else if (rc == 0)
+			print_event(&ev);
 	} while (rc == 1 || rc == 0 || rc == -EAGAIN);
 
 	if (rc != 0 && rc != -EAGAIN)

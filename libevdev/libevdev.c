@@ -195,21 +195,13 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 
 	if (dev->fd == -1) {
 		libevdev_log_func_t log;
-		libevdev_callback_proc cb, scb;
-		void *userdata;
 
 		/* these may be set before set_fd */
-		cb = dev->callback;
-		scb = dev->sync_callback;
-		userdata = dev->userdata;
 		log = dev->log;
 
 		memset(dev, 0, sizeof(*dev));
 
 		dev->fd = -1;
-		dev->callback = cb;
-		dev->sync_callback = scb;
-		dev->userdata = userdata;
 		dev->log = log;
 	}
 
@@ -279,19 +271,6 @@ libevdev_get_fd(const struct libevdev* dev)
 	return dev->fd;
 }
 
-int
-libevdev_set_callbacks(struct libevdev *dev,
-		       libevdev_callback_proc callback,
-		       libevdev_callback_proc sync_callback,
-		       void *userdata)
-{
-	dev->callback = callback;
-	dev->sync_callback = sync_callback;
-	dev->userdata = userdata;
-
-	return 0;
-}
-
 static inline void
 init_event(struct input_event *ev, int type, int code, int value)
 {
@@ -308,20 +287,18 @@ sync_key_state(struct libevdev *dev)
 	int rc;
 	int i;
 	unsigned long keystate[NLONGS(KEY_MAX)];
-	struct input_event ev;
 
 	rc = ioctl(dev->fd, EVIOCGKEY(sizeof(keystate)), keystate);
 	if (rc < 0)
 		goto out;
 
 	for (i = 0; i < KEY_MAX; i++) {
+		struct input_event *ev = &dev->queue[dev->queue_next++];
 		int old, new;
 		old = bit_is_set(dev->key_values, i);
 		new = bit_is_set(keystate, i);
-		if (old ^ new) {
-			init_event(&ev, EV_KEY, i, new ? 1 : 0);
-			dev->sync_callback(dev, &ev, dev->userdata);
-		}
+		if (old ^ new)
+			init_event(ev, EV_KEY, i, new ? 1 : 0);
 		set_bit_state(dev->key_values, i, new);
 	}
 
@@ -335,23 +312,25 @@ sync_abs_state(struct libevdev *dev)
 {
 	int rc;
 	int i;
-	struct input_event ev;
 
 	for (i = ABS_X; i <= ABS_MAX; i++) {
+		struct input_absinfo abs_info;
+
 		if (i >= ABS_MT_MIN && i <= ABS_MT_MAX)
 			continue;
 
-		if (bit_is_set(dev->abs_bits, i)) {
-			struct input_absinfo abs_info;
-			rc = ioctl(dev->fd, EVIOCGABS(i), &abs_info);
-			if (rc < 0)
-				goto out;
+		if (!bit_is_set(dev->abs_bits, i))
+			continue;
 
-			if (dev->abs_info[i].value != abs_info.value) {
-				init_event(&ev, EV_ABS, i, abs_info.value);
-				dev->sync_callback(dev, &ev, dev->userdata);
-				dev->abs_info[i].value = abs_info.value;
-			}
+		rc = ioctl(dev->fd, EVIOCGABS(i), &abs_info);
+		if (rc < 0)
+			goto out;
+
+		if (dev->abs_info[i].value != abs_info.value) {
+			struct input_event *ev = &dev->queue[dev->queue_next++];
+
+			init_event(ev, EV_ABS, i, abs_info.value);
+			dev->abs_info[i].value = abs_info.value;
 		}
 	}
 
@@ -369,7 +348,6 @@ sync_mt_state(struct libevdev *dev)
 		int code;
 		int val[MAX_SLOTS];
 	} mt_state[ABS_MT_CNT];
-	struct input_event ev;
 
 	for (i = ABS_MT_MIN; i < ABS_MT_MAX; i++) {
 		int idx;
@@ -385,16 +363,19 @@ sync_mt_state(struct libevdev *dev)
 
 	for (i = 0; i < dev->num_slots; i++) {
 		int j;
-		init_event(&ev, EV_ABS, ABS_MT_SLOT, i);
-		dev->sync_callback(dev, &ev, dev->userdata);
+		struct input_event *ev;
+
+		ev = &dev->queue[dev->queue_next++];
+		init_event(ev, EV_ABS, ABS_MT_SLOT, i);
 		for (j = ABS_MT_MIN; j < ABS_MT_MAX; j++) {
 			int jdx = j - ABS_MT_MIN;
 
-			if (dev->mt_slot_vals[i][jdx] != mt_state[jdx].val[i]) {
-				init_event(&ev, EV_ABS, j, mt_state[jdx].val[i]);
-				dev->sync_callback(dev, &ev, dev->userdata);
-				dev->mt_slot_vals[i][jdx] = mt_state[jdx].val[i];
-			}
+			if (dev->mt_slot_vals[i][jdx] == mt_state[jdx].val[i])
+				continue;
+
+			ev = &dev->queue[dev->queue_next++];
+			init_event(ev, EV_ABS, j, mt_state[jdx].val[i]);
+			dev->mt_slot_vals[i][jdx] = mt_state[jdx].val[i];
 		}
 	}
 
@@ -404,21 +385,26 @@ out:
 }
 
 static int
-sync_state(struct libevdev *dev, unsigned int flags)
+sync_state(struct libevdev *dev)
 {
 	int rc = 0;
-	struct input_event ev;
+	struct input_event *ev;
+
+	/* FIXME: if we have events in the queue after the SYN_DROPPED (which was
+	   queue[0]) we need to shift this backwards somehow.
+	 */
 
 	if (libevdev_has_event_type(dev, EV_KEY))
-		rc = sync_key_state(dev); /* FIXME: handle ER_SINGLE */
+		rc = sync_key_state(dev);
 	if (rc == 0 && libevdev_has_event_type(dev, EV_ABS))
 		rc = sync_abs_state(dev);
 	if (rc == 0 && libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT))
 		rc = sync_mt_state(dev);
 
-	init_event(&ev, EV_SYN, SYN_REPORT, 0);
-	dev->sync_callback(dev, &ev, dev->userdata);
+	ev = &dev->queue[dev->queue_next++];
+	init_event(ev, EV_SYN, SYN_REPORT, 0);
 
+	dev->queue_nsync = dev->queue_next;
 	dev->need_sync = 0;
 
 	return rc;
@@ -487,61 +473,65 @@ read_more_events(struct libevdev *dev)
 
 	len = read(dev->fd, &dev->queue[dev->queue_next], free_elem * sizeof(struct input_event));
 	if (len < 0) {
-		if (errno != EAGAIN || dev->queue_next == 0)
-			return -errno;
+		return -errno;
 	} else if (len > 0 && len % sizeof(struct input_event) != 0)
 		return -EINVAL;
-
-	dev->queue_next += len/sizeof(struct input_event);
+	else if (len > 0)
+		dev->queue_next += len/sizeof(struct input_event);
 
 	return 0;
 }
 
-int libevdev_read_events(struct libevdev *dev,
-			 unsigned int flags)
+int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event *ev)
 {
-	int nevents, processed;
-	int i;
 	int rc = 0;
+	int i;
 
 	if (dev->fd < 0)
 		return -ENODEV;
 
 	if (flags & ER_SYNC) {
-		if (!dev->need_sync)
-			return 0;
-		return sync_state(dev, flags);
+		if (!dev->need_sync && dev->queue_nsync == 0)
+			return -EAGAIN;
+		else if (dev->need_sync) {
+			rc = sync_state(dev);
+			if (rc != 0)
+				return rc;
+		}
+	} else if (dev->need_sync) {
+		/* FIXME: if a client decides not to sync, drop all sync events */
+		return 1;
 	}
 
 	/* Always read in some more events. Best case this smoothes over a potential SYN_DROPPED,
 	   worst case we don't read fast enough and end up with SYN_DROPPED anyway */
 	rc = read_more_events(dev);
-	if (rc < 0)
+	if (rc < 0 && rc != -EAGAIN)
 		goto out;
 
-	nevents = dev->queue_next;
-	for (processed = 0; processed < nevents; processed++) {
-		struct input_event *e = &dev->queue[processed];
+	if (dev->queue_next == 0)
+		return -EAGAIN;
 
-		update_state(dev, e);
+	*ev = dev->queue[0];
 
-		if (e->type == EV_SYN && e->code == SYN_DROPPED) {
-			dev->need_sync = 0;
-			rc = 1;
-			break;
-		} else if (libevdev_has_event_code(dev, e->type, e->code)) {
-			if (dev->callback(dev, e, dev->userdata) != 0) {
-				rc = -ECANCELED;
-				break;
-			}
-		}
+	update_state(dev, ev);
+
+	rc = 0;
+	if (ev->type == EV_SYN && ev->code == SYN_DROPPED) {
+		dev->need_sync = 1;
+		rc = 1;
 	}
 
-	for (i = 0; i < nevents - processed; i++) {
-		dev->queue[i] = dev->queue[i + processed];
+	for (i = 0; dev->queue_next > 1 && i < dev->queue_next - 1; i++)
+		dev->queue[i] = dev->queue[i + 1];
+
+	dev->queue_next--;
+
+	if (flags & ER_SYNC && dev->queue_nsync > 0) {
+		dev->queue_nsync--;
+		rc = 1;
 	}
 
-	dev->queue_next -= processed;
 out:
 	return rc;
 }
