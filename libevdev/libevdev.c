@@ -125,14 +125,7 @@ init_event_queue(struct libevdev *dev)
 
 	const int QUEUE_SIZE = 256;
 
-	dev->queue = calloc(QUEUE_SIZE, sizeof(struct input_event));
-	if (!dev->queue)
-		return -ENOSPC;
-
-	dev->queue_size = QUEUE_SIZE;
-	dev->queue_next = 0;
-
-	return 0;
+	return queue_alloc(dev, QUEUE_SIZE);
 }
 
 static void
@@ -293,12 +286,13 @@ sync_key_state(struct libevdev *dev)
 		goto out;
 
 	for (i = 0; i < KEY_MAX; i++) {
-		struct input_event *ev = &dev->queue[dev->queue_next++];
 		int old, new;
 		old = bit_is_set(dev->key_values, i);
 		new = bit_is_set(keystate, i);
-		if (old ^ new)
+		if (old ^ new) {
+			struct input_event *ev = queue_push(dev);
 			init_event(ev, EV_KEY, i, new ? 1 : 0);
+		}
 		set_bit_state(dev->key_values, i, new);
 	}
 
@@ -327,7 +321,7 @@ sync_abs_state(struct libevdev *dev)
 			goto out;
 
 		if (dev->abs_info[i].value != abs_info.value) {
-			struct input_event *ev = &dev->queue[dev->queue_next++];
+			struct input_event *ev = queue_push(dev);
 
 			init_event(ev, EV_ABS, i, abs_info.value);
 			dev->abs_info[i].value = abs_info.value;
@@ -365,7 +359,7 @@ sync_mt_state(struct libevdev *dev)
 		int j;
 		struct input_event *ev;
 
-		ev = &dev->queue[dev->queue_next++];
+		ev = queue_push(dev);
 		init_event(ev, EV_ABS, ABS_MT_SLOT, i);
 		for (j = ABS_MT_MIN; j < ABS_MT_MAX; j++) {
 			int jdx = j - ABS_MT_MIN;
@@ -373,7 +367,7 @@ sync_mt_state(struct libevdev *dev)
 			if (dev->mt_slot_vals[i][jdx] == mt_state[jdx].val[i])
 				continue;
 
-			ev = &dev->queue[dev->queue_next++];
+			ev = queue_push(dev);
 			init_event(ev, EV_ABS, j, mt_state[jdx].val[i]);
 			dev->mt_slot_vals[i][jdx] = mt_state[jdx].val[i];
 		}
@@ -401,10 +395,10 @@ sync_state(struct libevdev *dev)
 	if (rc == 0 && libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT))
 		rc = sync_mt_state(dev);
 
-	ev = &dev->queue[dev->queue_next++];
+	ev = queue_push(dev);
 	init_event(ev, EV_SYN, SYN_REPORT, 0);
 
-	dev->queue_nsync = dev->queue_next;
+	dev->queue_nsync = queue_num_elements(dev);
 	dev->need_sync = 0;
 
 	return rc;
@@ -466,18 +460,22 @@ read_more_events(struct libevdev *dev)
 {
 	int free_elem;
 	int len;
+	struct input_event *next;
 
-	free_elem = dev->queue_size - dev->queue_next - 1;
+	free_elem = queue_num_free_elements(dev);
 	if (free_elem <= 0)
 		return 0;
 
-	len = read(dev->fd, &dev->queue[dev->queue_next], free_elem * sizeof(struct input_event));
+	next = queue_next_element(dev);
+	len = read(dev->fd, next, free_elem * sizeof(struct input_event));
 	if (len < 0) {
 		return -errno;
 	} else if (len > 0 && len % sizeof(struct input_event) != 0)
 		return -EINVAL;
-	else if (len > 0)
-		dev->queue_next += len/sizeof(struct input_event);
+	else if (len > 0) {
+		int nev = len/sizeof(struct input_event);
+		queue_set_num_elements(dev, queue_num_elements(dev) + nev);
+	}
 
 	return 0;
 }
@@ -485,7 +483,6 @@ read_more_events(struct libevdev *dev)
 int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event *ev)
 {
 	int rc = 0;
-	int i;
 
 	if (dev->fd < 0)
 		return -ENODEV;
@@ -509,10 +506,8 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 	if (rc < 0 && rc != -EAGAIN)
 		goto out;
 
-	if (dev->queue_next == 0)
+	if (queue_shift(dev, ev) != 0)
 		return -EAGAIN;
-
-	*ev = dev->queue[0];
 
 	update_state(dev, ev);
 
@@ -521,11 +516,6 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 		dev->need_sync = 1;
 		rc = 1;
 	}
-
-	for (i = 0; dev->queue_next > 1 && i < dev->queue_next - 1; i++)
-		dev->queue[i] = dev->queue[i + 1];
-
-	dev->queue_next--;
 
 	if (flags & ER_SYNC && dev->queue_nsync > 0) {
 		dev->queue_nsync--;

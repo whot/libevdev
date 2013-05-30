@@ -61,5 +61,104 @@ struct libevdev {
 	size_t queue_nsync; /**< number of sync events */
 };
 
+/**
+ * @return a pointer to the next element in the queue, or NULL if the queue
+ * is full.
+ */
+static inline struct input_event*
+queue_push(struct libevdev *dev)
+{
+	if (dev->queue_next >= dev->queue_size)
+		return NULL;
+
+	return &dev->queue[dev->queue_next++];
+}
+
+/**
+ * Set ev to the last element in the queue, removing it from the queue.
+ *
+ * @return 0 on success, 1 if the queue is empty.
+ */
+static inline int
+queue_pop(struct libevdev *dev, struct input_event *ev)
+{
+	if (dev->queue_next == 0)
+		return 1;
+
+	*ev = dev->queue[--dev->queue_next];
+
+	return 0;
+}
+
+/**
+ * Set ev to the first element in the queue, shifting everything else
+ * forward by one.
+ *
+ * @return 0 on success, 1 if the queue is empty.
+ */
+static inline int
+queue_shift(struct libevdev *dev, struct input_event *ev)
+{
+	int i;
+
+	if (dev->queue_next == 0)
+		return 1;
+
+	*ev = dev->queue[0];
+
+	for (i = 0; i < dev->queue_next - 1; i++)
+		dev->queue[i] = dev->queue[i + 1];
+
+	dev->queue_next--;
+
+	return 0;
+}
+
+static inline int
+queue_alloc(struct libevdev *dev, int size)
+{
+	dev->queue = calloc(size, sizeof(struct input_event));
+	if (!dev->queue)
+		return -ENOSPC;
+
+	dev->queue_size = size;
+	dev->queue_next = 0;
+	return 0;
+}
+
+static inline int
+queue_num_elements(struct libevdev *dev)
+{
+	return dev->queue_next;
+}
+
+static inline int
+queue_size(struct libevdev *dev)
+{
+	return dev->queue_size;
+}
+
+static inline int
+queue_num_free_elements(struct libevdev *dev)
+{
+	return dev->queue_size - dev->queue_next - 1;
+}
+
+static inline struct input_event *
+queue_next_element(struct libevdev *dev)
+{
+	return &dev->queue[dev->queue_next];
+}
+
+static inline int
+queue_set_num_elements(struct libevdev *dev, int nelem)
+{
+	if (nelem > dev->queue_size)
+		return 1;
+
+	dev->queue_next = nelem;
+
+	return 0;
+}
 #endif
 
