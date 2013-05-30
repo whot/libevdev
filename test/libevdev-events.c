@@ -103,7 +103,7 @@ main(int argc, char **argv)
 			printf("::::::::::::::::::::: dropped ::::::::::::::::::::::\n");
 			while (rc == 1) {
 				print_sync_event(&ev);
-				rc = libevdev_next_event(dev, ER_SYNC, &ev);
+				rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
 			}
 			printf("::::::::::::::::::::: re-synced ::::::::::::::::::::::\n");
 		} else if (rc == 0)

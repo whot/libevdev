@@ -29,9 +29,7 @@
 struct libevdev;
 
 enum EvdevReadFlags {
-    ER_SINGLE		= 1, /**< Read until including the first EV_SYN or EAGAIN */
-    ER_SYNC		= 2, /**< Process data in sync mode */
-    ER_ALL		= 4, /**< Read until EAGAIN */
+    LIBEVDEV_READ_SYNC		= 1, /**< Process data in sync mode */
 };
 
 
