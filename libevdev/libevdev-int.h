@@ -35,6 +35,19 @@
 #define ABS_MT_MAX ABS_MT_TOOL_Y
 #define ABS_MT_CNT (ABS_MT_MAX - ABS_MT_MIN + 1)
 
+#undef min
+#undef max
+#define min(a,b) \
+		({ __typeof__ (a) _a = (a); \
+	          __typeof__ (b) _b = (b); \
+		_a > _b ? _b : _a; \
+		})
+#define max(a,b) \
+		({ __typeof__ (a) _a = (a); \
+	          __typeof__ (b) _b = (b); \
+		_a > _b ? _a : _b; \
+		})
+
 struct libevdev {
 	int fd;
 	libevdev_log_func_t log;
@@ -90,6 +103,46 @@ queue_pop(struct libevdev *dev, struct input_event *ev)
 	return 0;
 }
 
+static inline int
+queue_peek(struct libevdev *dev, size_t idx, struct input_event *ev)
+{
+	if (idx > dev->queue_next)
+		return 1;
+	*ev = dev->queue[idx];
+	return 0;
+}
+
+
+/**
+ * Shift the first n elements into ev and return the number of elements
+ * shifted.
+ * ev must be large enough to store n elements.
+ *
+ * @param ev The buffer to copy into, or NULL
+ * @return The number of elements in ev.
+ */
+static inline int
+queue_shift_multiple(struct libevdev *dev, int n, struct input_event *ev)
+{
+	int i;
+
+	if (dev->queue_next == 0)
+		return 0;
+
+	n = min(n, dev->queue_next);
+
+	if (ev) {
+		for (i = 0; i < n; i++)
+			ev[i] = dev->queue[i];
+	}
+
+	for (i = 0; i < dev->queue_next - n; i++)
+		dev->queue[i] = dev->queue[n + i];
+
+	dev->queue_next -= n;
+	return n;
+}
+
 /**
  * Set ev to the first element in the queue, shifting everything else
  * forward by one.
@@ -99,19 +152,7 @@ queue_pop(struct libevdev *dev, struct input_event *ev)
 static inline int
 queue_shift(struct libevdev *dev, struct input_event *ev)
 {
-	int i;
-
-	if (dev->queue_next == 0)
-		return 1;
-
-	*ev = dev->queue[0];
-
-	for (i = 0; i < dev->queue_next - 1; i++)
-		dev->queue[i] = dev->queue[i + 1];
-
-	dev->queue_next--;
-
-	return 0;
+	return queue_shift_multiple(dev, 1, ev) == 1 ? 0 : 1;
 }
 
 static inline int

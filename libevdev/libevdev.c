@@ -381,12 +381,29 @@ out:
 static int
 sync_state(struct libevdev *dev)
 {
+	int i;
 	int rc = 0;
 	struct input_event *ev;
 
 	/* FIXME: if we have events in the queue after the SYN_DROPPED (which was
-	   queue[0]) we need to shift this backwards somehow.
+	   queue[0]) we need to shift this backwards. Except that chances are that the
+	   queue may be either full or too full to prepend all the events needed for
+	   syncing.
+
+	   so we search for the last sync event in the queue and drop everything before
+	   including that event and rely on the kernel to tell us the right value for that
+	   bitfield during the sync process.
 	 */
+
+	for (i = queue_num_elements(dev) - 1; i >= 0; i--) {
+		struct input_event e;
+		queue_peek(dev, i, &e);
+		if (e.type == EV_SYN)
+			break;
+	}
+
+	if (i > 0)
+		queue_shift_multiple(dev, i + 1, NULL);
 
 	if (libevdev_has_event_type(dev, EV_KEY))
 		rc = sync_key_state(dev);
