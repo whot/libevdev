@@ -346,11 +346,13 @@ sync_mt_state(struct libevdev *dev)
 	struct input_event ev;
 
 	for (i = ABS_MT_MIN; i < ABS_MT_MAX; i++) {
+		int idx;
 		if (i == ABS_MT_SLOT)
 			continue;
 
-		mt_state[i].code = i;
-		rc = ioctl(dev->fd, EVIOCGMTSLOTS(sizeof(struct mt_state)), &mt_state[i]);
+		idx = i - ABS_MT_MIN;
+		mt_state[idx].code = i;
+		rc = ioctl(dev->fd, EVIOCGMTSLOTS(sizeof(struct mt_state)), &mt_state[idx]);
 		if (rc < 0)
 			goto out;
 	}
@@ -360,10 +362,12 @@ sync_mt_state(struct libevdev *dev)
 		init_event(&ev, EV_ABS, ABS_MT_SLOT, i);
 		dev->sync_callback(dev, &ev, dev->userdata);
 		for (j = ABS_MT_MIN; j < ABS_MT_MAX; j++) {
-			if (dev->mt_slot_vals[i][j] != mt_state[j].val[i]) {
-				init_event(&ev, EV_ABS, j, mt_state[j].val[i]);
+			int jdx = j - ABS_MT_MIN;
+
+			if (dev->mt_slot_vals[i][jdx] != mt_state[jdx].val[i]) {
+				init_event(&ev, EV_ABS, j, mt_state[jdx].val[i]);
 				dev->sync_callback(dev, &ev, dev->userdata);
-				dev->mt_slot_vals[i][j] = mt_state[j].val[i];
+				dev->mt_slot_vals[i][jdx] = mt_state[jdx].val[i];
 			}
 		}
 	}
