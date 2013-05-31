@@ -165,6 +165,7 @@ libevdev_new(int fd)
 void
 libevdev_free(struct libevdev *dev)
 {
+	queue_free(dev);
 	free(dev);
 }
 

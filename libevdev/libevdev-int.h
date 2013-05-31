@@ -168,6 +168,14 @@ queue_alloc(struct libevdev *dev, int size)
 	return 0;
 }
 
+static inline void
+queue_free(struct libevdev *dev)
+{
+	free(dev->queue);
+	dev->queue_size = 0;
+	dev->queue_next = 0;
+}
+
 static inline int
 queue_num_elements(struct libevdev *dev)
 {
