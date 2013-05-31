@@ -847,9 +847,15 @@ libevdev_grab(struct libevdev *dev, int grab)
 {
 	int rc = 0;
 
-	if (grab && !dev->grabbed)
+	if (grab != LIBEVDEV_GRAB && grab != LIBEVDEV_UNGRAB)
+		return -EINVAL;
+
+	if (grab == dev->grabbed)
+		return 0;
+
+	if (grab == LIBEVDEV_GRAB)
 		rc = ioctl(dev->fd, EVIOCGRAB, (void *)1);
-	else if (!grab && dev->grabbed)
+	else if (grab == LIBEVDEV_UNGRAB)
 		rc = ioctl(dev->fd, EVIOCGRAB, (void *)0);
 
 	if (rc == 0)

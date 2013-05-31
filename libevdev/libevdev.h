@@ -83,6 +83,12 @@ typedef void (*libevdev_log_func_t)(const char *format, va_list args);
  */
 void libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc);
 
+
+enum EvdevGrabModes {
+	LIBEVDEV_GRAB = 3,
+	LIBEVDEV_UNGRAB = 4,
+};
+
 /**
  * Grab or ungrab the device through a kernel EVIOCGRAB. This prevents other
  * clients (including kernel-internal ones such as rfkill) from receiving
