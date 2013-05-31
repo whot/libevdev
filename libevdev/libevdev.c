@@ -205,17 +205,8 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	int rc;
 	int i;
 
-	if (dev->fd == -1) {
-		libevdev_log_func_t log;
-
-		/* these may be set before set_fd */
-		log = dev->log;
-
-		memset(dev, 0, sizeof(*dev));
-
-		dev->fd = -1;
-		dev->log = log;
-	}
+	if (dev->fd != -1)
+		return -EBADF;
 
 	rc = ioctl(fd, EVIOCGBIT(0, sizeof(dev->bits)), dev->bits);
 	if (rc < 0)
