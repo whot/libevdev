@@ -541,8 +541,12 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 			if (rc != 0)
 				return rc;
 		}
-	} else if (dev->need_sync)
+	} else if (dev->need_sync) {
+		/* FIXME: still need to call update_state for all events
+		 * here, otherwise the library has the wrong view of the
+		 * device too */
 		queue_shift_multiple(dev, dev->queue_nsync, NULL);
+	}
 
 	/* Always read in some more events. Best case this smoothes over a potential SYN_DROPPED,
 	   worst case we don't read fast enough and end up with SYN_DROPPED anyway */
