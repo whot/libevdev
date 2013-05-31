@@ -548,6 +548,10 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 		queue_shift_multiple(dev, dev->queue_nsync, NULL);
 	}
 
+	/* FIXME: check for O_NONBLOCK and if not set, skip if we have an
+	 * event in the queue from the previous read.
+	 */
+
 	/* Always read in some more events. Best case this smoothes over a potential SYN_DROPPED,
 	   worst case we don't read fast enough and end up with SYN_DROPPED anyway */
 	rc = read_more_events(dev);
