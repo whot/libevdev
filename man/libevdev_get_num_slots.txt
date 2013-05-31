@@ -1,0 +1,53 @@
+libevdev_get_num_slots(3)
+=========================
+
+NAME
+----
+
+libevdev_get_num_slots, libevdev_get_current_slot - get the number of available multitouch slots and the currently active slot
+
+SYNOPSIS
+--------
+
+#include <libevdev/libevdev.h>
+
+int libevdev_get_num_slots(const struct libevdev *dev);
+
+int libevdev_get_current_slot(const struct libevdev *dev);
+
+DESCRIPTION
+-----------
+*libevdev_get_num_slots* returns the available number of multitouch slots on
+this device.
+
+*libevdev_get_current_slot* returns the currently active slot. Note that
+this value may lag behind the state visible to other readers on the
+same device. The return value of this function is the current slot as seen
+by the caller, i.e. the state as defined by the set of events processed so
+far.
+
+PARAMETERS
+----------
+*dev*::
+	Pointer to the libevdev device.
+
+RETURN VALUE
+------------
+On success, *libevdev_get_num_slots* returns the number of slots. If the
+device does not support the slot protocol, -1 is returned.
+
+On success, *libevdev_get_current_slot* returns the current of slot ID. If
+the device does not support the slot protocol, the return value is
+undefined.
+
+NOTES
+-----
+Some devices support more touch points that they expose multitouch slots
+for. For example, a touchpad may only expose two slots, but detect up to
+four-finger touches. A caller should check for BTN_TOOL_TRIPLETAP,
+BTN_TOOL_QUADTAP, etc. as well as the state of the slots.
+
+SEE ALSO
+--------
+
+libevdev_has_event_type(3), libevdev_has_event_code(3), libevdev_get_slot_value(3)

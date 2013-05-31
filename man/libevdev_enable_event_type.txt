@@ -1,0 +1,63 @@
+libevdev_disable_event_type(3)
+==============================
+
+NAME
+----
+
+libevdev_disable_event_type, libevdev_disable_event_code, libevdev_enable_event_type, libevdev_enable_event_code - disable or enable an event type or code on the device
+
+SYNOPSIS
+--------
+
+#include <libevdev/libevdev.h>
+
+int libevdev_disable_event_type(struct libevdev *dev, unsigned int type);
+
+int libevdev_enable_event_type(struct libevdev *dev, unsigned int type);
+
+int libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned int code);
+
+int libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned int code, const void *data);
+
+DESCRIPTION
+-----------
+
+*libevdev_disable_event_type* and *libevdev_disable_event_code* disable
+capabilities on this device. Once an event type or
+code is disabled, future calls to *libevdev_has_event_type* and
+*libevdev_has_event_code* will return 0.
+
+*libevev_enable_event_type* and *libevdev_enable_event_code* enable
+capabilities on this device. Once an event type or code is enabled, future
+calls to *libevdev_has_event_type* and *libevdev_has_event_code* will return 1.
+
+This change is library-internal only. Neither function disables the actual
+axis on the device and other processes using libevdev to read from the
+device will not see any changes.
+
+PARAMETERS
+----------
+*dev*::
+	Pointer to the libevdev device.
+
+*type*::
+	Specifies the event type to enable or disable.
+
+*code*::
+	Specifies the event code to enable or disable.
+
+*data*::
+	If type is EV_ABS, data points to a struct input_absinfo with the
+	ranges for this axis. Otherwise, 'data' is ignored.
+
+RETURN VALUE
+------------
+On success, these functions return 0. On failure, these functions return -1.
+
+Failure indicates an invalid argument that is out of range from the kernel
+parameters.
+
+SEE ALSO
+--------
+
+libevdev_has_event_type(3), libevdev_has_event_code(3)

@@ -1,0 +1,72 @@
+libevdev_new(3)
+===============
+
+NAME
+----
+
+libevdev_new, libevdev_new_from_fd, libevdev_free - initialize and free a libevdev device
+
+SYNOPSIS
+--------
+
+#include <libevdev/libevdev.h>
+
+struct libevdev* libevdev_new(void);
+
+int libevdev_new_from_fd(int fd, struct libevdev **dev);
+
+void libevdev_free(struct libevdev *dev);
+
+DESCRIPTION
+-----------
+
+*libevdev_new* allocates the memory required for libevdev's
+wrapping of an evdev kernel input device. This does not initialize the
+device yet, use *libevdev_set_fd(3)* for that.
+
+*libevdev_new_from_fd* allocates the memory required for a kernel input
+device and initializes that device from the given fd. The fd must be opened
+in read or read-write mode and the caller must have the required permissions
+to perform *ioctl(2)* calls on the fd.
+
+The function *libevdev_free* frees the memory associated with the kernel input
+device.
+
+PARAMETERS
+----------
+*dev*::
+	Pointer to the libevdev device. In *libevdev_new_from_fd*, 'dev' is
+	set to the newly allocated pointer. In *libevdev_free*, 'dev' is the
+	previously allocated struct.
+
+*fd*::
+	An open file descriptor to the kernel device. The fd must be opened
+	in O_RDONLY or O_RDWR.
+
+RETURN VALUE
+------------
+
+On success, *libevdev_new* returns a pointer to the opaque 'struct
+libevdev'. On failure, NULL is returned.
+
+On success, *libevdev_new_from_fd* returns 0 and sets 'dev' to the newly
+allocated device. On failure, a negative errno is returned indicating the
+type of failure:
+
+*ENOSP*::
+	Memory allocation failed.
+
+*EBADF*::
+	'fd' is not a valid file descriptor.
+
+*EACCESS*::
+	Permission denied.
+
+For a full list of potential error codes consult *ioctl(2)*.
+
+SEE ALSO
+--------
+
+libevdev_set_fd(3), libevdev_change_fd(3),
+libevdev_grab(3),
+libevdev_has_event_type(3), libevdev_has_event_code(3)

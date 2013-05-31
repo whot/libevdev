@@ -1,0 +1,69 @@
+libevdev_has_event_type(3)
+==========================
+
+NAME
+----
+
+libevdev_has_event_type, libevdev_has_event_code, libevdev_has_property - check if a event type, code or property is available on this device
+
+SYNOPSIS
+--------
+
+#include <libevdev/libevdev.h>
+
+int libevdev_has_event_type(const struct libevdev *dev, unsigned int type);
+
+int libevdev_has_event_code(const struct libevdev *dev, unsigned int type, unsigned int code);
+
+int libevdev_has_property(const struct libevdev *dev, unsigned int prop);
+
+DESCRIPTION
+-----------
+
+*libevdev_has_event_type* and *libevdev_has_event_code* check if an event
+type or event code is supported by this device.
+
+Event types are listed in <linux/input.h> and start with EV_SYN and end with
+EV_MAX. Event types signal general availability of a type of event, i.e.
+they indicate if a device has keys/buttons, axes, LEDs etc. Event codes are
+specific to each event type and are also listed in <linux/input.h>. Event
+codes signal the device's ability to send a specific key/button, axis, LED,
+etc. event.
+
+*libevdev_has_property* checks if a property bit is set on this device.
+Property values are listed in <linux/input.h> and start with
+INPUT_PROP_POINTER and end with INPUT_PROP_MAX.
+
+
+PARAMETERS
+----------
+*dev*::
+	Pointer to the libevdev device.
+
+*type*::
+	Specifies the event type to query.
+
+*code*::
+	Specifies the event code to query.
+
+*prop*::
+	Specifies the property to query.
+
+RETURN VALUE
+------------
+
+If the device supports a given type, code or property,
+*libevdev_has_event_type*, *libevdev_has_event_code* and
+*libevdev_has_property* return 1. Otherwise, 0 is returned.
+
+NOTES
+-----
+An event type or code only signals the potential for the device to send
+such events. Many devices initialize more axes than they physically provide
+and such axes will never generate an event.
+
+SEE ALSO
+--------
+
+libevdev_enable_event_type(3), libevdev_enable_event_code(3),
+libevdev_disable_event_type(3), libevdev_disable_event_code(3)

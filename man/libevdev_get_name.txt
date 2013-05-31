@@ -1,0 +1,49 @@
+libevdev_get_name(3)
+====================
+
+NAME
+----
+
+libevdev_get_name, libevdev_get_product_id, libevdev_get_vendor_id, libevdev_get_bustype - retreive information about this device
+
+SYNOPSIS
+--------
+
+#include <libevdev/libevdev.h>
+
+const char* libevdev_get_name(const struct libevdev *dev);
+
+int libevdev_get_product_id(const struct libevdev *dev);
+
+int libevdev_get_vendor_id(const struct libevdev *dev);
+
+int libevdev_get_bustype(const struct libevdev *dev);
+
+DESCRIPTION
+-----------
+
+*libevdev_get_name* returns a pointer to the device name as set by the
+kernel.
+
+*libevdev_get_product_id* and *libevdev_get_vendor_id* return the numeric
+product and vendor ID as set by the kernel.
+
+*libevdev_get_bustype* returns the numeric bus type as set by the kernel.
+
+PARAMETERS
+----------
+*dev*::
+	Pointer to the libevdev device.
+
+RETURN VALUE
+------------
+*libevdev_get_name* returns a const pointer to the device name.
+
+*libevdev_get_product_id*, *libevdev_get_vendor_id* and
+*libevdev_get_bustype* return the numeric product ID, vendor ID, or bus
+type.
+
+SEE ALSO
+--------
+
+libevdev_has_event_type(3), libevdev_has_event_code(3)

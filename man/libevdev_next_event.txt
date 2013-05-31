@@ -1,0 +1,81 @@
+libevdev_next_event(3)
+======================
+
+NAME
+----
+
+libevdev_next_event - fetch the next event from the device
+
+SYNOPSIS
+--------
+
+#include <libevdev/libevdev.h>
+
+enum EvdevReadFlags {
+    LIBEVDEV_READ_SYNC,
+};
+
+int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event *ev);
+
+DESCRIPTION
+-----------
+
+*libevdev_next_event* returns the next event available for this device. This
+event may have been read previously and is currently in libevdev's event
+queue, or the event may be read off the fd now.
+
+A device has two read modes: normal and sync mode. In normal mode, the next
+available event is returned. If the event is a SYN_DROPPED event,
+*libevdev_next_event* returns 1 and switches to sync mode.
+
+In sync mode, the caller must repeatedly call *libevdev_next_event* with the
+'LIBEVDEV_READ_SYNC' flag set. *libevdev_next_event* returns the set of
+events required to bring the caller's device state in sync with the actual
+device. If no more events are available, *libevdev_next_event* returns
+-EAGAIN and the caller can switch back to normal mode.
+
+If the caller does not call with the 'LIBEVDEV_READ_SYNC' flag once in sync
+mode, libevdev drops all events and returns the next event from the device.
+
+PARAMETERS
+----------
+*dev*::
+	Pointer to the libevdev device.
+
+*flags*::
+	Specifies the read mode for this device.
+
+*ev*::
+	The event returned.
+
+RETURN VALUE
+------------
+
+On success, *libevdev_next_event* returns 0 and 'ev' points to the next
+event available on the device.
+
+If a SYN_DROPPED event was read from the device, *libevdev_next_event*
+returns 1 and switches to sync mode. The value of 'ev' is undefined.
+
+On error, *libevdev_next_event* returns a negative errno and the value of
+'ev' is undefined.
+
+*ENODEV*::
+	The file descriptor does not point to a valid device. Call
+	*libevdev_set_fd(3)* first.
+
+*EAGAIN*::
+	No events are currently available for this device.
+
+For a full list of potential error codes consult *read(2)*.
+
+NOTES
+-----
+*libevdev_next_event* reads more than one event off the fd. If the fd is not
+set to O_NONBLOCK, this call will block if no more events are available on
+the fd, even if events are present in the queue.
+
+SEE ALSO
+--------
+
+libevdev_set_fd(3)

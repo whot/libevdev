@@ -44,3 +44,4 @@ ylwrap
 *.swp
 .vimdir
 *.tar.*
+*.3

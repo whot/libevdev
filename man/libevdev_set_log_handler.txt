@@ -1,0 +1,43 @@
+libevdev_set_log_handler(3)
+===========================
+
+NAME
+----
+
+libevdev_set_log_handler - set the library's log handler to a user-supplied function
+
+SYNOPSIS
+--------
+
+#include <libevdev/libevdev.h>
+
+typedef void (*libevdev_log_func_t)(const char *format, va_list args);
+
+void libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc);
+
+
+DESCRIPTION
+-----------
+
+*libevdev_set_log_handler* set the log handler for the given device to the
+user-specified function. Messages from the library will printed using this
+function.
+
+PARAMETERS
+----------
+*dev*::
+	Pointer to the libevdev device.
+
+*logfunc*::
+	A vprintf-style function.
+
+Notes
+-----
+
+This function may be called before *libevdev_set_fd*.
+
+
+SEE ALSO
+--------
+
+libevdev_set_fd(3)

@@ -1,0 +1,67 @@
+libevdev_set_fd(3)
+==================
+
+NAME
+----
+
+libevdev_set_fd, libevdev_change_fd, libevdev_get_fd - set or change the fd for this device.
+
+SYNOPSIS
+--------
+
+#include <libevdev/libevdev.h>
+
+int libevdev_set_fd(struct libevdev* dev, int fd);
+
+int libevdev_change_fd(struct libevdev* dev, int fd);
+
+int libevdev_get_fd(const struct libevdev* dev);
+
+
+DESCRIPTION
+-----------
+
+*libevdev_set_fd* initializes the fd for this device, querying the kernel
+device for information. The fd must be open in O_RDONLY or O_RDWR mode. This
+call must be performed before querying the device for any information.
+
+*libevdev_change_fd* changes the fd for this device without querying the
+kernel for information. Use this function if the original fd had to be
+closed and re-opened without the device changing underneath.
+
+*libevdev_get_fd* returns the current fd for this device.
+
+PARAMETERS
+----------
+*dev*::
+	Pointer to the libevdev device.
+
+*fd*::
+	The fd to use for this device.
+
+RETURN VALUE
+------------
+
+On success, *libevdev_set_fd* returns 0. On error, a negative errno is
+returned. For a full list of potential error codes consult *ioctl(2)*.
+
+On success, *libevdev_change_fd* returns 0. On error, it returns -1.
+
+*libevdev_get_fd* returns the currently set file descriptor, or -1 if none
+has been set yet.
+
+NOTES
+-----
+*libevdev_set_fd* may only be called once per device. If the device needs to
+be re-initialized, use *libevdev_free(3)* and *libevdev_new(3)*.
+
+If the device was initialized with *libevdev_new_from_fd(3)*,
+*libevdev_set_fd* was already called by the library and calling it again
+will result in an error.
+
+*libevdev_get_fd* may be called before *libevdev_set_fd*.
+
+SEE ALSO
+--------
+
+libevdev_new(3), libevdev_free(3), libevdev_new_from_fd(3)

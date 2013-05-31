@@ -40,8 +40,19 @@ if test "x$GCC" = "xyes"; then
 fi
 AC_SUBST(GCC_CFLAGS)
 
+AC_PATH_PROG(ASCIIDOC, [a2x])
+if test "x$ASCIIDOC" = "x"; then
+	AC_MSG_WARN([asciidoc not found - unable to build man pages])
+	have_asciidoc=no
+else
+	have_asciidoc=yes
+fi
+AM_CONDITIONAL([HAVE_ASCIIDOC], [test "$have_asciidoc" = yes])
+
+
 AC_CONFIG_FILES([Makefile
 		 libevdev/Makefile
+		 man/Makefile
 		 test/Makefile
 		 libevdev.pc])
 AC_OUTPUT
