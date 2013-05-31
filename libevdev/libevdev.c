@@ -149,6 +149,8 @@ libevdev_new(int fd)
 	struct libevdev *dev;
 
 	dev = calloc(1, sizeof(*dev));
+	if (!dev)
+		return NULL;
 	dev->num_slots = -1;
 	dev->current_slot = -1;
 	dev->log = libevdev_noop_log_func;
