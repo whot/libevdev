@@ -34,14 +34,29 @@ enum EvdevReadFlags {
 
 
 /**
- * Initialize a new libevdev struct.
- *
- * @param fd If fd >= 0, the device is initialised for the fd. Otherwise, a
- * caller must call evdev_set_fd() before attempting to read events.
- *
+ * Initialize a new libevdev device.
+*
  * @see libevdev_set_fd
  */
-struct libevdev* libevdev_new(int fd);
+struct libevdev* libevdev_new(void);
+
+/**
+ * Initialize a new libevdev device from the given fd.
+ *
+ * This is a shortcut for
+ *
+ * <pre>
+ * struct libevdev *dev = libevdev_new();
+ * libevdev_set_fd(dev, fd);
+ * </pre>
+ *
+ * @param fd A file descriptor to the device in O_RDWR or O_RDONLY mode.
+ *
+ * @return On success, zero is returned and dev is set to the newly
+ * allocated struct. On failure, a negative errno is returned and the value
+ * of dev is undefined.
+ */
+int libevdev_new_from_fd(int fd, struct libevdev **dev);
 
 /**
  * Clean up and free the libevdev struct.

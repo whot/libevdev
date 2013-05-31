@@ -23,6 +23,7 @@
 #include <config.h>
 
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -111,6 +112,7 @@ main(int argc, char **argv)
 	struct libevdev *dev;
 	const char *file;
 	int fd;
+	int rc;
 
 
 	if (argc < 2)
@@ -123,9 +125,9 @@ main(int argc, char **argv)
 		return 1;
 	}
 
-	dev = libevdev_new(fd);
-	if (!dev) {
-		fprintf(stderr, "Failed to init libevdev\n");
+	rc = libevdev_new_from_fd(fd, &dev);
+	if (rc < 0) {
+		fprintf(stderr, "Failed to init libevdev (%s)\n", strerror(-rc));
 		return 1;
 	}
 

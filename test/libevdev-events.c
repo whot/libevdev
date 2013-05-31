@@ -90,9 +90,9 @@ main(int argc, char **argv)
 		goto out;
 	}
 
-	dev = libevdev_new(fd);
-	if (!dev) {
-		fprintf(stderr, "Failed to init libevdev\n");
+	rc = libevdev_new_from_fd(fd, &dev);
+	if (rc < 0) {
+		fprintf(stderr, "Failed to init libevdev (%s)\n", strerror(-rc));
 		goto out;
 	}
 

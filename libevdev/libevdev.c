@@ -144,22 +144,37 @@ libevdev_noop_log_func(const char *format, va_list args)
 }
 
 struct libevdev*
-libevdev_new(int fd)
+libevdev_new(void)
 {
 	struct libevdev *dev;
 
 	dev = calloc(1, sizeof(*dev));
 	if (!dev)
 		return NULL;
+	dev->fd = -1;
 	dev->num_slots = -1;
 	dev->current_slot = -1;
 	dev->log = libevdev_noop_log_func;
 
-	if (fd >= 0)
-		libevdev_set_fd(dev, fd);
-	dev->fd = fd;
-
 	return dev;
+}
+
+int
+libevdev_new_from_fd(int fd, struct libevdev **dev)
+{
+	struct libevdev *d;
+	int rc;
+
+	d = libevdev_new();
+	if (!d)
+		return -ENOSPC;
+
+	rc = libevdev_set_fd(d, fd);
+	if (rc < 0)
+		libevdev_free(d);
+	else
+		*dev = d;
+	return rc;
 }
 
 void
