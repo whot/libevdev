@@ -202,6 +202,20 @@ int libevdev_get_vendor_id(const struct libevdev *dev);
 int libevdev_get_bustype(const struct libevdev *dev);
 
 /**
+ * @return The device's firmware version
+ *
+ * @note This function is signal-safe.
+ */
+int libevdev_get_version(const struct libevdev *dev);
+
+/**
+ * @return The driver version for this device
+ *
+ * @note This function is signal-safe.
+ */
+int libevdev_get_driver_version(const struct libevdev *dev);
+
+/**
  * @return 1 if the device supports this event type, or 0 otherwise.
  *
  * @note This function is signal-safe

@@ -4,7 +4,8 @@ libevdev_get_name(3)
 NAME
 ----
 
-libevdev_get_name, libevdev_get_product_id, libevdev_get_vendor_id, libevdev_get_bustype - retreive information about this device
+libevdev_get_name, libevdev_get_product_id, libevdev_get_vendor_id,
+libevdev_get_bustype, libevdev_get_version, libevdev_get_driver_version - retreive information about this device
 
 SYNOPSIS
 --------
@@ -19,6 +20,10 @@ int libevdev_get_vendor_id(const struct libevdev *dev);
 
 int libevdev_get_bustype(const struct libevdev *dev);
 
+int libevdev_get_version(const struct libevdev *dev);
+
+int libevdev_get_driver_version(const struct libevdev *dev);
+
 DESCRIPTION
 -----------
 
@@ -30,6 +35,11 @@ product and vendor ID as set by the kernel.
 
 *libevdev_get_bustype* returns the numeric bus type as set by the kernel.
 
+*libevdev_get_version* returns the firmware or driver version.
+
+*libevdev_get_driver_version* returns the version of the evdev kernel
+driver.
+
 PARAMETERS
 ----------
 *dev*::
@@ -40,8 +50,11 @@ RETURN VALUE
 *libevdev_get_name* returns a const pointer to the device name.
 
 *libevdev_get_product_id*, *libevdev_get_vendor_id* and
-*libevdev_get_bustype* return the numeric product ID, vendor ID, or bus
-type.
+*libevdev_get_bustype*, *libevdev_get_version* return the numeric product
+ID, vendor ID, bus type or version.
+
+*libevdev_get_driver_version* returns the version of the evdev kernel
+driver.
 
 SEE ALSO
 --------

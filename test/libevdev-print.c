@@ -135,6 +135,7 @@ main(int argc, char **argv)
 			libevdev_get_bustype(dev),
 			libevdev_get_vendor_id(dev),
 			libevdev_get_product_id(dev));
+	printf("Evdev version: %x\n", libevdev_get_driver_version(dev));
 	printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
 	print_bits(dev);
 	print_props(dev);

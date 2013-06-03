@@ -220,6 +220,10 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	if (rc < 0)
 		goto out;
 
+	rc = ioctl(fd, EVIOCGVERSION, &dev->driver_version);
+	if (rc < 0)
+		goto out;
+
 	rc = ioctl(fd, EVIOCGPROP(sizeof(dev->props)), dev->props);
 	if (rc < 0)
 		goto out;
@@ -597,6 +601,16 @@ int libevdev_get_vendor_id(const struct libevdev *dev)
 int libevdev_get_bustype(const struct libevdev *dev)
 {
 	return dev->ids.bustype;
+}
+
+int libevdev_get_version(const struct libevdev *dev)
+{
+	return dev->ids.version;
+}
+
+int libevdev_get_driver_version(const struct libevdev *dev)
+{
+	return dev->driver_version;
 }
 
 int

@@ -54,6 +54,7 @@ struct libevdev {
 
 	char name[MAX_NAME];
 	struct input_id ids;
+	int driver_version;
 	unsigned long bits[NLONGS(EV_CNT)];
 	unsigned long props[NLONGS(INPUT_PROP_CNT)];
 	unsigned long key_bits[NLONGS(KEY_CNT)];
