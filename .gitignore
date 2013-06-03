@@ -46,3 +46,4 @@ ylwrap
 *.tar.*
 *.3
 libevdev-events
+event-names.h

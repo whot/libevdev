@@ -29,6 +29,7 @@
 
 #include "libevdev.h"
 #include "libevdev-int.h"
+#include "event-names.h"
 
 #define MAXEVENTS 64
 
@@ -936,4 +937,34 @@ libevdev_grab(struct libevdev *dev, int grab)
 		dev->grabbed = grab;
 
 	return rc < 0 ? -errno : 0;
+}
+
+const char*
+libevdev_get_event_type_name(unsigned int type)
+{
+	if (type > EV_MAX)
+		return NULL;
+
+	return ev_map[type];
+}
+
+const char*
+libevdev_get_event_code_name(unsigned int type, unsigned int code)
+{
+	if (type > EV_MAX)
+		return NULL;
+
+	if (code > ev_max[type])
+		return NULL;
+
+	return event_type_map[type][code];
+}
+
+const char*
+libevdev_get_input_prop_name(unsigned int prop)
+{
+	if (prop > INPUT_PROP_MAX)
+		return NULL;
+
+	return input_prop_map[prop];
 }

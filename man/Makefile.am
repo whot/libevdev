@@ -7,6 +7,7 @@ dist_man3_MANS = $(shell find . -name "libevdev_*.3" -printf "%P\n")
 man_src = \
 	libevdev_enable_event_type.txt	\
 	libevdev_get_abs_min.txt	\
+	libevdev_get_event_type_name.txt\
 	libevdev_get_name.txt		\
 	libevdev_get_num_slots.txt	\
 	libevdev_get_phys.txt		\

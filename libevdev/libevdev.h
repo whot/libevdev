@@ -464,4 +464,32 @@ int libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigne
  */
 int libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs);
 
+/**
+ * @return The name of the given event type (e.g. EV_ABS) or NULL for an
+ * invalid type
+ *
+ * @note The list of names is compiled into libevdev. If the kernel adds new
+ * defines for new properties libevdev will not automatically pick these up.
+ */
+const char * libevdev_get_event_type_name(unsigned int type);
+/**
+ * @return The name of the given event code (e.g. ABS_X) or NULL for an
+ * invalid type or code
+ *
+ * @note The list of names is compiled into libevdev. If the kernel adds new
+ * defines for new properties libevdev will not automatically pick these up.
+ */
+const char * libevdev_get_event_code_name(unsigned int type, unsigned int code);
+
+/**
+ * @return The name of the given input prop (e.g. INPUT_PROP_BUTTONPAD) or NULL for an
+ * invalid property
+ *
+ * @note The list of names is compiled into libevdev. If the kernel adds new
+ * defines for new properties libevdev will not automatically pick these up.
+ * @note On older kernels input properties may not be defined and
+ * libevdev_get_input_prop_name will always return NULL
+ */
+const char * libevdev_get_input_prop_name(unsigned int prop);
+
 #endif /* libevdev_H */
