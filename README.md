@@ -9,11 +9,13 @@ http://github.com/whot/libevdev
 
 **libevdev is currently in early stages of development. Use at your own risk**
 
-Device capabilities
--------------------
-libevdev provides interfaces to query a device's capabilities.  These
-interfaces are type-safe (as opposed to the ioctl bits) and protect against
-invalid codes, etc.
+The eventual goal is that libevdev wraps all ioctls available to evdev
+devices, thus making direct access unnecessary.
+
+ioctl wrappers
+--------------
+libevdev provides interfaces to query a device's capabilities, providing
+type-safe interfaces to query and set a device's capabilities and state.
 
 SYN_DROPPED handling
 --------------------
@@ -28,6 +30,3 @@ compare bitfields. Instead, libevdev sends the 'missing' events to the
 caller, allowing it to use the same event processing paths as it would
 otherwise.
 
-Changing devices
-----------------
-libevdev provides interfaces to **modify** the kernel device.
