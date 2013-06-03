@@ -52,7 +52,7 @@ struct libevdev {
 	int fd;
 	libevdev_log_func_t log;
 
-	char name[MAX_NAME];
+	char *name;
 	char *phys;
 	char *uniq;
 	struct input_id ids;

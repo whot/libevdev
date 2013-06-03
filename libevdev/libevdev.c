@@ -180,6 +180,7 @@ libevdev_new_from_fd(int fd, struct libevdev **dev)
 void
 libevdev_free(struct libevdev *dev)
 {
+	free(dev->name);
 	free(dev->phys);
 	free(dev->uniq);
 	queue_free(dev);
@@ -215,9 +216,17 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	if (rc < 0)
 		goto out;
 
-	rc = ioctl(fd, EVIOCGNAME(sizeof(dev->name) - 1), dev->name);
+	memset(buf, 0, sizeof(buf));
+	rc = ioctl(fd, EVIOCGNAME(sizeof(buf) - 1), buf);
 	if (rc < 0)
 		goto out;
+
+	dev->name = calloc(strlen(buf) + 1, sizeof(char));
+	if (!dev->name) {
+		errno = ENOSPC;
+		goto out;
+	}
+	strcpy(dev->name, buf);
 
 	memset(buf, 0, sizeof(buf));
 	rc = ioctl(fd, EVIOCGPHYS(sizeof(buf) - 1), buf);
