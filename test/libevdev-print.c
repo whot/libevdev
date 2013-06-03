@@ -137,6 +137,8 @@ main(int argc, char **argv)
 			libevdev_get_product_id(dev));
 	printf("Evdev version: %x\n", libevdev_get_driver_version(dev));
 	printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
+	printf("Phys location: %s\n", libevdev_get_phys(dev));
+	printf("Uniq identifier: %s\n", libevdev_get_uniq(dev));
 	print_bits(dev);
 	print_props(dev);
 

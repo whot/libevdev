@@ -182,6 +182,22 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 const char* libevdev_get_name(const struct libevdev *dev);
 
 /**
+ * Virtual devices such as uinput devices have no phys location.
+ *
+ * @return The physical location of this device, or NULL if there is none
+ *
+ * @note This function is signal safe.
+ */
+const char * libevdev_get_phys(const struct libevdev *dev);
+
+/**
+ * @return The unique identifier for this device, or NULL if there is none
+ *
+ * @note This function is signal safe.
+ */
+const char * libevdev_get_uniq(const struct libevdev *dev);
+
+/**
  * @return The device's product ID
  *
  * @note This function is signal-safe.

@@ -9,6 +9,7 @@ man_src = \
 	libevdev_get_abs_min.txt	\
 	libevdev_get_name.txt		\
 	libevdev_get_num_slots.txt	\
+	libevdev_get_phys.txt		\
 	libevdev_grab.txt		\
 	libevdev_has_event_type.txt	\
 	libevdev_new.txt		\

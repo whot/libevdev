@@ -180,6 +180,8 @@ libevdev_new_from_fd(int fd, struct libevdev **dev)
 void
 libevdev_free(struct libevdev *dev)
 {
+	free(dev->phys);
+	free(dev->uniq);
 	queue_free(dev);
 	free(dev);
 }
@@ -204,6 +206,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 {
 	int rc;
 	int i;
+	char buf[256];
 
 	if (dev->fd != -1)
 		return -EBADF;
@@ -215,6 +218,35 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	rc = ioctl(fd, EVIOCGNAME(sizeof(dev->name) - 1), dev->name);
 	if (rc < 0)
 		goto out;
+
+	memset(buf, 0, sizeof(buf));
+	rc = ioctl(fd, EVIOCGPHYS(sizeof(buf) - 1), buf);
+	if (rc < 0) {
+		/* uinput has no phys */
+		if (errno != ENOENT)
+			goto out;
+	} else {
+		dev->phys = calloc(strlen(buf) + 1, sizeof(char));
+		if (!dev->phys) {
+			errno = ENOSPC;
+			goto out;
+		}
+		strcpy(dev->phys, buf);
+	}
+
+	memset(buf, 0, sizeof(buf));
+	rc = ioctl(fd, EVIOCGUNIQ(sizeof(buf) - 1), buf);
+	if (rc < 0) {
+		if (errno != ENOENT)
+			goto out;
+	} else  {
+		dev->uniq = calloc(strlen(buf) + 1, sizeof(char));
+		if (!dev->uniq) {
+			errno = ENOSPC;
+			goto out;
+		}
+		strcpy(dev->uniq, buf);
+	}
 
 	rc = ioctl(fd, EVIOCGID, &dev->ids);
 	if (rc < 0)
@@ -586,6 +618,18 @@ const char *
 libevdev_get_name(const struct libevdev *dev)
 {
 	return dev->name;
+}
+
+const char *
+libevdev_get_phys(const struct libevdev *dev)
+{
+	return dev->phys;
+}
+
+const char *
+libevdev_get_uniq(const struct libevdev *dev)
+{
+	return dev->uniq;
 }
 
 int libevdev_get_product_id(const struct libevdev *dev)

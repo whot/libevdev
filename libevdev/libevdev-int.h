@@ -53,6 +53,8 @@ struct libevdev {
 	libevdev_log_func_t log;
 
 	char name[MAX_NAME];
+	char *phys;
+	char *uniq;
 	struct input_id ids;
 	int driver_version;
 	unsigned long bits[NLONGS(EV_CNT)];

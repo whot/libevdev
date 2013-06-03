@@ -1,0 +1,41 @@
+libevdev_get_phys(3)
+====================
+
+NAME
+----
+
+libevdev_get_phys, libevdev_get_uniq - retreive the physical location and unique identifier for this device
+
+SYNOPSIS
+--------
+
+#include <libevdev/libevdev.h>
+
+
+DESCRIPTION
+-----------
+
+*libevdev_get_phys* returns a pointer to a string representing the physical
+location of this device. For virtual devices such as those created by
+uinput, no physical location is available.
+
+*libevdev_get_uniq* returns a pointer to a uniq identifier of this device.
+Not all devices have such an identifier.
+
+PARAMETERS
+----------
+*dev*::
+	Pointer to the libevdev device.
+
+RETURN VALUE
+------------
+*libevdev_get_phys* returns a pointer to a string representing the physical
+location of this device, or NULL if none is defined.
+
+*libevdev_get_uniq* returns a pointer to a uniq identifier of this device,
+or NULL if none is defined.
+
+SEE ALSO
+--------
+
+libevdev_get_name(3)
