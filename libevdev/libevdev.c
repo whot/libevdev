@@ -421,6 +421,9 @@ sync_mt_state(struct libevdev *dev)
 		for (j = ABS_MT_MIN; j < ABS_MT_MAX; j++) {
 			int jdx = j - ABS_MT_MIN;
 
+			if (j == ABS_MT_SLOT)
+				continue;
+
 			if (dev->mt_slot_vals[i][jdx] == mt_state[jdx].val[i])
 				continue;
 
