@@ -584,12 +584,12 @@ libevdev_get_name(const struct libevdev *dev)
 	return dev->name;
 }
 
-int libevdev_get_pid(const struct libevdev *dev)
+int libevdev_get_product_id(const struct libevdev *dev)
 {
 	return dev->ids.product;
 }
 
-int libevdev_get_vid(const struct libevdev *dev)
+int libevdev_get_vendor_id(const struct libevdev *dev)
 {
 	return dev->ids.vendor;
 }

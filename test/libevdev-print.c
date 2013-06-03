@@ -133,8 +133,8 @@ main(int argc, char **argv)
 
 	printf("Input device ID: bus %#x vendor %#x product %#x\n",
 			libevdev_get_bustype(dev),
-			libevdev_get_vid(dev),
-			libevdev_get_pid(dev));
+			libevdev_get_vendor_id(dev),
+			libevdev_get_product_id(dev));
 	printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
 	print_bits(dev);
 	print_props(dev);

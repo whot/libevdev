@@ -186,13 +186,13 @@ const char* libevdev_get_name(const struct libevdev *dev);
  *
  * @note This function is signal-safe.
  */
-int libevdev_get_pid(const struct libevdev *dev);
+int libevdev_get_product_id(const struct libevdev *dev);
 /**
  * @return The device's vendor ID
  *
  * @note This function is signal-safe.
  */
-int libevdev_get_vid(const struct libevdev *dev);
+int libevdev_get_vendor_id(const struct libevdev *dev);
 
 /**
  * @return The device's bus type
