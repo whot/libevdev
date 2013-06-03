@@ -288,10 +288,11 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	for (i = ABS_X; i <= ABS_MAX; i++) {
 		if (bit_is_set(dev->abs_bits, i)) {
 			struct input_absinfo abs_info;
-			rc = ioctl(fd, EVIOCGABS(i), &dev->abs_info[i]);
+			rc = ioctl(fd, EVIOCGABS(i), &abs_info);
 			if (rc < 0)
 				goto out;
 
+			dev->abs_info[i] = abs_info;
 			if (i == ABS_MT_SLOT) {
 				dev->num_slots = abs_info.maximum + 1; /* FIXME: non-zero min? */
 				dev->current_slot = abs_info.value;
