@@ -76,6 +76,8 @@ struct libevdev {
 	size_t queue_size; /**< size of queue in elements */
 	size_t queue_next; /**< next event index */
 	size_t queue_nsync; /**< number of sync events */
+
+	struct timeval last_event_time;
 };
 
 /**

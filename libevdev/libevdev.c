@@ -322,10 +322,9 @@ libevdev_get_fd(const struct libevdev* dev)
 }
 
 static inline void
-init_event(struct input_event *ev, int type, int code, int value)
+init_event(struct libevdev *dev, struct input_event *ev, int type, int code, int value)
 {
-	ev->time.tv_sec = 0; /* FIXME: blah! */
-	ev->time.tv_usec = 0; /* FIXME: blah! */
+	ev->time = dev->last_event_time;
 	ev->type = type;
 	ev->code = code;
 	ev->value = value;
@@ -348,7 +347,7 @@ sync_key_state(struct libevdev *dev)
 		new = bit_is_set(keystate, i);
 		if (old ^ new) {
 			struct input_event *ev = queue_push(dev);
-			init_event(ev, EV_KEY, i, new ? 1 : 0);
+			init_event(dev, ev, EV_KEY, i, new ? 1 : 0);
 		}
 		set_bit_state(dev->key_values, i, new);
 	}
@@ -380,7 +379,7 @@ sync_abs_state(struct libevdev *dev)
 		if (dev->abs_info[i].value != abs_info.value) {
 			struct input_event *ev = queue_push(dev);
 
-			init_event(ev, EV_ABS, i, abs_info.value);
+			init_event(dev, ev, EV_ABS, i, abs_info.value);
 			dev->abs_info[i].value = abs_info.value;
 		}
 	}
@@ -417,7 +416,7 @@ sync_mt_state(struct libevdev *dev)
 		struct input_event *ev;
 
 		ev = queue_push(dev);
-		init_event(ev, EV_ABS, ABS_MT_SLOT, i);
+		init_event(dev, ev, EV_ABS, ABS_MT_SLOT, i);
 		for (j = ABS_MT_MIN; j < ABS_MT_MAX; j++) {
 			int jdx = j - ABS_MT_MIN;
 
@@ -425,7 +424,7 @@ sync_mt_state(struct libevdev *dev)
 				continue;
 
 			ev = queue_push(dev);
-			init_event(ev, EV_ABS, j, mt_state[jdx].val[i]);
+			init_event(dev, ev, EV_ABS, j, mt_state[jdx].val[i]);
 			dev->mt_slot_vals[i][jdx] = mt_state[jdx].val[i];
 		}
 	}
@@ -470,7 +469,7 @@ sync_state(struct libevdev *dev)
 		rc = sync_mt_state(dev);
 
 	ev = queue_push(dev);
-	init_event(ev, EV_SYN, SYN_REPORT, 0);
+	init_event(dev, ev, EV_SYN, SYN_REPORT, 0);
 
 	dev->queue_nsync = queue_num_elements(dev);
 	dev->need_sync = 0;
@@ -542,6 +541,8 @@ update_state(struct libevdev *dev, const struct input_event *e)
 			rc = update_abs_state(dev, e);
 			break;
 	}
+
+	dev->last_event_time = e->time;
 
 	return rc;
 }
