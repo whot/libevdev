@@ -34,18 +34,6 @@
 #include "libevdev.h"
 #include "event-names.h"
 
-void
-print_code_bits(struct libevdev *dev, unsigned int type, unsigned int max)
-{
-	unsigned int i;
-	for (i = 0; i <= max; i++) {
-		if (libevdev_has_event_code(dev, type, i))
-			printf("%s: %s\n",
-					event_get_type_name(type),
-					event_get_code_name(type, i));
-	}
-}
-
 int print_event(struct input_event *ev)
 {
 	if (ev->type == EV_SYN)
