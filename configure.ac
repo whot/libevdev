@@ -52,6 +52,6 @@ AM_CONDITIONAL([HAVE_ASCIIDOC], [test "$have_asciidoc" = yes])
 AC_CONFIG_FILES([Makefile
 		 libevdev/Makefile
 		 man/Makefile
-		 test/Makefile
+		 tools/Makefile
 		 libevdev.pc])
 AC_OUTPUT

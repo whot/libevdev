@@ -45,3 +45,4 @@ ylwrap
 .vimdir
 *.tar.*
 *.3
+libevdev-events
