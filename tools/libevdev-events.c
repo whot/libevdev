@@ -32,7 +32,6 @@
 #include <linux/input.h>
 
 #include "libevdev.h"
-#include "event-names.h"
 
 static void
 print_abs_bits(struct libevdev *dev, int axis)
@@ -63,7 +62,7 @@ print_code_bits(struct libevdev *dev, unsigned int type, unsigned int max)
 		if (!libevdev_has_event_code(dev, type, i))
 			continue;
 
-		printf("    Event code %i (%s)\n", i, event_get_code_name(type, i));
+		printf("    Event code %i (%s)\n", i, libevdev_get_event_code_name(type, i));
 		if (type == EV_ABS)
 			print_abs_bits(dev, i);
 	}
@@ -77,7 +76,7 @@ print_bits(struct libevdev *dev)
 
 	for (i = 0; i <= EV_MAX; i++) {
 		if (libevdev_has_event_type(dev, i))
-			printf("  Event type %d (%s)\n", i, event_get_type_name(i));
+			printf("  Event type %d (%s)\n", i, libevdev_get_event_type_name(i));
 		switch(i) {
 			case EV_KEY:
 				print_code_bits(dev, EV_KEY, KEY_MAX);
@@ -103,7 +102,8 @@ print_props(struct libevdev *dev)
 
 	for (i = 0; i <= INPUT_PROP_MAX; i++) {
 		if (libevdev_has_property(dev, i))
-			printf("  Property type %d (%s)\n", i, input_prop_map[i]);
+			printf("  Property type %d (%s)\n", i,
+					libevdev_get_input_prop_name(i));
 	}
 }
 
@@ -113,15 +113,15 @@ int print_event(struct input_event *ev)
 		printf("Event: time %ld.%06ld, ++++++++++++++++++++ %s +++++++++++++++\n",
 				ev->time.tv_sec,
 				ev->time.tv_usec,
-				event_get_type_name(ev->type));
+				libevdev_get_event_type_name(ev->type));
 	else
 		printf("Event: time %ld.%06ld, type %d (%s), code %d (%s), value %d\n",
 			ev->time.tv_sec,
 			ev->time.tv_usec,
 			ev->type,
-			event_get_type_name(ev->type),
+			libevdev_get_event_type_name(ev->type),
 			ev->code,
-			event_get_code_name(ev->type, ev->code),
+			libevdev_get_event_code_name(ev->type, ev->code),
 			ev->value);
 	return 0;
 }
