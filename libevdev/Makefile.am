@@ -3,6 +3,7 @@ lib_LTLIBRARIES=libevdev.la
 libevdev_la_SOURCES = \
                    libevdev.h \
                    libevdev-int.h \
+                   libevdev-util.h \
                    libevdev.c
 
 libevdev_la_LDFLAGS = -version-info $(LIBEVDEV_LT_VERSION) -export-symbols-regex '^libevdev_'
