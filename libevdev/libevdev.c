@@ -194,6 +194,9 @@ libevdev_free(struct libevdev *dev)
 void
 libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc)
 {
+	if (dev == NULL)
+		return;
+
 	dev->log = logfunc ? logfunc : libevdev_noop_log_func;
 }
 
