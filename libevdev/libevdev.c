@@ -180,6 +180,9 @@ libevdev_new_from_fd(int fd, struct libevdev **dev)
 void
 libevdev_free(struct libevdev *dev)
 {
+	if (!dev)
+		return;
+
 	free(dev->name);
 	free(dev->phys);
 	free(dev->uniq);
