@@ -454,6 +454,41 @@ int libevdev_enable_event_code(struct libevdev *dev, unsigned int type, unsigned
  */
 int libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned int code);
 
+
+/**
+ * Forcibly enable an event type on this device, even if the underlying
+ * device does not support it. While this cannot make the device actually
+ * report such events, it will now return true for libevdev_has_event_code.
+ *
+ * This will be written to the kernel.
+ *
+ * This cannot be undone, the kernel only allows to enable axes, not disable
+ * them.
+ *
+ * This function calls libevdev_kernel_enable_event_type if necessary.
+ *
+ * @param type The event type to enable (EV_ABS, EV_KEY, ...)
+ * @param code The event code to enable (ABS_X, REL_X, etc.)
+ */
+int libevdev_kernel_enable_event_type(struct libevdev *dev, unsigned int type);
+
+/**
+ * Forcibly enable an event code on this device, even if the underlying
+ * device does not support it. While this cannot make the device actually
+ * report such events, it will now return true for libevdev_has_event_code.
+ *
+ * This will be written to the kernel.
+ *
+ * This cannot be undone, the kernel only allows to enable axes, not disable
+ * them.
+ *
+ * This function calls libevdev_kernel_enable_event_type if necessary.
+ *
+ * @param type The event type to enable (EV_ABS, EV_KEY, ...)
+ * @param code The event code to enable (ABS_X, REL_X, etc.)
+ */
+int libevdev_kernel_enable_event_code(struct libevdev *dev, unsigned int type, unsigned int code);
+
 /**
  * Set the device's EV_ABS/<code> axis to the value defined in the abs
  * parameter. This will be written to the kernel.

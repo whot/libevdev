@@ -26,6 +26,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <linux/uinput.h>
 
 #include "libevdev.h"
 #include "libevdev-int.h"
@@ -753,8 +754,6 @@ libevdev_enable_event_type(struct libevdev *dev, unsigned int type)
 
 	set_bit(dev->bits, type);
 
-	/* FIXME: pass through to kernel */
-
 	return 0;
 }
 
@@ -765,8 +764,6 @@ libevdev_disable_event_type(struct libevdev *dev, unsigned int type)
 		return 1;
 
 	clear_bit(dev->bits, type);
-
-	/* FIXME: pass through to kernel */
 
 	return 0;
 }
@@ -793,8 +790,6 @@ libevdev_enable_event_code(struct libevdev *dev, unsigned int type,
 		dev->abs_info[code] = *abs;
 	}
 
-	/* FIXME: pass through to kernel */
-
 	return 0;
 }
 
@@ -814,9 +809,56 @@ libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned in
 
 	clear_bit(mask, code);
 
-	/* FIXME: pass through to kernel */
-
 	return 0;
+}
+
+int
+libevdev_kernel_enable_event_type(struct libevdev *dev, unsigned int type)
+{
+	int rc;
+
+	if (type > EV_MAX)
+		return -1;
+
+	rc = ioctl(dev->fd, UI_SET_EVBIT, type);
+	if (rc != -1)
+		libevdev_enable_event_type(dev, type);
+
+	return (rc != -1) ? 0 : -errno;
+}
+
+int
+libevdev_kernel_enable_event_code(struct libevdev *dev, unsigned int type, unsigned int code)
+{
+	int rc;
+	int uinput_bit;
+	int max;
+	const unsigned long *mask;
+
+	rc = libevdev_kernel_enable_event_type(dev, type);
+	if (rc != 0)
+		return rc;
+
+	max = type_to_mask_const(dev, type, &mask);
+	if (code > max)
+		return -EINVAL;
+
+	switch(type) {
+		case EV_KEY: uinput_bit = UI_SET_KEYBIT; break;
+		case EV_REL: uinput_bit = UI_SET_RELBIT; break;
+		case EV_ABS: uinput_bit = UI_SET_ABSBIT; break;
+		case EV_MSC: uinput_bit = UI_SET_MSCBIT; break;
+		case EV_LED: uinput_bit = UI_SET_LEDBIT; break;
+		case EV_SND: uinput_bit = UI_SET_SNDBIT; break;
+		case EV_FF: uinput_bit = UI_SET_FFBIT; break;
+		case EV_SW: uinput_bit = UI_SET_SWBIT; break;
+	}
+
+	rc = ioctl(dev->fd, uinput_bit, type);
+	if (rc != -1)
+		libevdev_enable_event_type(dev, type);
+
+	return (rc != -1) ? 0 : -errno;
 }
 
 int
