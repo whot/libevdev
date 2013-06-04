@@ -33,6 +33,7 @@ LT_PREREQ([2.2])
 LT_INIT
 
 PKG_PROG_PKG_CONFIG()
+PKG_CHECK_MODULES(CHECK, [check])
 
 if test "x$GCC" = "xyes"; then
 	GCC_CFLAGS="-Wall -Wextra -Wno-unused-parameter -g -Wstrict-prototypes -Wmissing-prototypes -fvisibility=hidden"
@@ -53,5 +54,6 @@ AC_CONFIG_FILES([Makefile
 		 libevdev/Makefile
 		 man/Makefile
 		 tools/Makefile
+		 test/Makefile
 		 libevdev.pc])
 AC_OUTPUT

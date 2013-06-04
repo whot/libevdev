@@ -1,2 +1,7 @@
 libevdev-print
 libevdev-events
+
+# ignore all tests, but not .c/.h files
+test-*
+!test-*.c
+!test-*.h

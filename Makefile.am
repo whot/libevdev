@@ -1,4 +1,4 @@
-SUBDIRS = libevdev tools man
+SUBDIRS = libevdev tools man test
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libevdev.pc
