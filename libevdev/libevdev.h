@@ -25,6 +25,7 @@
 
 #include <config.h>
 #include <linux/input.h>
+#include <stdarg.h>
 
 struct libevdev;
 
