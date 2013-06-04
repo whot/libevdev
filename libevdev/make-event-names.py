@@ -29,7 +29,14 @@ prefixes = [
 ]
 
 blacklist = [
-		"EV_VERSION"
+		"EV_VERSION",
+		"BTN_MISC",
+		"BTN_MOUSE",
+		"BTN_JOYSTICK",
+		"BTN_GAMEPAD",
+		"BTN_DIGI",
+		"BTN_WHEEL",
+		"BTN_TRIGGER_HAPPY"
 ]
 
 def print_bits(bits, prefix):
