@@ -24,6 +24,9 @@
 #define libevdev_INT_H
 
 #include <config.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
 #include "libevdev.h"
 
 #define LONG_BITS (sizeof(long) * 8)
