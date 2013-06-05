@@ -74,6 +74,7 @@ def print_map(bits):
 	print ""
 
 	print "static const int ev_max[EV_MAX + 1] = {"
+	print "	[0 ... EV_MAX] = -1,"
 	for prefix in prefixes:
 		if prefix == "BTN_" or prefix == "EV_" or prefix == "INPUT_PROP_":
 			continue
