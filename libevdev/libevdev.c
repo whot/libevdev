@@ -929,3 +929,12 @@ libevdev_get_input_prop_name(unsigned int prop)
 
 	return input_prop_map[prop];
 }
+
+int
+libevdev_get_event_type_max(unsigned int type)
+{
+	if (type > EV_MAX)
+		return -1;
+
+	return ev_max[type];
+}

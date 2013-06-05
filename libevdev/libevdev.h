@@ -527,4 +527,13 @@ const char * libevdev_get_event_code_name(unsigned int type, unsigned int code);
  */
 const char * libevdev_get_input_prop_name(unsigned int prop);
 
+/**
+ * @return The max value defined for the given event type, e.g. ABS_MAX for a type of EV_ABS, or -1
+ * for an invalid type.
+ *
+ * @note The max value is compiled into libevdev. If the kernel changes the
+ * max value, libevdev will not automatically pick these up.
+ */
+int libevdev_get_event_type_max(unsigned int type);
+
 #endif /* libevdev_H */
