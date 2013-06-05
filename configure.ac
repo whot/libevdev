@@ -50,6 +50,26 @@ fi
 AM_CONDITIONAL([HAVE_ASCIIDOC], [test "$have_asciidoc" = yes])
 
 
+AC_MSG_CHECKING([whether to build with gcov])
+AC_ARG_ENABLE([gcov],
+	      [AS_HELP_STRING([--enable-gcov],
+			      [Whether to enable coverage testing (default:enabled)])]
+	      [],
+	      [enable_gcov=yes],
+	      )
+AS_IF([test "x$enable_gcov" != "xno"],
+      [
+       GCOV_CFLAGS="-fprofile-arcs -ftest-coverage"
+       GCOV_LDFLAGS="-fprofile-arcs -ftest-coverage"
+       enable_gcov=yes
+       ],
+)
+
+AM_CONDITIONAL([GCOV_ENABLED], [test "x$enable_gcov" != "xno"])
+AC_SUBST([GCOV_CFLAGS])
+AC_SUBST([GCOV_LDFLAGS])
+AC_MSG_RESULT([$enable_gcov])
+
 AC_CONFIG_FILES([Makefile
 		 libevdev/Makefile
 		 man/Makefile
