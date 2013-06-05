@@ -53,10 +53,10 @@ set_bit_state(unsigned long *array, int bit, int state)
 		clear_bit(array, bit);
 }
 
-static inline unsigned int
+static inline int
 type_to_mask_const(const struct libevdev *dev, unsigned int type, const unsigned long **mask)
 {
-	unsigned int max;
+	int max;
 
 	switch(type) {
 		case EV_ABS:
@@ -76,16 +76,16 @@ type_to_mask_const(const struct libevdev *dev, unsigned int type, const unsigned
 			max = LED_MAX;
 			break;
 		default:
-		     return 0;
+		     return -1;
 	}
 
 	return max;
 }
 
-static inline unsigned int
+static inline int
 type_to_mask(struct libevdev *dev, unsigned int type, unsigned long **mask)
 {
-	unsigned int max;
+	int max;
 
 	switch(type) {
 		case EV_ABS:
@@ -105,7 +105,7 @@ type_to_mask(struct libevdev *dev, unsigned int type, unsigned long **mask)
 			max = LED_MAX;
 			break;
 		default:
-		     return 0;
+		     return -1;
 	}
 
 	return max;

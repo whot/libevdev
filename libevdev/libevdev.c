@@ -611,7 +611,7 @@ int
 libevdev_has_event_code(const struct libevdev *dev, unsigned int type, unsigned int code)
 {
 	const unsigned long *mask;
-	unsigned int max;
+	int max;
 
 	if (!libevdev_has_event_type(dev, type))
 		return 0;
@@ -621,7 +621,7 @@ libevdev_has_event_code(const struct libevdev *dev, unsigned int type, unsigned 
 
 	max = type_to_mask_const(dev, type, &mask);
 
-	if (code > max)
+	if (max == -1 || code > max)
 		return 0;
 
 	return bit_is_set(mask, code);
@@ -840,7 +840,7 @@ libevdev_kernel_enable_event_code(struct libevdev *dev, unsigned int type, unsig
 		return rc;
 
 	max = type_to_mask_const(dev, type, &mask);
-	if (code > max)
+	if (max == -1 || code > max)
 		return -EINVAL;
 
 	switch(type) {
