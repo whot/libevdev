@@ -53,30 +53,26 @@ set_bit_state(unsigned long *array, int bit, int state)
 		clear_bit(array, bit);
 }
 
+#define max_mask(uc, lc) \
+	case EV_##uc: \
+			*mask = dev->lc##_bits; \
+			max = libevdev_get_event_type_max(type); \
+		break;
+
+
 static inline int
 type_to_mask_const(const struct libevdev *dev, unsigned int type, const unsigned long **mask)
 {
 	int max;
 
 	switch(type) {
-		case EV_ABS:
-			*mask = dev->abs_bits;
-			max = ABS_MAX;
-			break;
-		case EV_REL:
-			*mask = dev->rel_bits;
-			max = REL_MAX;
-			break;
-		case EV_KEY:
-			*mask = dev->key_bits;
-			max = KEY_MAX;
-			break;
-		case EV_LED:
-			*mask = dev->led_bits;
-			max = LED_MAX;
-			break;
+		max_mask(ABS, abs);
+		max_mask(REL, rel);
+		max_mask(KEY, key);
+		max_mask(LED, led);
 		default:
-		     return -1;
+		     max = -1;
+		     break;
 	}
 
 	return max;
@@ -88,27 +84,18 @@ type_to_mask(struct libevdev *dev, unsigned int type, unsigned long **mask)
 	int max;
 
 	switch(type) {
-		case EV_ABS:
-			*mask = dev->abs_bits;
-			max = ABS_MAX;
-			break;
-		case EV_REL:
-			*mask = dev->rel_bits;
-			max = REL_MAX;
-			break;
-		case EV_KEY:
-			*mask = dev->key_bits;
-			max = KEY_MAX;
-			break;
-		case EV_LED:
-			*mask = dev->led_bits;
-			max = LED_MAX;
-			break;
+		max_mask(ABS, abs);
+		max_mask(REL, rel);
+		max_mask(KEY, key);
+		max_mask(LED, led);
 		default:
-		     return -1;
+		     max = -1;
+		     break;
 	}
 
 	return max;
 }
+
+#undef max_mask
 
 #endif
