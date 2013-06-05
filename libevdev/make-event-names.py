@@ -25,6 +25,7 @@ prefixes = [
 		"SW_",
 		"FF_",
 		"SYN_",
+		"REP_",
 		"INPUT_PROP_",
 ]
 
