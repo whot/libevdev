@@ -70,6 +70,11 @@ type_to_mask_const(const struct libevdev *dev, unsigned int type, const unsigned
 		max_mask(REL, rel);
 		max_mask(KEY, key);
 		max_mask(LED, led);
+		max_mask(MSC, msc);
+		max_mask(SW, sw);
+		max_mask(FF, ff);
+		max_mask(REP, rep);
+		max_mask(SND, snd);
 		default:
 		     max = -1;
 		     break;
@@ -88,6 +93,11 @@ type_to_mask(struct libevdev *dev, unsigned int type, unsigned long **mask)
 		max_mask(REL, rel);
 		max_mask(KEY, key);
 		max_mask(LED, led);
+		max_mask(MSC, msc);
+		max_mask(SW, sw);
+		max_mask(FF, ff);
+		max_mask(REP, rep);
+		max_mask(SND, snd);
 		default:
 		     max = -1;
 		     break;
