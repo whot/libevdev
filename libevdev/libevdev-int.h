@@ -173,6 +173,9 @@ queue_shift(struct libevdev *dev, struct input_event *ev)
 static inline int
 queue_alloc(struct libevdev *dev, size_t size)
 {
+	if (size == 0)
+		return -ENOSPC;
+
 	dev->queue = calloc(size, sizeof(struct input_event));
 	if (!dev->queue)
 		return -ENOSPC;
