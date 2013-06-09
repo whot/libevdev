@@ -1,4 +1,4 @@
-noinst_PROGRAMS = test-event-names test-libevdev-init test-libevdev-has-event
+noinst_PROGRAMS = test-event-names test-libevdev-init test-libevdev-has-event test-int-queue
 
 TESTS = $(noinst_PROGRAMS)
 
@@ -20,6 +20,9 @@ test_libevdev_init_LDADD = $(CHECK_LIBS) $(GCOV_LDFLAGS)
 
 test_libevdev_has_event_SOURCES = test-libevdev-has-event.c $(common_sources)
 test_libevdev_has_event_LDADD = $(CHECK_LIBS) $(GCOV_LDFLAGS)
+
+test_int_queue_SOURCES = test-int-queue.c $(common_sources)
+test_int_queue_LDADD = $(CHECK_LIBS) $(GCOV_LDFLAGS)
 
 if GCOV_ENABLED
 gcov-clean:
