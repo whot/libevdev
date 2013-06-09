@@ -62,6 +62,10 @@ An event type or code only signals the potential for the device to send
 such events. Many devices initialize more axes than they physically provide
 and such axes will never generate an event.
 
+A device with type EV_REP set will always return a set event code for
+REP_DELAY and REP_PERIOD.
+
+
 SEE ALSO
 --------
 
