@@ -536,4 +536,14 @@ const char * libevdev_get_input_prop_name(unsigned int prop);
  */
 int libevdev_get_event_type_max(unsigned int type);
 
+/**
+ * Get the repeat delay and repeat period values for this device.
+ *
+ * @param delay If not null, set to the repeat delay value
+ * @param period If not null, set to the repeat period value
+ *
+ * @return 0 on success, -1 if this device does not have repeat settings.
+ */
+int libevdev_get_repeat(struct libevdev *dev, int *delay, int *period);
+
 #endif /* libevdev_H */

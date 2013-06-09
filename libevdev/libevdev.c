@@ -963,3 +963,17 @@ libevdev_get_event_type_max(unsigned int type)
 
 	return ev_max[type];
 }
+
+int
+libevdev_get_repeat(struct libevdev *dev, int *delay, int *period)
+{
+	if (!libevdev_has_event_type(dev, EV_REP))
+		return -1;
+
+	if (delay != NULL)
+		*delay = dev->rep_values[REP_DELAY];
+	if (period != NULL)
+		*period = dev->rep_values[REP_PERIOD];
+
+	return 0;
+}
