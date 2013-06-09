@@ -208,7 +208,10 @@ queue_size(struct libevdev *dev)
 static inline size_t
 queue_num_free_elements(struct libevdev *dev)
 {
-	return dev->queue_size - dev->queue_next - 1;
+	if (dev->queue_size == 0)
+		return 0;
+
+	return dev->queue_size - dev->queue_next;
 }
 
 static inline struct input_event *
