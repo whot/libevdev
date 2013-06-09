@@ -137,9 +137,9 @@ queue_peek(struct libevdev *dev, size_t idx, struct input_event *ev)
  * @return The number of elements in ev.
  */
 static inline int
-queue_shift_multiple(struct libevdev *dev, int n, struct input_event *ev)
+queue_shift_multiple(struct libevdev *dev, size_t n, struct input_event *ev)
 {
-	int i;
+	size_t i;
 
 	if (dev->queue_next == 0)
 		return 0;
@@ -171,7 +171,7 @@ queue_shift(struct libevdev *dev, struct input_event *ev)
 }
 
 static inline int
-queue_alloc(struct libevdev *dev, int size)
+queue_alloc(struct libevdev *dev, size_t size)
 {
 	dev->queue = calloc(size, sizeof(struct input_event));
 	if (!dev->queue)
@@ -190,19 +190,19 @@ queue_free(struct libevdev *dev)
 	dev->queue_next = 0;
 }
 
-static inline int
+static inline size_t
 queue_num_elements(struct libevdev *dev)
 {
 	return dev->queue_next;
 }
 
-static inline int
+static inline size_t
 queue_size(struct libevdev *dev)
 {
 	return dev->queue_size;
 }
 
-static inline int
+static inline size_t
 queue_num_free_elements(struct libevdev *dev)
 {
 	return dev->queue_size - dev->queue_next - 1;
@@ -215,7 +215,7 @@ queue_next_element(struct libevdev *dev)
 }
 
 static inline int
-queue_set_num_elements(struct libevdev *dev, int nelem)
+queue_set_num_elements(struct libevdev *dev, size_t nelem)
 {
 	if (nelem > dev->queue_size)
 		return 1;
