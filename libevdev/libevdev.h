@@ -490,7 +490,7 @@ int libevdev_kernel_enable_event_type(struct libevdev *dev, unsigned int type);
 int libevdev_kernel_enable_event_code(struct libevdev *dev, unsigned int type, unsigned int code);
 
 /**
- * Set the device's EV_ABS/<code> axis to the value defined in the abs
+ * Set the device's EV_ABS axis to the value defined in the abs
  * parameter. This will be written to the kernel.
  *
  * @return zero on success, or a negative errno on failure
