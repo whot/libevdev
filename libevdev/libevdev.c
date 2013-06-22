@@ -243,7 +243,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 
 			dev->abs_info[i] = abs_info;
 			if (i == ABS_MT_SLOT) {
-				dev->num_slots = abs_info.maximum + 1; /* FIXME: non-zero min? */
+				dev->num_slots = abs_info.maximum + 1;
 				dev->current_slot = abs_info.value;
 			}
 

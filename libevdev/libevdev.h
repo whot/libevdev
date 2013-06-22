@@ -533,11 +533,11 @@ int libevdev_fetch_slot_value(const struct libevdev *dev, unsigned int slot, uns
  *
  * Get the number of slots supported by this device.
  *
- * Note that the slot offset may be non-zero, use libevdev_get_abs_min() or
- * libevdev_get_abs_info() to get the minimum slot number.
- *
  * @return The number of slots supported, or -1 if the device does not provide
  * any slots
+ *
+ * @note A device may provide ABS_MT_SLOT but a total number of 0 slots. Hence
+ * the return value of -1 for "device does not provide slots at all"
  */
 int libevdev_get_num_slots(const struct libevdev *dev);
 
