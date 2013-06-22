@@ -8,7 +8,8 @@ libevdev_sources = $(top_srcdir)/libevdev/libevdev.c \
 		   $(top_srcdir)/libevdev/libevdev-int.h
 common_sources = $(libevdev_sources) test-common-uinput.c test-common-uinput.h
 
-AM_CPPFLAGS = -I$(top_srcdir)/libevdev $(CHECK_CFLAGS) $(GCOV_CFLAGS)
+# include builddir for event-names.h
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)/libevdev $(CHECK_CFLAGS) $(GCOV_CFLAGS)
 
 
 
