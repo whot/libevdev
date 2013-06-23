@@ -47,3 +47,7 @@ ylwrap
 *.3
 libevdev-events
 event-names.h
+html
+libevdev-*/
+*.gcno
+test-driver
