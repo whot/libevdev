@@ -214,6 +214,9 @@ queue_num_free_elements(struct libevdev *dev)
 static inline struct input_event *
 queue_next_element(struct libevdev *dev)
 {
+	if (dev->queue_next == dev->queue_size)
+		return NULL;
+
 	return &dev->queue[dev->queue_next];
 }
 
