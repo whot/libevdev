@@ -145,12 +145,11 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	if (rc < 0)
 		goto out;
 
-	dev->name = calloc(strlen(buf) + 1, sizeof(char));
+	dev->name = strdup(buf);
 	if (!dev->name) {
 		errno = ENOSPC;
 		goto out;
 	}
-	strcpy(dev->name, buf);
 
 	memset(buf, 0, sizeof(buf));
 	rc = ioctl(fd, EVIOCGPHYS(sizeof(buf) - 1), buf);
@@ -159,12 +158,11 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 		if (errno != ENOENT)
 			goto out;
 	} else {
-		dev->phys = calloc(strlen(buf) + 1, sizeof(char));
+		dev->phys = strdup(buf);
 		if (!dev->phys) {
 			errno = ENOSPC;
 			goto out;
 		}
-		strcpy(dev->phys, buf);
 	}
 
 	memset(buf, 0, sizeof(buf));
@@ -173,12 +171,11 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 		if (errno != ENOENT)
 			goto out;
 	} else  {
-		dev->uniq = calloc(strlen(buf) + 1, sizeof(char));
+		dev->uniq = strdup(buf);
 		if (!dev->uniq) {
 			errno = ENOSPC;
 			goto out;
 		}
-		strcpy(dev->uniq, buf);
 	}
 
 	rc = ioctl(fd, EVIOCGID, &dev->ids);
