@@ -580,7 +580,7 @@ out:
 const char *
 libevdev_get_name(const struct libevdev *dev)
 {
-	return dev->name;
+	return dev->name ? dev->name : "";
 }
 
 const char *
