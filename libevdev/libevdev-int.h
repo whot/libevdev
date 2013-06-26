@@ -121,7 +121,7 @@ queue_pop(struct libevdev *dev, struct input_event *ev)
 static inline int
 queue_peek(struct libevdev *dev, size_t idx, struct input_event *ev)
 {
-	if (idx > dev->queue_next)
+	if (dev->queue_next == 0 || idx > dev->queue_next)
 		return 1;
 	*ev = dev->queue[idx];
 	return 0;
