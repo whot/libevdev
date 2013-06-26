@@ -26,6 +26,9 @@ test_int_queue_SOURCES = test-int-queue.c $(common_sources)
 test_int_queue_LDADD = $(CHECK_LIBS) $(GCOV_LDFLAGS)
 
 if GCOV_ENABLED
+
+CLEANFILES = gcov-report.txt
+
 gcov-clean:
 	@rm -f *.gcov
 
@@ -66,3 +69,4 @@ endif
 
 clean-local: gcov-clean
 	rm -f *.gcno *.gcda
+

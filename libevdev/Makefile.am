@@ -20,3 +20,6 @@ EXTRA_DIST = make-event-names.py
 CLEANFILES = event-names.h
 BUILT_SOURCES = event-names.h
 
+# gcov leaves it's mess in this directory too
+clean-local:
+	@rm -f *.gcno
