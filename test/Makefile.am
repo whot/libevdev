@@ -32,7 +32,9 @@ CLEANFILES = gcov-report.txt
 gcov-clean:
 	@rm -f *.gcov
 
-gcov-report.txt: gcov-clean check-TESTS
+gcov-report.txt: gcov-clean $(TEST)
+	$(AM_V_GEN)test -n "$$TEST" || (echo "Run as 'make gcov TEST=<test>'" && exit 1)
+	$(AM_V_GEN)($(builddir)/$(TEST))
 	$(AM_V_GEN)(rm -rf $@; \
 		echo "========== coverage report ========" >> $@; \
 		for file in `find $(top_srcdir)/libevdev -name "*.c" -printf "%P\n"`; do \
