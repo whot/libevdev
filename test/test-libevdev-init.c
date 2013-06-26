@@ -194,15 +194,3 @@ libevdev_init_test(void)
 
 	return s;
 }
-
-int main(int argc, char **argv)
-{
-	int failed;
-	Suite *s = libevdev_init_test();
-	SRunner *sr = srunner_create(s);
-	srunner_run_all(sr, CK_NORMAL);
-	failed = srunner_ntests_failed(sr);
-	srunner_free(sr);
-
-	return failed;
-}
