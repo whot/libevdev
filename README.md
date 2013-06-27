@@ -12,6 +12,9 @@ http://github.com/whot/libevdev
 The eventual goal is that libevdev wraps all ioctls available to evdev
 devices, thus making direct access unnecessary.
 
+Go here for the API documentation:
+http://whot.github.io/libevdev/
+
 ioctl wrappers
 --------------
 libevdev provides interfaces to query a device's capabilities, providing
