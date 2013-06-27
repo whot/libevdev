@@ -130,6 +130,15 @@
  */
 
 /**
+ * @defgroup events Event handling
+ *
+ * Functions to handle events and fetch the current state of the event. Generally,
+ * libevdev updates its internal state as the event is processed and forwarded
+ * to the caller. Thus, the libevdev state of the device should always be identical
+ * to the caller's state. It may however lag behind the actual state of the device.
+ */
+
+/**
  * @ingroup init
  *
  * Opaque struct representing an evdev device.
@@ -286,22 +295,27 @@ int libevdev_get_fd(const struct libevdev* dev);
 /**
  * @ingroup events
  *
- * Get the next event from the device.
+ * Get the next event from the device. This function operates in two different
+ * modes: normal mode or sync mode.
  *
  * In normal mode, this function returns 0 and returns the event in the
  * parameter ev. If no events are available at this time, it returns -EAGAIN
  * and ev is undefined.
  *
  * If a SYN_DROPPED is read from the device, this function returns 1. The
- * caller should now call this function with the ER_SYNC flag set, to get
- * the set of events that make up the device state diff. This function
- * returns 1 for each event part of that diff, until it returns -EAGAIN once
+ * caller should now call this function with the LIBEVDEV_READ_SYNC flag set,
+ * to get the set of events that make up the device state delta. This function
+ * returns 1 for each event part of that delta, until it returns -EAGAIN once
  * all events have been synced.
  *
  * If a device needs to be synced by the caller but the caller does not call
- * with the ER_SYNC flag set, all events from the diff are dropped and event
- * processing continues as normal.
+ * with the LIBEVDEV_READ_SYNC flag set, all events from the diff are dropped
+ * and event processing continues as normal.
  *
+ * @param flags Set of flags to determine behaviour. If LIBEVDEV_READ_NORMAL
+ * is set, the next event is read in normal mode. If LIBEVDEV_READ_SYNC is
+ * set, the next event is read in sync mode.
+ * @param ev On success, set to the current event.
  * @return On failure, a negative errno is returned.
  * @retval 0 One or more events where read of the device
  * @retval -EAGAIN No events are currently available on the device
