@@ -73,6 +73,7 @@ libevdev_new(void)
 	dev->num_slots = -1;
 	dev->current_slot = -1;
 	dev->log = libevdev_noop_log_func;
+	dev->grabbed = LIBEVDEV_UNGRAB;
 
 	return dev;
 }
