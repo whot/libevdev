@@ -170,7 +170,7 @@ main(int argc, char **argv)
 
 	do {
 		struct input_event ev;
-		rc = libevdev_next_event(dev, 0, &ev);
+		rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
 		if (rc == 1) {
 			printf("::::::::::::::::::::: dropped ::::::::::::::::::::::\n");
 			while (rc == 1) {
