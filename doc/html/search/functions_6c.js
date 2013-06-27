@@ -41,7 +41,7 @@ var searchData=
   ['libevdev_5fkernel_5fset_5fabs_5fvalue',['libevdev_kernel_set_abs_value',['../group__kernel.html#ga608f18f6cf7c0db1e904311e380b5288',1,'libevdev.h']]],
   ['libevdev_5fnew',['libevdev_new',['../group__init.html#ga332c8ee260b4ef864345abe5d04e820c',1,'libevdev.h']]],
   ['libevdev_5fnew_5ffrom_5ffd',['libevdev_new_from_fd',['../group__init.html#ga89bb5bce1c23e293293484b05b12aaf4',1,'libevdev.h']]],
-  ['libevdev_5fnext_5fevent',['libevdev_next_event',['../libevdev_8h.html#abb96c864e836c0b98788f4ab771c3a76',1,'libevdev.h']]],
+  ['libevdev_5fnext_5fevent',['libevdev_next_event',['../group__events.html#gabb96c864e836c0b98788f4ab771c3a76',1,'libevdev.h']]],
   ['libevdev_5fset_5ffd',['libevdev_set_fd',['../group__init.html#ga6658ac490d68c307ff8b8d1536c12b44',1,'libevdev.h']]],
   ['libevdev_5fset_5flog_5fhandler',['libevdev_set_log_handler',['../libevdev_8h.html#af16afb23d4db5b432c673914cae67eee',1,'libevdev.h']]]
 ];

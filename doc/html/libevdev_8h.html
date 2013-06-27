@@ -105,7 +105,8 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a91c53c94148902faf9391bb4aa320299"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299">EvdevReadFlags</a> { <a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299a7f050f41c99aaffc5e19a43316a9d6cd">LIBEVDEV_READ_SYNC</a> = 1
+<tr class="memitem:a91c53c94148902faf9391bb4aa320299"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299">EvdevReadFlags</a> { <a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299a7f050f41c99aaffc5e19a43316a9d6cd">LIBEVDEV_READ_SYNC</a> = 1, 
+<a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299a7d73c32e0a017a2816dfeff0b8f7343b">LIBEVDEV_READ_NORMAL</a> = 2
  }</td></tr>
 <tr class="separator:a91c53c94148902faf9391bb4aa320299"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ed340121b7f4d56223dff90b964a010"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="libevdev_8h.html#a8ed340121b7f4d56223dff90b964a010">EvdevGrabModes</a> { <a class="el" href="libevdev_8h.html#a8ed340121b7f4d56223dff90b964a010ad3ac6f5f3ebf7d38a6aad74a88396c88">LIBEVDEV_GRAB</a> = 3, 
@@ -138,9 +139,9 @@ Functions</h2></td></tr>
 <tr class="separator:gac71c9cca4c572ed1b1a8c233be70a17c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9bfc800859ac3aa63f41d58ec4b616c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="libevdev_8h.html#ab9bfc800859ac3aa63f41d58ec4b616c">libevdev_get_fd</a> (const struct libevdev *dev)</td></tr>
 <tr class="separator:ab9bfc800859ac3aa63f41d58ec4b616c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abb96c864e836c0b98788f4ab771c3a76"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="libevdev_8h.html#abb96c864e836c0b98788f4ab771c3a76">libevdev_next_event</a> (struct libevdev *dev, unsigned int flags, struct input_event *ev)</td></tr>
-<tr class="memdesc:abb96c864e836c0b98788f4ab771c3a76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the next event from the device.  <a href="#abb96c864e836c0b98788f4ab771c3a76">More...</a><br/></td></tr>
-<tr class="separator:abb96c864e836c0b98788f4ab771c3a76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabb96c864e836c0b98788f4ab771c3a76"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__events.html#gabb96c864e836c0b98788f4ab771c3a76">libevdev_next_event</a> (struct libevdev *dev, unsigned int flags, struct input_event *ev)</td></tr>
+<tr class="memdesc:gabb96c864e836c0b98788f4ab771c3a76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the next event from the device.  <a href="group__events.html#gabb96c864e836c0b98788f4ab771c3a76">More...</a><br/></td></tr>
+<tr class="separator:gabb96c864e836c0b98788f4ab771c3a76"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaed0328c67b7a78422636d9fe09a73f12"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bits.html#gaed0328c67b7a78422636d9fe09a73f12">libevdev_get_name</a> (const struct libevdev *dev)</td></tr>
 <tr class="separator:gaed0328c67b7a78422636d9fe09a73f12"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5df483b0b24d7b96ea1181808fab851d"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bits.html#ga5df483b0b24d7b96ea1181808fab851d">libevdev_get_phys</a> (const struct libevdev *dev)</td></tr>
@@ -283,6 +284,9 @@ Functions</h2></td></tr>
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="a91c53c94148902faf9391bb4aa320299a7f050f41c99aaffc5e19a43316a9d6cd"></a>LIBEVDEV_READ_SYNC</em>&nbsp;</td><td class="fielddoc">
 <p>Process data in sync mode. </p>
 </td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="a91c53c94148902faf9391bb4aa320299a7d73c32e0a017a2816dfeff0b8f7343b"></a>LIBEVDEV_READ_NORMAL</em>&nbsp;</td><td class="fielddoc">
+<p>Process data in normal mode. </p>
+</td></tr>
 </table>
 
 </div>
@@ -341,53 +345,6 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>0 if the device was successfull grabbed or ungrabbed, or a negative errno in case of failure. </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="abb96c864e836c0b98788f4ab771c3a76"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int libevdev_next_event </td>
-          <td>(</td>
-          <td class="paramtype">struct libevdev *&#160;</td>
-          <td class="paramname"><em>dev</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned int&#160;</td>
-          <td class="paramname"><em>flags</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">struct input_event *&#160;</td>
-          <td class="paramname"><em>ev</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get the next event from the device. </p>
-<p>In normal mode, this function returns 0 and returns the event in the parameter ev. If no events are available at this time, it returns -EAGAIN and ev is undefined.</p>
-<p>If a SYN_DROPPED is read from the device, this function returns 1. The caller should now call this function with the ER_SYNC flag set, to get the set of events that make up the device state diff. This function returns 1 for each event part of that diff, until it returns -EAGAIN once all events have been synced.</p>
-<p>If a device needs to be synced by the caller but the caller does not call with the ER_SYNC flag set, all events from the diff are dropped and event processing continues as normal.</p>
-<dl class="section return"><dt>Returns</dt><dd>On failure, a negative errno is returned. </dd></dl>
-<dl class="retval"><dt>Return values</dt><dd>
-  <table class="retval">
-    <tr><td class="paramname">0</td><td>One or more events where read of the device </td></tr>
-    <tr><td class="paramname">-EAGAIN</td><td>No events are currently available on the device </td></tr>
-    <tr><td class="paramname">1</td><td>A SYN_DROPPED event was received, or a synced event was returned.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>This function is signal-safe. </dd></dl>
 
 </div>
 </div>
