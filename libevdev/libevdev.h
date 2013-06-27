@@ -30,20 +30,61 @@
 /**
  * @mainpage
  *
- * libevdev is a library for handling evdev kernel devices. It abstracts
+ * **libevdev** is a library for handling evdev kernel devices. It abstracts
  * the ioctls through type-safe interfaces and provides functions to change
  * the appearance of the device.
  *
+ * Handling events and SYN_DROPPED
+ * ===============================
+ *
  * libevdev provides an interface for handling events, including most notably
- * SYN_DROPPED events.
+ * SYN_DROPPED events. SYN_DROPPED events are sent by the kernel when the
+ * process does not read events fast enough and the kernel is forced to drop
+ * some events. This causes the device to get out of sync with the process'
+ * view of it. libevdev handles this by telling the caller that a SYN_DROPPED
+ * has been received and that the state of the device is different to what is
+ * to be expected. It then provides the delta between the previous state and
+ * the actual state of the device as a set of events. See
+ * libevdev_next_event() for more information.
+ *
+ * Signal safety
+ * =============
  *
  * libevdev is signal-safe for the majority of its operations. Check the API
  * documentation to make sure, unless explicitly stated a call is <b>not</b>
  * signal safe.
  *
+ * Device handling
+ * ===============
+ *
  * libevdev does not attempt duplicate detection. Initializing two libevdev
  * devices for the same fd is valid and behaves the same as for two different
  * devices.
+ *
+ * libevdev does not handle the file descriptors directly, it merely uses
+ * them. The caller is responsible for opening the file descriptors, setting
+ * them to O_NONBLOCK and handling permissions.
+ *
+ * Where does libevdev sit?
+ * ========================
+ *
+ * libevdev is essentially a read(2) on steroids for /dev/input/eventX
+ * devices. It sits below the process that handles input events, in between
+ * the kernel and that process. In the simplest case, e.g. an evtest-like tool
+ * the stack would look like this:
+ *
+ * kernel → libevdev → evtest
+ *
+ * For X.Org input modules, the stack would look like this:
+ *
+ * kernel → libevdev → xf86-input-evdev → X server → X client
+ *
+ * For Weston/Wayland, the stack would look like this:
+ *
+ * kernel → libevdev → Weston → Wayland client
+ *
+ * libevdev does **not** have knowledge of X clients or Wayland clients, it is
+ * too low in the stack.
  */
 
 /**
