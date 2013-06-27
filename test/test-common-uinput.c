@@ -368,9 +368,11 @@ uinput_device_event(const struct uinput_device *dev, unsigned int type, unsigned
 	if (type > EV_MAX)
 		return -EINVAL;
 
-	max = type_to_mask_const(&dev->d, type, &mask);
-	if (max == -1 || code > max)
-		return -EINVAL;
+	if (type != EV_SYN) {
+		max = type_to_mask_const(&dev->d, type, &mask);
+		if (max == -1 || code > max)
+			return -EINVAL;
+	}
 
 	ev.type = type;
 	ev.code = code;
