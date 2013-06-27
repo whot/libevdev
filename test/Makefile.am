@@ -17,6 +17,7 @@ test_libevdev_SOURCES = \
 			test-libevdev-init.c \
 			test-libevdev-has-event.c \
 			test-int-queue.c \
+			test-libevdev-events.c \
 			$(common_sources)
 
 test_libevdev_LDADD =  $(CHECK_LIBS) $(GCOV_LDFLAGS)

@@ -27,12 +27,14 @@ extern Suite *event_name_suite(void);
 extern Suite *libevdev_init_test(void);
 extern Suite *queue_suite(void);
 extern Suite *libevdev_has_event_test(void);
+extern Suite *libevdev_events(void);
 
 int main(int argc, char **argv)
 {
 	int failed;
 	Suite *s = libevdev_has_event_test();
 	SRunner *sr = srunner_create(s);
+	srunner_add_suite(sr, libevdev_events());
 	srunner_add_suite(sr, libevdev_init_test());
 	srunner_add_suite(sr, queue_suite());
 	srunner_add_suite(sr, event_name_suite());
