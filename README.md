@@ -1,7 +1,7 @@
-libevemu - wrapper library for evdev input devices
+libevdev - wrapper library for evdev input devices
 ==================================================
 
-libevdevdev is a wrapper library for evdev devices. it moves the common
+libevdev is a wrapper library for evdev devices. it moves the common
 tasks when dealing with evdev devices into a library and provides a library
 interface to the callers, thus avoiding erroneous ioctls, etc.
 
@@ -24,7 +24,7 @@ reporting rate of the device. Once the kernel's buffer is full, it will
 issue a SYN_DROPPED event signalling dropped event. The userspace process
 must re-sync the device.
 
-libevdevdev semi-transparently handles SYN_DROPPED events, providing an
+libevdev semi-transparently handles SYN_DROPPED events, providing an
 interface to the caller to sync up device state without having to manually
 compare bitfields. Instead, libevdev sends the 'missing' events to the
 caller, allowing it to use the same event processing paths as it would
