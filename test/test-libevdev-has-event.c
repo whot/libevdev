@@ -131,6 +131,9 @@ START_TEST(test_event_codes)
 
 			ck_assert_msg(libevdev_has_event_type(dev, *evbit), "for event type %d\n", *evbit);
 			ck_assert_msg(libevdev_has_event_code(dev, *evbit, code), "for type %d code %d", *evbit, code);
+			ck_assert_msg(libevdev_has_event_code(dev, EV_SYN, SYN_REPORT), "for EV_SYN");
+			/* always false */
+			ck_assert_msg(!libevdev_has_event_code(dev, EV_PWR, 0), "for EV_PWR");
 
 			libevdev_free(dev);
 			uinput_device_free(uidev);

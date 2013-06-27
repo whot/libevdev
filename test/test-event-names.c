@@ -37,6 +37,7 @@ START_TEST(test_limits)
 	ck_assert(libevdev_get_event_code_name(EV_SND, SND_MAX + 1) == NULL);
 	ck_assert(libevdev_get_event_code_name(EV_REP, REP_MAX + 1) == NULL);
 	ck_assert(libevdev_get_event_code_name(EV_FF, FF_MAX + 1) == NULL);
+	ck_assert(libevdev_get_event_code_name(EV_MAX + 1, 0) == NULL);
 }
 END_TEST
 
@@ -212,6 +213,19 @@ START_TEST(test_prop_name)
 	ck_assert_str_eq(libevdev_get_input_prop_name(INPUT_PROP_MAX), "INPUT_PROP_MAX");
 
 	ck_assert(libevdev_get_input_prop_name(INPUT_PROP_MAX - 1) == NULL);
+	ck_assert(libevdev_get_input_prop_name(INPUT_PROP_MAX + 1) == NULL);
+}
+END_TEST
+
+START_TEST(test_event_type_max)
+{
+	ck_assert_int_eq(libevdev_get_event_type_max(EV_ABS), ABS_MAX);
+	ck_assert_int_eq(libevdev_get_event_type_max(EV_REL), REL_MAX);
+	ck_assert_int_eq(libevdev_get_event_type_max(EV_KEY), KEY_MAX);
+
+	ck_assert_int_eq(libevdev_get_event_type_max(EV_MAX - 1), -1);
+	ck_assert_int_eq(libevdev_get_event_type_max(EV_MAX + 1), -1);
+
 }
 END_TEST
 
@@ -223,6 +237,7 @@ event_name_suite(void)
 	TCase *tc_limits = tcase_create("type limits");
 	tcase_add_test(tc_limits, test_limits);
 	tcase_add_test(tc_limits, test_syn_max);
+	tcase_add_test(tc_limits, test_event_type_max);
 	suite_add_tcase(s, tc_limits);
 
 	TCase *tc_tname = tcase_create("type names");
