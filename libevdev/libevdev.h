@@ -137,7 +137,8 @@
 struct libevdev;
 
 enum EvdevReadFlags {
-    LIBEVDEV_READ_SYNC		= 1, /**< Process data in sync mode */
+	LIBEVDEV_READ_SYNC		= 1, /**< Process data in sync mode */
+	LIBEVDEV_READ_NORMAL		= 2, /**< Process data in normal mode */
 };
 
 /**

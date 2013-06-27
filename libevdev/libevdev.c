@@ -530,6 +530,9 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 	if (dev->fd < 0)
 		return -ENODEV;
 
+	if (!(flags & (LIBEVDEV_READ_NORMAL|LIBEVDEV_READ_SYNC)))
+		return -EINVAL;
+
 	if (flags & LIBEVDEV_READ_SYNC) {
 		if (!dev->need_sync && dev->queue_nsync == 0)
 			return -EAGAIN;

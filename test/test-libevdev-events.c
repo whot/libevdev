@@ -53,12 +53,12 @@ START_TEST(test_next_event)
 	rc = libevdev_new_from_fd(fd, &dev);
 	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
 
-	rc = libevdev_next_event(dev, 0, &ev);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
 	ck_assert_int_eq(rc, -EAGAIN);
 
 	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 1);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
-	rc = libevdev_next_event(dev, 0, &ev);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
 	ck_assert_int_eq(rc, 0);
 	ck_assert_int_eq(ev.type, EV_KEY);
 	ck_assert_int_eq(ev.code, BTN_LEFT);
@@ -104,7 +104,7 @@ START_TEST(test_syn_event)
 	 */
 	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 1);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
-	rc = libevdev_next_event(dev, 0, &ev);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
 	ck_assert_int_eq(rc, 0);
 	ck_assert_int_eq(ev.type, EV_KEY);
 	ck_assert_int_eq(ev.code, BTN_LEFT);
@@ -118,14 +118,14 @@ START_TEST(test_syn_event)
 	ev.value = 0;
 	rc = write(pipefd[1], &ev, sizeof(ev));
 	ck_assert_int_eq(rc, sizeof(ev));
-	rc = libevdev_next_event(dev, 0, &ev);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
 
 	libevdev_change_fd(dev, fd);
 
 	ck_assert_int_eq(rc, 0);
 	ck_assert_int_eq(ev.type, EV_SYN);
 	ck_assert_int_eq(ev.code, SYN_REPORT);
-	rc = libevdev_next_event(dev, 0, &ev);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
 	ck_assert_int_eq(rc, 1);
 
 	/* only check for the rc, nothing actually changed on the device */
