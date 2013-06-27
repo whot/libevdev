@@ -222,6 +222,68 @@ START_TEST(test_ev_rep_values)
 }
 END_TEST
 
+START_TEST(test_no_slots)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	const char *str;
+	int rc;
+
+	dev = libevdev_new();
+
+	str = libevdev_get_name(dev);
+	ck_assert(str != NULL);
+	ck_assert_int_eq(strlen(str), 0);
+
+	rc = uinput_device_new_with_events(&uidev, "test device", DEFAULT_IDS,
+					   EV_ABS, ABS_X,
+					   EV_ABS, ABS_Y,
+					   EV_ABS, ABS_MT_POSITION_X,
+					   EV_ABS, ABS_MT_POSITION_Y,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+	rc = libevdev_set_fd(dev, uinput_device_get_fd(uidev));
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
+
+	ck_assert_int_eq(libevdev_get_num_slots(dev), -1);
+	ck_assert_int_eq(libevdev_get_current_slot(dev), -1);
+
+	uinput_device_free(uidev);
+}
+END_TEST
+
+START_TEST(test_slot_number)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	const char *str;
+	int rc;
+
+	dev = libevdev_new();
+
+	str = libevdev_get_name(dev);
+	ck_assert(str != NULL);
+	ck_assert_int_eq(strlen(str), 0);
+
+	rc = uinput_device_new_with_events(&uidev, "test device", DEFAULT_IDS,
+					   EV_ABS, ABS_X,
+					   EV_ABS, ABS_Y,
+					   EV_ABS, ABS_MT_POSITION_X,
+					   EV_ABS, ABS_MT_POSITION_Y,
+					   EV_ABS, ABS_MT_SLOT,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+	rc = libevdev_set_fd(dev, uinput_device_get_fd(uidev));
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
+
+	ck_assert_int_eq(libevdev_get_num_slots(dev), 1);
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 0);
+
+	uinput_device_free(uidev);
+}
+END_TEST
+
+
 START_TEST(test_device_name)
 {
 	struct uinput_device* uidev;
@@ -280,6 +342,11 @@ libevdev_has_event_test(void)
 	tc = tcase_create("ev_rep");
 	tcase_add_test(tc, test_ev_rep);
 	tcase_add_test(tc, test_ev_rep_values);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("multitouch info");
+	tcase_add_test(tc, test_no_slots);
+	tcase_add_test(tc, test_slot_number);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("device info");
