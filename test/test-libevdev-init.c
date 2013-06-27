@@ -171,6 +171,45 @@ START_TEST(test_device_init_from_fd)
 }
 END_TEST
 
+START_TEST(test_device_grab)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+
+	rc = uinput_device_new_with_events(&uidev,
+					   "test device", DEFAULT_IDS,
+					   EV_SYN, SYN_REPORT,
+					   EV_REL, REL_X,
+					   EV_REL, REL_Y,
+					   EV_REL, REL_WHEEL,
+					   EV_KEY, BTN_LEFT,
+					   EV_KEY, BTN_MIDDLE,
+					   EV_KEY, BTN_RIGHT,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
+
+	rc = libevdev_grab(dev, 0);
+	ck_assert_int_eq(rc, -EINVAL);
+	rc = libevdev_grab(dev, 1);
+	ck_assert_int_eq(rc, -EINVAL);
+
+	rc = libevdev_grab(dev, LIBEVDEV_UNGRAB);
+	ck_assert_int_eq(rc, 0);
+	rc = libevdev_grab(dev, LIBEVDEV_GRAB);
+	ck_assert_int_eq(rc, 0);
+	rc = libevdev_grab(dev, LIBEVDEV_GRAB);
+	ck_assert_int_eq(rc, 0);
+	rc = libevdev_grab(dev, LIBEVDEV_UNGRAB);
+	ck_assert_int_eq(rc, 0);
+
+	uinput_device_free(uidev);
+}
+END_TEST
+
 Suite *
 libevdev_init_test(void)
 {
@@ -190,6 +229,10 @@ libevdev_init_test(void)
 	tc = tcase_create("device fd init");
 	tcase_add_test(tc, test_device_init);
 	tcase_add_test(tc, test_device_init_from_fd);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("device grab");
+	tcase_add_test(tc, test_device_grab);
 	suite_add_tcase(s, tc);
 
 	return s;
