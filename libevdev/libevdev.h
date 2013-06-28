@@ -189,6 +189,9 @@ struct libevdev;
 enum EvdevReadFlags {
 	LIBEVDEV_READ_SYNC		= 1, /**< Process data in sync mode */
 	LIBEVDEV_READ_NORMAL		= 2, /**< Process data in normal mode */
+	LIBEVDEV_FORCE_SYNC		= 4, /**< Pretend the next event is a SYN_DROPPED. There is
+					          no reason to ever use this except for
+						  automated tests, so don't. */
 };
 
 /**
