@@ -552,6 +552,8 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 	 * event in the queue from the previous read.
 	 */
 
+	/* FIXME: if the first event after syncing is a SYN_DROPPED, log this */
+
 	/* Always read in some more events. Best case this smoothes over a potential SYN_DROPPED,
 	   worst case we don't read fast enough and end up with SYN_DROPPED anyway */
 	rc = read_more_events(dev);
