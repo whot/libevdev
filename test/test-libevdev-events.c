@@ -133,8 +133,8 @@ START_TEST(test_syn_event)
 	libevdev_free(dev);
 	uinput_device_free(uidev);
 
+	close(pipefd[0]);
 	close(pipefd[1]);
-	close(pipefd[2]);
 
 }
 END_TEST
