@@ -219,6 +219,7 @@ START_TEST(test_ev_rep_values)
 	ck_assert_int_eq(period, 0xbc);
 
 	uinput_device_free(uidev);
+	libevdev_free(dev);
 }
 END_TEST
 
@@ -239,6 +240,9 @@ START_TEST(test_input_props)
 	ck_assert_int_eq(libevdev_has_property(dev, INPUT_PROP_MAX), 0);
 	ck_assert_int_eq(libevdev_has_property(dev, INPUT_PROP_BUTTONPAD), 0);
 	/* FIXME: no idea how to set props on uinput devices */
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
 }
 END_TEST
 
@@ -269,6 +273,7 @@ START_TEST(test_no_slots)
 	ck_assert_int_eq(libevdev_get_current_slot(dev), -1);
 
 	uinput_device_free(uidev);
+	libevdev_free(dev);
 }
 END_TEST
 
@@ -300,6 +305,7 @@ START_TEST(test_slot_number)
 	ck_assert_int_eq(libevdev_get_current_slot(dev), 0);
 
 	uinput_device_free(uidev);
+	libevdev_free(dev);
 }
 END_TEST
 
@@ -341,6 +347,7 @@ START_TEST(test_device_name)
 	ck_assert_int_eq(libevdev_get_driver_version(dev), EV_VERSION);
 
 	uinput_device_free(uidev);
+	libevdev_free(dev);
 }
 END_TEST
 

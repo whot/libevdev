@@ -211,6 +211,8 @@ START_TEST(test_queue_shift)
 	ck_assert_int_eq(rc, 0);
 
 	ck_assert_int_eq(queue_shift(&dev, &ev), 1);
+
+	queue_free(&dev);
 }
 END_TEST
 
@@ -266,6 +268,8 @@ START_TEST(test_queue_shift_multiple)
 	ck_assert_int_eq(rc, 0);
 
 	ck_assert_int_eq(queue_shift_multiple(&dev, 1, events), 0);
+
+	queue_free(&dev);
 }
 END_TEST
 

@@ -92,6 +92,7 @@ START_TEST(test_init_and_change_fd)
 	ck_assert_int_eq(libevdev_get_fd(dev), 0);
 
 	uinput_device_free(uidev);
+	libevdev_free(dev);
 }
 END_TEST
 
@@ -143,6 +144,7 @@ START_TEST(test_device_init)
 	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
 
 	uinput_device_free(uidev);
+	libevdev_free(dev);
 }
 END_TEST
 
@@ -168,6 +170,7 @@ START_TEST(test_device_init_from_fd)
 	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
 
 	uinput_device_free(uidev);
+	libevdev_free(dev);
 }
 END_TEST
 
@@ -207,6 +210,7 @@ START_TEST(test_device_grab)
 	ck_assert_int_eq(rc, 0);
 
 	uinput_device_free(uidev);
+	libevdev_free(dev);
 }
 END_TEST
 

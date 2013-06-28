@@ -190,6 +190,9 @@ START_TEST(test_syn_delta_button)
 	ck_assert(libevdev_get_event_value(dev, EV_KEY, BTN_LEFT));
 	ck_assert(libevdev_get_event_value(dev, EV_KEY, BTN_RIGHT));
 	ck_assert(!libevdev_get_event_value(dev, EV_KEY, BTN_MIDDLE));
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
 }
 END_TEST
 
