@@ -139,6 +139,61 @@ START_TEST(test_syn_event)
 }
 END_TEST
 
+START_TEST(test_syn_delta_button)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	int fd;
+	struct input_event ev;
+
+	rc = uinput_device_new_with_events(&uidev, "test device", DEFAULT_IDS,
+					   EV_SYN, SYN_REPORT,
+					   EV_SYN, SYN_DROPPED,
+					   EV_REL, REL_X,
+					   EV_REL, REL_Y,
+					   EV_KEY, BTN_LEFT,
+					   EV_KEY, BTN_MIDDLE,
+					   EV_KEY, BTN_RIGHT,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+
+	fd = uinput_device_get_fd(uidev);
+	rc = fcntl(fd, F_SETFL, O_NONBLOCK);
+	ck_assert_int_eq(rc, 0);
+	rc = libevdev_new_from_fd(fd, &dev);
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
+
+	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 1);
+	uinput_device_event(uidev, EV_KEY, BTN_RIGHT, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
+	ck_assert_int_eq(rc, 1);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
+	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(ev.type, EV_KEY);
+	ck_assert_int_eq(ev.code, BTN_LEFT);
+	ck_assert_int_eq(ev.value, 1);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
+	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(ev.type, EV_KEY);
+	ck_assert_int_eq(ev.code, BTN_RIGHT);
+	ck_assert_int_eq(ev.value, 1);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
+	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(ev.type, EV_SYN);
+	ck_assert_int_eq(ev.code, SYN_REPORT);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	ck_assert(libevdev_get_event_value(dev, EV_KEY, BTN_LEFT));
+	ck_assert(libevdev_get_event_value(dev, EV_KEY, BTN_RIGHT));
+	ck_assert(!libevdev_get_event_value(dev, EV_KEY, BTN_MIDDLE));
+}
+END_TEST
+
+
 Suite *
 libevdev_events(void)
 {
@@ -147,6 +202,10 @@ libevdev_events(void)
 	TCase *tc = tcase_create("event polling");
 	tcase_add_test(tc, test_next_event);
 	tcase_add_test(tc, test_syn_event);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("SYN_DROPPED deltas");
+	tcase_add_test(tc, test_syn_delta_button);
 	suite_add_tcase(s, tc);
 
 
