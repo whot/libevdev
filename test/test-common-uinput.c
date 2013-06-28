@@ -377,6 +377,8 @@ uinput_device_event(const struct uinput_device *dev, unsigned int type, unsigned
 	ev.type = type;
 	ev.code = code;
 	ev.value = value;
+	ev.time.tv_sec = 0;
+	ev.time.tv_usec = 0;
 
 	rc = write(dev->d.fd, &ev, sizeof(ev));
 
