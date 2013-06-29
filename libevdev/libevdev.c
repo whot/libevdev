@@ -863,7 +863,8 @@ libevdev_kernel_enable_event_type(struct libevdev *dev, unsigned int type)
 }
 
 int
-libevdev_kernel_enable_event_code(struct libevdev *dev, unsigned int type, unsigned int code)
+libevdev_kernel_enable_event_code(struct libevdev *dev, unsigned int type,
+				  unsigned int code, const void *data)
 {
 	int rc;
 	int uinput_bit;
@@ -890,9 +891,18 @@ libevdev_kernel_enable_event_code(struct libevdev *dev, unsigned int type, unsig
 	}
 
 	rc = ioctl(dev->fd, uinput_bit, type);
-	if (rc != -1)
-		libevdev_enable_event_type(dev, type);
+	if (rc == -1)
+		goto out;
 
+	rc = libevdev_enable_event_type(dev, type);
+	if (rc == -1)
+		goto out;
+
+	/* FIXME: can't back out of this if it fails */
+	if (type == EV_ABS)
+		rc = libevdev_kernel_set_abs_value(dev, code, (const struct input_absinfo*)data);
+
+out:
 	return (rc != -1) ? 0 : -errno;
 }
 

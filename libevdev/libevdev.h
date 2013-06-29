@@ -737,12 +737,18 @@ int libevdev_kernel_enable_event_type(struct libevdev *dev, unsigned int type);
  * This cannot be undone, the kernel only allows to enable axes, not disable
  * them.
  *
+ * The last argument depends on the type and code:
+ * - If type is EV_ABS, the vararg must be a pointer to a struct input_absinfo
+ * containing the data for this axis.
+ * - For all other types, the argument is ignored.
+ *
  * This function calls libevdev_kernel_enable_event_type() if necessary.
  *
  * @param type The event type to enable (EV_ABS, EV_KEY, ...)
  * @param code The event code to enable (ABS_X, REL_X, etc.)
+ * @param data Axis/key data, depending on type and code
  */
-int libevdev_kernel_enable_event_code(struct libevdev *dev, unsigned int type, unsigned int code);
+int libevdev_kernel_enable_event_code(struct libevdev *dev, unsigned int type, unsigned int code, const void *data);
 
 /**
  * @ingroup kernel
