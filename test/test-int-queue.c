@@ -21,13 +21,12 @@
  */
 
 #include <config.h>
-
 #include <limits.h>
-
-#include <libevdev/libevdev.h>
 #include <libevdev/libevdev-int.h>
+#include "test-common.h"
 
-#include <check.h>
+
+
 
 START_TEST(test_queue_alloc)
 {

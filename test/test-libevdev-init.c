@@ -21,13 +21,10 @@
  */
 
 #include <config.h>
-#include <libevdev/libevdev.h>
-
-#include <check.h>
 #include <errno.h>
 #include <unistd.h>
 
-#include "test-common-uinput.h"
+#include "test-common.h"
 
 START_TEST(test_new_device)
 {

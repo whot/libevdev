@@ -21,15 +21,12 @@
  */
 
 #include <config.h>
-#include <libevdev/libevdev.h>
 #include <linux/input.h>
-
-#include <check.h>
 #include <errno.h>
 #include <unistd.h>
 #include <limits.h>
 
-#include "test-common-uinput.h"
+#include "test-common.h"
 
 static int evbits[] = {
 	EV_SYN, EV_KEY, EV_REL, EV_ABS, EV_MSC,

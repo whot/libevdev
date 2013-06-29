@@ -22,15 +22,12 @@
 
 #define _GNU_SOURCE
 #include <config.h>
-#include <libevdev/libevdev.h>
 #include <linux/input.h>
-
-#include <check.h>
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "test-common-uinput.h"
+#include "test-common.h"
 
 START_TEST(test_next_event)
 {

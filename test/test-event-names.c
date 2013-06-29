@@ -21,9 +21,7 @@
  */
 
 #include <config.h>
-#include <libevdev/libevdev.h>
-
-#include <check.h>
+#include "test-common.h"
 
 START_TEST(test_limits)
 {
