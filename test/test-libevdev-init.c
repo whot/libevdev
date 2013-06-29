@@ -177,20 +177,16 @@ START_TEST(test_device_grab)
 	struct libevdev *dev;
 	int rc;
 
-	rc = uinput_device_new_with_events(&uidev,
-					   "test device", DEFAULT_IDS,
-					   EV_SYN, SYN_REPORT,
-					   EV_REL, REL_X,
-					   EV_REL, REL_Y,
-					   EV_REL, REL_WHEEL,
-					   EV_KEY, BTN_LEFT,
-					   EV_KEY, BTN_MIDDLE,
-					   EV_KEY, BTN_RIGHT,
-					   -1);
-	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
-
-	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
-	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
+	rc = test_create_device(&uidev, &dev,
+				EV_SYN, SYN_REPORT,
+				EV_REL, REL_X,
+				EV_REL, REL_Y,
+				EV_REL, REL_WHEEL,
+				EV_KEY, BTN_LEFT,
+				EV_KEY, BTN_MIDDLE,
+				EV_KEY, BTN_RIGHT,
+				-1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
 
 	rc = libevdev_grab(dev, 0);
 	ck_assert_int_eq(rc, -EINVAL);
