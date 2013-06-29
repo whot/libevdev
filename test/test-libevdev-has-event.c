@@ -351,6 +351,149 @@ START_TEST(test_device_name)
 }
 END_TEST
 
+START_TEST(test_device_enable_bit)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev, *dev2;
+	struct input_absinfo abs;
+	int rc;
+
+	rc = uinput_device_new_with_events(&uidev, "test device", DEFAULT_IDS,
+					   EV_ABS, ABS_X,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));
+
+	ck_assert(!libevdev_has_event_code(dev, EV_ABS, ABS_Y));
+	ck_assert(!libevdev_has_event_type(dev, EV_REL));
+	ck_assert(!libevdev_has_event_code(dev, EV_REL, REL_X));
+
+	abs.minimum = 0;
+	abs.maximum = 100;
+	abs.fuzz = 1;
+	abs.flat = 2;
+	abs.resolution = 3;
+
+	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_ABS, ABS_Y, &abs), 0);
+	ck_assert(libevdev_has_event_code(dev, EV_ABS, ABS_Y));
+
+	ck_assert_int_eq(libevdev_enable_event_type(dev, EV_REL), 0);
+	ck_assert(libevdev_has_event_type(dev, EV_REL));
+	ck_assert(!libevdev_has_event_code(dev, EV_REL, REL_X));
+
+	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_REL, REL_X, NULL), 0);
+	ck_assert(libevdev_has_event_code(dev, EV_REL, REL_X));
+
+	/* make sure kernel device is unchanged */
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev2);
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));
+	ck_assert(libevdev_has_event_code(dev2, EV_ABS, ABS_X));
+	ck_assert(!libevdev_has_event_code(dev2, EV_ABS, ABS_Y));
+	ck_assert(!libevdev_has_event_type(dev2, EV_REL));
+	ck_assert(!libevdev_has_event_code(dev2, EV_REL, REL_X));
+	libevdev_free(dev2);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
+START_TEST(test_device_enable_bit_invalid)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	struct input_absinfo abs = {0};
+	int rc;
+
+	rc = uinput_device_new_with_events(&uidev, "test device", DEFAULT_IDS,
+					   EV_ABS, ABS_X,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));
+
+
+	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_ABS, ABS_MAX + 1, &abs), -1);
+	ck_assert_int_eq(libevdev_enable_event_type(dev, EV_MAX + 1), -1);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
+START_TEST(test_device_disable_bit)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev, *dev2;
+	int rc;
+
+	rc = uinput_device_new_with_events(&uidev, "test device", DEFAULT_IDS,
+					   EV_ABS, ABS_X,
+					   EV_ABS, ABS_Y,
+					   EV_REL, REL_X,
+					   EV_REL, REL_Y,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));
+
+	ck_assert(libevdev_has_event_code(dev, EV_ABS, ABS_X));
+	ck_assert(libevdev_has_event_code(dev, EV_ABS, ABS_Y));
+	ck_assert(libevdev_has_event_type(dev, EV_REL));
+	ck_assert(libevdev_has_event_code(dev, EV_REL, REL_X));
+	ck_assert(libevdev_has_event_code(dev, EV_REL, REL_Y));
+
+	ck_assert_int_eq(libevdev_disable_event_code(dev, EV_ABS, ABS_Y), 0);
+	ck_assert(!libevdev_has_event_code(dev, EV_ABS, ABS_Y));
+
+	ck_assert_int_eq(libevdev_disable_event_code(dev, EV_REL, REL_X), 0);
+	ck_assert(!libevdev_has_event_code(dev, EV_REL, REL_X));
+	ck_assert(libevdev_has_event_code(dev, EV_REL, REL_Y));
+	ck_assert(libevdev_has_event_type(dev, EV_REL));
+
+	ck_assert_int_eq(libevdev_disable_event_type(dev, EV_REL), 0);
+	ck_assert(!libevdev_has_event_type(dev, EV_REL));
+	ck_assert(!libevdev_has_event_code(dev, EV_REL, REL_X));
+	ck_assert(!libevdev_has_event_code(dev, EV_REL, REL_Y));
+
+	/* make sure kernel device is unchanged */
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev2);
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));
+	ck_assert(libevdev_has_event_code(dev2, EV_ABS, ABS_X));
+	ck_assert(libevdev_has_event_code(dev2, EV_ABS, ABS_Y));
+	ck_assert(libevdev_has_event_type(dev2, EV_REL));
+	ck_assert(libevdev_has_event_code(dev2, EV_REL, REL_X));
+	ck_assert(libevdev_has_event_code(dev2, EV_REL, REL_Y));
+	libevdev_free(dev2);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
+START_TEST(test_device_disable_bit_invalid)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+
+	rc = uinput_device_new_with_events(&uidev, "test device", DEFAULT_IDS,
+					   EV_ABS, ABS_X,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));
+
+
+	ck_assert_int_eq(libevdev_disable_event_code(dev, EV_ABS, ABS_MAX + 1), -1);
+	ck_assert_int_eq(libevdev_disable_event_type(dev, EV_MAX + 1), -1);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 Suite *
 libevdev_has_event_test(void)
 {
@@ -382,6 +525,13 @@ libevdev_has_event_test(void)
 
 	tc = tcase_create("device info");
 	tcase_add_test(tc, test_device_name);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("device bit manipulation");
+	tcase_add_test(tc, test_device_enable_bit);
+	tcase_add_test(tc, test_device_enable_bit_invalid);
+	tcase_add_test(tc, test_device_disable_bit);
+	tcase_add_test(tc, test_device_disable_bit_invalid);
 	suite_add_tcase(s, tc);
 
 	return s;
