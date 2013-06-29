@@ -21,18 +21,38 @@
  */
 
 #include <config.h>
-#include <libevdev/libevdev.h>
-
 #include <check.h>
+#include <errno.h>
+#include <fcntl.h>
 
-#ifndef _TEST_COMMON_H_
-#define _TEST_COMMON_H_
+#include "test-common.h"
 
-#include "test-common-uinput.h"
+int test_create_device(struct uinput_device **uidev_return,
+		       struct libevdev **dev_return,
+		       ...)
+{
+	int rc, fd;
+	struct uinput_device *uidev;
+	struct libevdev *dev;
+	va_list args;
 
+	va_start(args, dev_return);
 
-int test_create_device(struct uinput_device **uidev,
-		       struct libevdev **dev,
-		       ...);
+	rc = uinput_device_new_with_events_v(&uidev, "test device", DEFAULT_IDS, args);
+	va_end(args);
 
-#endif /* _TEST_COMMON_H_ */
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+
+	fd = uinput_device_get_fd(uidev);
+
+	rc = libevdev_new_from_fd(fd, &dev);
+	ck_assert_msg(rc == 0, "Failed to init device device: %s", strerror(-rc));
+	rc = fcntl(fd, F_SETFL, O_NONBLOCK);
+	ck_assert_msg(rc == 0, "fcntl failed: %s", strerror(errno));
+
+	*uidev_return = uidev;
+	*dev_return = dev;
+
+	return rc == 0 ? rc : -errno;
+}
+
