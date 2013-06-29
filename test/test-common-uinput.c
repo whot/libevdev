@@ -66,10 +66,9 @@ uinput_device_new(const char *name)
 }
 
 int
-uinput_device_new_with_events(struct uinput_device **d, const char *name, const struct input_id *id, ...)
+uinput_device_new_with_events_v(struct uinput_device **d, const char *name, const struct input_id *id, va_list args)
 {
 	int rc;
-	va_list args;
 	struct uinput_device *dev;
 
 	dev = uinput_device_new(name);
@@ -78,9 +77,7 @@ uinput_device_new_with_events(struct uinput_device **d, const char *name, const 
 	if (id != DEFAULT_IDS)
 		uinput_device_set_ids(dev, id);
 
-	va_start(args, id);
 	rc = uinput_device_set_event_bits_v(dev, args);
-	va_end(args);
 
 	if (rc == 0)
 		rc = uinput_device_create(dev);
@@ -94,6 +91,18 @@ uinput_device_new_with_events(struct uinput_device **d, const char *name, const 
 	return rc;
 }
 
+int
+uinput_device_new_with_events(struct uinput_device **d, const char *name, const struct input_id *id, ...)
+{
+	int rc;
+	va_list args;
+
+	va_start(args, id);
+	rc = uinput_device_new_with_events_v(d, name, id, args);
+	va_end(args);
+
+	return rc;
+}
 
 void
 uinput_device_free(struct uinput_device *dev)
