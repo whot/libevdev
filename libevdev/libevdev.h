@@ -224,6 +224,7 @@ struct libevdev* libevdev_new(void);
  * @endcode
  *
  * @param fd A file descriptor to the device in O_RDWR or O_RDONLY mode.
+ * @param[out] dev The newly initialized evdev device.
  *
  * @return On success, zero is returned and dev is set to the newly
  * allocated struct. On failure, a negative errno is returned and the value
@@ -238,6 +239,8 @@ int libevdev_new_from_fd(int fd, struct libevdev **dev);
  *
  * Clean up and free the libevdev struct. After completion, the <code>struct
  * libevdev</code> is invalid and must not be used.
+ *
+ * @param dev The evdev device
  *
  * @note This function may be called before libevdev_set_fd().
  */
@@ -255,7 +258,12 @@ void libevdev_free(struct libevdev *dev);
 typedef void (*libevdev_log_func_t)(const char *format, va_list args);
 
 /**
- * Set a printf-style logging handler for library-internal logging.
+ * Set a printf-style logging handler for library-internal logging. The default
+ * logging function is a noop.
+ *
+ * @param dev The evdev device
+ * @param logfunc The logging function for this device. If NULL, the current
+ * logging function is unset.
  *
  * @note This function may be called before libevdev_set_fd().
  */
@@ -277,6 +285,7 @@ enum EvdevGrabModes {
  * Grabbing an already grabbed device, or ungrabbing an ungrabbed device is
  * a noop and always succeeds.
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param grab If true, grab the device. Otherwise ungrab the device.
  *
  * @return 0 if the device was successfull grabbed or ungrabbed, or a
@@ -298,6 +307,7 @@ int libevdev_grab(struct libevdev *dev, int grab);
  * Unless otherwise specified, libevdev function behavior is undefined until
  * a successfull call to libevdev_set_fd().
  *
+ * @param dev The evdev device
  * @param fd The file descriptor for the device
  *
  * @return 0 on success, or a negative error code on failure
@@ -321,6 +331,7 @@ int libevdev_set_fd(struct libevdev* dev, int fd);
  *
  * It is an error to call this function before calling libevdev_set_fd().
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param fd The new fd
  *
  * @return 0 on success, or -1 on failure.
@@ -330,6 +341,7 @@ int libevdev_set_fd(struct libevdev* dev, int fd);
 int libevdev_change_fd(struct libevdev* dev, int fd);
 
 /**
+ * @param dev The evdev device
  *
  * @return The previously set fd, or -1 if none had been set previously.
  * @note This function may be called before libevdev_set_fd().
@@ -356,6 +368,7 @@ int libevdev_get_fd(const struct libevdev* dev);
  * with the LIBEVDEV_READ_SYNC flag set, all events from the diff are dropped
  * and event processing continues as normal.
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param flags Set of flags to determine behaviour. If LIBEVDEV_READ_NORMAL
  * is set, the next event is read in normal mode. If LIBEVDEV_READ_SYNC is
  * set, the next event is read in sync mode.
@@ -373,6 +386,8 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 /**
  * @ingroup bits
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ *
  * @return The device name as read off the kernel device. The name is never
  * NULL but it may be the empty string.
  *
@@ -385,6 +400,8 @@ const char* libevdev_get_name(const struct libevdev *dev);
  *
  * Virtual devices such as uinput devices have no phys location.
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ *
  * @return The physical location of this device, or NULL if there is none
  *
  * @note This function is signal safe.
@@ -393,6 +410,8 @@ const char * libevdev_get_phys(const struct libevdev *dev);
 
 /**
  * @ingroup bits
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  *
  * @return The unique identifier for this device, or NULL if there is none
  *
@@ -403,6 +422,8 @@ const char * libevdev_get_uniq(const struct libevdev *dev);
 /**
  * @ingroup bits
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ *
  * @return The device's product ID
  *
  * @note This function is signal-safe.
@@ -411,6 +432,8 @@ int libevdev_get_product_id(const struct libevdev *dev);
 
 /**
  * @ingroup bits
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  *
  * @return The device's vendor ID
  *
@@ -421,6 +444,8 @@ int libevdev_get_vendor_id(const struct libevdev *dev);
 /**
  * @ingroup bits
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ *
  * @return The device's bus type
  *
  * @note This function is signal-safe.
@@ -429,6 +454,8 @@ int libevdev_get_bustype(const struct libevdev *dev);
 
 /**
  * @ingroup bits
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  *
  * @return The device's firmware version
  *
@@ -439,6 +466,8 @@ int libevdev_get_version(const struct libevdev *dev);
 /**
  * @ingroup bits
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ *
  * @return The driver version for this device
  *
  * @note This function is signal-safe.
@@ -447,6 +476,9 @@ int libevdev_get_driver_version(const struct libevdev *dev);
 
 /**
  * @ingroup bits
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param prop The input property to query for, one of INPUT_PROP_...
  *
  * @return 1 if the device provides this input property, or 0 otherwise.
  *
@@ -457,6 +489,9 @@ int libevdev_has_property(const struct libevdev *dev, unsigned int prop);
 /**
  * @ingroup bits
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param type The event type to query for, one of EV_SYN, EV_REL, etc.
+ *
  * @return 1 if the device supports this event type, or 0 otherwise.
  *
  * @note This function is signal-safe.
@@ -465,6 +500,10 @@ int libevdev_has_event_type(const struct libevdev *dev, unsigned int type);
 
 /**
  * @ingroup bits
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param type The event type for the code to query (EV_SYN, EV_REL, etc.)
+ * @param code The event code to query for, one of ABS_X, REL_X, etc.
  *
  * @return 1 if the device supports this event type and code, or 0 otherwise.
  *
@@ -475,11 +514,21 @@ int libevdev_has_event_code(const struct libevdev *dev, unsigned int type, unsig
 /**
  * @ingroup bits
  *
+ * Get the minimum axis value for the given axis, as advertised by the kernel.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code The EV_ABS event code to query for, one of ABS_X, ABS_Y, etc.
+ *
  * @return axis minimum for the given axis or 0 if the axis is invalid
  */
 int libevdev_get_abs_min(const struct libevdev *dev, unsigned int code);
 /**
  * @ingroup bits
+ *
+ * Get the maximum axis value for the given axis, as advertised by the kernel.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code The EV_ABS event code to query for, one of ABS_X, ABS_Y, etc.
  *
  * @return axis maximum for the given axis or 0 if the axis is invalid
  */
@@ -487,11 +536,21 @@ int libevdev_get_abs_max(const struct libevdev *dev, unsigned int code);
 /**
  * @ingroup bits
  *
+ * Get the axis fuzz for the given axis, as advertised by the kernel.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code The EV_ABS event code to query for, one of ABS_X, ABS_Y, etc.
+ *
  * @return axis fuzz for the given axis or 0 if the axis is invalid
  */
 int libevdev_get_abs_fuzz(const struct libevdev *dev, unsigned int code);
 /**
  * @ingroup bits
+ *
+ * Get the axis flat for the given axis, as advertised by the kernel.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code The EV_ABS event code to query for, one of ABS_X, ABS_Y, etc.
  *
  * @return axis flat for the given axis or 0 if the axis is invalid
  */
@@ -499,12 +558,22 @@ int libevdev_get_abs_flat(const struct libevdev *dev, unsigned int code);
 /**
  * @ingroup bits
  *
+ * Get the axis resolution for the given axis, as advertised by the kernel.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code The EV_ABS event code to query for, one of ABS_X, ABS_Y, etc.
+ *
  * @return axis resolution for the given axis or 0 if the axis is invalid
  */
 int libevdev_get_abs_resolution(const struct libevdev *dev, unsigned int code);
 
 /**
  * @ingroup bits
+ *
+ * Get the axis info for the given axis, as advertised by the kernel.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code The EV_ABS event code to query for, one of ABS_X, ABS_Y, etc.
  *
  * @return The input_absinfo for the given code, or NULL if the device does
  * not support this event code.
@@ -516,6 +585,10 @@ const struct input_absinfo* libevdev_get_abs_info(const struct libevdev *dev, un
  *
  * Behaviour of this function is undefined if the device does not provide
  * the event.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param type The event type for the code to query (EV_SYN, EV_REL, etc.)
+ * @param code The event code to query for, one of ABS_X, REL_X, etc.
  *
  * @return The current value of the event.
  *
@@ -536,6 +609,11 @@ int libevdev_get_event_value(const struct libevdev *dev, unsigned int type, unsi
  *   if (libevdev_has_event_type(dev, t) && libevdev_has_event_code(dev, t, c))
  *       val = libevdev_get_event_value(dev, t, c);
  * @endcode
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param type The event type for the code to query (EV_SYN, EV_REL, etc.)
+ * @param code The event code to query for, one of ABS_X, REL_X, etc.
+ * @param[out] value The current value of this axis returned.
  *
  * @return If the device supports this event type and code, the return value is
  * non-zero and value is set to the current value of this axis. Otherwise,
@@ -558,6 +636,11 @@ int libevdev_fetch_event_value(const struct libevdev *dev, unsigned int type, un
  * the device, for a code that is not in the permitted ABS_MT range or for a
  * device that does not have slots.
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param slot The numerical slot number, must be smaller than the total number
+ * of slots on this * device
+ * @param code The event code to query for, one of ABS_MT_POSITION_X, etc.
+ *
  * @note This function is signal-safe.
  * @note The value for events other than ABS_MT_ is undefined, use
  * libevdev_fetch_value() instead
@@ -578,6 +661,12 @@ int libevdev_get_slot_value(const struct libevdev *dev, unsigned int slot, unsig
  *       val = libevdev_get_slot_value(dev, slot, c);
  * @endcode
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param slot The numerical slot number, must be smaller than the total number
+ * of slots on this * device
+ * @param[out] value The current value of this axis returned.
+ *
+ * @param code The event code to query for, one of ABS_MT_POSITION_X, etc.
  * @return If the device supports this event code, the return value is
  * non-zero and value is set to the current value of this axis. Otherwise, or
  * if the event code is not an ABS_MT_* event code, zero is returned and value
@@ -591,6 +680,8 @@ int libevdev_fetch_slot_value(const struct libevdev *dev, unsigned int slot, uns
  * @ingroup mt
  *
  * Get the number of slots supported by this device.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  *
  * @return The number of slots supported, or -1 if the device does not provide
  * any slots
@@ -609,6 +700,8 @@ int libevdev_get_num_slots(const struct libevdev *dev);
  * waiting to be processed. The returned value is the value a caller would
  * see if it were to process events manually one-by-one.
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ *
  * @return the currently active slot (logically)
  */
 int libevdev_get_current_slot(const struct libevdev *dev);
@@ -623,6 +716,7 @@ int libevdev_get_current_slot(const struct libevdev *dev);
  * This is a local modification only affecting only this representation of
  * this device.
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type to enable (EV_ABS, EV_KEY, ...)
  *
  * @return 0 on success or -1 otherwise
@@ -645,6 +739,7 @@ int libevdev_enable_event_type(struct libevdev *dev, unsigned int type);
  * This is a local modification only affecting only this representation of
  * this device.
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type to disable (EV_ABS, EV_KEY, ...)
  *
  * @return 0 on success or -1 otherwise
@@ -671,6 +766,7 @@ int libevdev_disable_event_type(struct libevdev *dev, unsigned int type);
  * This is a local modification only affecting only this representation of
  * this device.
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type to enable (EV_ABS, EV_KEY, ...)
  * @param code The event code to enable (ABS_X, REL_X, etc.)
  * @param data Axis/key data, depending on type and code
@@ -696,6 +792,7 @@ int libevdev_enable_event_code(struct libevdev *dev, unsigned int type, unsigned
  * This is a local modification only affecting only this representation of
  * this device.
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type to disable (EV_ABS, EV_KEY, ...)
  * @param code The event code to disable (ABS_X, REL_X, etc.)
  *
@@ -712,6 +809,10 @@ int libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigne
  * Set the device's EV_ABS axis to the value defined in the abs
  * parameter. This will be written to the kernel.
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code The EV_ABS event code to modify, one of ABS_X, ABS_Y, etc.
+ * @param abs Axis info to set the kernel axis to
+ *
  * @return zero on success, or a negative errno on failure
  *
  * @see libevdev_enable_event_code
@@ -720,6 +821,8 @@ int libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const
 
 /**
  * @ingroup misc
+ *
+ * @param type The event type to return the name for.
  *
  * @return The name of the given event type (e.g. EV_ABS) or NULL for an
  * invalid type
@@ -731,6 +834,9 @@ const char * libevdev_get_event_type_name(unsigned int type);
 /**
  * @ingroup misc
  *
+ * @param type The event type for the code to query (EV_SYN, EV_REL, etc.)
+ * @param code The event code to return the name for (e.g. ABS_X)
+ *
  * @return The name of the given event code (e.g. ABS_X) or NULL for an
  * invalid type or code
  *
@@ -741,6 +847,8 @@ const char * libevdev_get_event_code_name(unsigned int type, unsigned int code);
 
 /**
  * @ingroup misc
+ *
+ * @param prop The input prop to return the name for (e.g. INPUT_PROP_BUTTONPAD)
  *
  * @return The name of the given input prop (e.g. INPUT_PROP_BUTTONPAD) or NULL for an
  * invalid property
@@ -755,6 +863,9 @@ const char * libevdev_get_input_prop_name(unsigned int prop);
 /**
  * @ingroup misc
  *
+ * @param type The event type to return the maximum for (EV_ABS, EV_REL, etc.). No max is defined for
+ * EV_SYN.
+ *
  * @return The max value defined for the given event type, e.g. ABS_MAX for a type of EV_ABS, or -1
  * for an invalid type.
  *
@@ -768,6 +879,7 @@ int libevdev_get_event_type_max(unsigned int type);
  *
  * Get the repeat delay and repeat period values for this device.
  *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param delay If not null, set to the repeat delay value
  * @param period If not null, set to the repeat period value
  *
