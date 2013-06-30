@@ -240,6 +240,14 @@ uinput_device_create(struct uinput_device* d)
 			rc = ioctl(fd, uinput_bit, code);
 			if (rc == -1)
 				goto error;
+
+			if (type == EV_ABS) {
+				dev.absmin[code] = d->d.abs_info[code].minimum;
+				dev.absmax[code] = d->d.abs_info[code].maximum;
+				dev.absfuzz[code] = d->d.abs_info[code].fuzz;
+				dev.absflat[code] = d->d.abs_info[code].flat;
+				/* FIXME: uinput has no resolution */
+			}
 		}
 
 	}
