@@ -757,9 +757,9 @@ int libevdev_disable_event_type(struct libevdev *dev, unsigned int type);
  * report such events, it will now return true for libevdev_has_event_code().
  *
  * The last argument depends on the type and code:
- * - If type is EV_ABS, the vararg must be a pointer to a struct input_absinfo
+ * - If type is EV_ABS, data must be a pointer to a struct input_absinfo
  * containing the data for this axis.
- * - For all other types, the argument is ignored.
+ * - For all other types, the argument must be NULL.
  *
  * This function calls libevdev_enable_event_type() if necessary.
  *
@@ -769,7 +769,8 @@ int libevdev_disable_event_type(struct libevdev *dev, unsigned int type);
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type to enable (EV_ABS, EV_KEY, ...)
  * @param code The event code to enable (ABS_X, REL_X, etc.)
- * @param data Axis/key data, depending on type and code
+ * @param data If type is EV_ABS, data points to a struct input_absinfo. Otherwise, data must be
+ * NULL
  *
  * @return 0 on success or -1 otherwise
  *
