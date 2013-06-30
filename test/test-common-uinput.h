@@ -38,7 +38,7 @@ int uinput_device_set_bit(struct uinput_device* dev, unsigned int bit);
 int uinput_device_set_event_bit(struct uinput_device* dev, unsigned int type, unsigned int code);
 int uinput_device_set_event_bits(struct uinput_device* dev, ...);
 int uinput_device_set_event_bits_v(struct uinput_device* dev, va_list args);
-int uinput_device_set_abs_bit(struct uinput_device* dev, unsigned int type, const struct input_absinfo *absinfo);
+int uinput_device_set_abs_bit(struct uinput_device* dev, unsigned int code, const struct input_absinfo *absinfo);
 int uinput_device_event(const struct uinput_device* dev, unsigned int type, unsigned int code, int value);
 int uinput_device_event_multiple(const struct uinput_device* dev, ...);
 int uinput_device_event_multiple_v(const struct uinput_device* dev, va_list args);
