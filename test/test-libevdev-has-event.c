@@ -569,6 +569,62 @@ START_TEST(test_device_disable_bit_invalid)
 }
 END_TEST
 
+START_TEST(test_device_kernel_change_axis)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev, *dev2;
+	struct input_absinfo abs;
+	int rc;
+
+	uidev = uinput_device_new("test device");
+	ck_assert(uidev != NULL);
+
+	abs.minimum = 0;
+	abs.maximum = 1000;
+	abs.fuzz = 1;
+	abs.flat = 2;
+	/* abs.resolution = 3;  FIXME: can't test resolution */
+	abs.value = 0;
+
+	uinput_device_set_abs_bit(uidev, ABS_X, &abs);
+
+	rc = uinput_device_create(uidev);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
+
+	ck_assert_int_eq(libevdev_get_abs_min(dev, ABS_X), 0);
+	ck_assert_int_eq(libevdev_get_abs_max(dev, ABS_X), 1000);
+	ck_assert_int_eq(libevdev_get_abs_fuzz(dev, ABS_X), 1);
+	ck_assert_int_eq(libevdev_get_abs_flat(dev, ABS_X), 2);
+
+	abs.minimum = 500;
+	abs.maximum = 5000;
+	abs.fuzz = 10;
+	abs.flat = 20;
+	rc = libevdev_kernel_set_abs_value(dev, ABS_X, &abs);
+	ck_assert_int_eq(rc, 0);
+
+	ck_assert_int_eq(libevdev_get_abs_min(dev, ABS_X), 500);
+	ck_assert_int_eq(libevdev_get_abs_max(dev, ABS_X), 5000);
+	ck_assert_int_eq(libevdev_get_abs_fuzz(dev, ABS_X), 10);
+	ck_assert_int_eq(libevdev_get_abs_flat(dev, ABS_X), 20);
+
+	/* make sure kernel device is changed */
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev2);
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));
+	ck_assert_int_eq(libevdev_get_abs_min(dev2, ABS_X), 500);
+	ck_assert_int_eq(libevdev_get_abs_max(dev2, ABS_X), 5000);
+	ck_assert_int_eq(libevdev_get_abs_fuzz(dev2, ABS_X), 10);
+	ck_assert_int_eq(libevdev_get_abs_flat(dev2, ABS_X), 20);
+	libevdev_free(dev2);
+
+	libevdev_free(dev);
+	uinput_device_free(uidev);
+}
+END_TEST
+
 Suite *
 libevdev_has_event_test(void)
 {
@@ -608,6 +664,7 @@ libevdev_has_event_test(void)
 	tcase_add_test(tc, test_device_enable_bit_invalid);
 	tcase_add_test(tc, test_device_disable_bit);
 	tcase_add_test(tc, test_device_disable_bit_invalid);
+	tcase_add_test(tc, test_device_kernel_change_axis);
 	suite_add_tcase(s, tc);
 
 	return s;
