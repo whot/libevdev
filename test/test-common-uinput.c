@@ -185,7 +185,7 @@ inotify_setup()
 int
 uinput_device_create(struct uinput_device* d)
 {
-	int i;
+	int type;
 	struct uinput_user_dev dev;
 	int rc;
 	int fd;
@@ -202,24 +202,24 @@ uinput_device_create(struct uinput_device* d)
 		strncpy(dev.name, d->d.name, UINPUT_MAX_NAME_SIZE - 1);
 	dev.id = d->d.ids;
 
-	for (i = 0; i < EV_MAX; i++) {
-		int j;
+	for (type = 0; type < EV_MAX; type++) {
+		int code;
 		int max;
 		int uinput_bit;
 		const unsigned long *mask;
 
-		if (!bit_is_set(d->d.bits, i))
+		if (!bit_is_set(d->d.bits, type))
 			continue;
 
-		rc = ioctl(fd, UI_SET_EVBIT, i);
+		rc = ioctl(fd, UI_SET_EVBIT, type);
 		if (rc == -1)
 			goto error;
 
-		max = type_to_mask_const(&d->d, i, &mask);
+		max = type_to_mask_const(&d->d, type, &mask);
 		if (max == -1)
 			continue;
 
-		switch(i) {
+		switch(type) {
 			case EV_KEY: uinput_bit = UI_SET_KEYBIT; break;
 			case EV_REL: uinput_bit = UI_SET_RELBIT; break;
 			case EV_ABS: uinput_bit = UI_SET_ABSBIT; break;
@@ -233,12 +233,11 @@ uinput_device_create(struct uinput_device* d)
 				    goto error;
 		}
 
-
-		for (j = 0; j < max; j++) {
-			if (!bit_is_set(mask, j))
+		for (code = 0; code < max; code++) {
+			if (!bit_is_set(mask, code))
 				continue;
 
-			rc = ioctl(fd, uinput_bit, j);
+			rc = ioctl(fd, uinput_bit, code);
 			if (rc == -1)
 				goto error;
 		}
