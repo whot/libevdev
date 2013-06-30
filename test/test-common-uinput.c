@@ -205,6 +205,7 @@ uinput_device_create(struct uinput_device* d)
 	for (i = 0; i < EV_MAX; i++) {
 		int j;
 		int max;
+		int uinput_bit;
 		const unsigned long *mask;
 
 		if (!bit_is_set(d->d.bits, i))
@@ -218,24 +219,24 @@ uinput_device_create(struct uinput_device* d)
 		if (max == -1)
 			continue;
 
+		switch(i) {
+			case EV_KEY: uinput_bit = UI_SET_KEYBIT; break;
+			case EV_REL: uinput_bit = UI_SET_RELBIT; break;
+			case EV_ABS: uinput_bit = UI_SET_ABSBIT; break;
+			case EV_MSC: uinput_bit = UI_SET_MSCBIT; break;
+			case EV_LED: uinput_bit = UI_SET_LEDBIT; break;
+			case EV_SND: uinput_bit = UI_SET_SNDBIT; break;
+			case EV_FF: uinput_bit = UI_SET_FFBIT; break;
+			case EV_SW: uinput_bit = UI_SET_SWBIT; break;
+			default:
+				    errno = EINVAL;
+				    goto error;
+		}
+
+
 		for (j = 0; j < max; j++) {
-			int uinput_bit;
 			if (!bit_is_set(mask, j))
 				continue;
-
-			switch(i) {
-				case EV_KEY: uinput_bit = UI_SET_KEYBIT; break;
-				case EV_REL: uinput_bit = UI_SET_RELBIT; break;
-				case EV_ABS: uinput_bit = UI_SET_ABSBIT; break;
-				case EV_MSC: uinput_bit = UI_SET_MSCBIT; break;
-				case EV_LED: uinput_bit = UI_SET_LEDBIT; break;
-				case EV_SND: uinput_bit = UI_SET_SNDBIT; break;
-				case EV_FF: uinput_bit = UI_SET_FFBIT; break;
-				case EV_SW: uinput_bit = UI_SET_SWBIT; break;
-				default:
-					    errno = EINVAL;
-					    goto error;
-			}
 
 			rc = ioctl(fd, uinput_bit, j);
 			if (rc == -1)
