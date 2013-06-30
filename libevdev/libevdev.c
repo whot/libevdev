@@ -848,65 +848,6 @@ libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned in
 }
 
 int
-libevdev_kernel_enable_event_type(struct libevdev *dev, unsigned int type)
-{
-	int rc;
-
-	if (type > EV_MAX)
-		return -1;
-
-	rc = ioctl(dev->fd, UI_SET_EVBIT, type);
-	if (rc != -1)
-		libevdev_enable_event_type(dev, type);
-
-	return (rc != -1) ? 0 : -errno;
-}
-
-int
-libevdev_kernel_enable_event_code(struct libevdev *dev, unsigned int type,
-				  unsigned int code, const void *data)
-{
-	int rc;
-	int uinput_bit;
-	int max;
-	const unsigned long *mask;
-
-	rc = libevdev_kernel_enable_event_type(dev, type);
-	if (rc != 0)
-		return rc;
-
-	max = type_to_mask_const(dev, type, &mask);
-	if (max == -1 || code > max)
-		return -EINVAL;
-
-	switch(type) {
-		case EV_KEY: uinput_bit = UI_SET_KEYBIT; break;
-		case EV_REL: uinput_bit = UI_SET_RELBIT; break;
-		case EV_ABS: uinput_bit = UI_SET_ABSBIT; break;
-		case EV_MSC: uinput_bit = UI_SET_MSCBIT; break;
-		case EV_LED: uinput_bit = UI_SET_LEDBIT; break;
-		case EV_SND: uinput_bit = UI_SET_SNDBIT; break;
-		case EV_FF: uinput_bit = UI_SET_FFBIT; break;
-		case EV_SW: uinput_bit = UI_SET_SWBIT; break;
-	}
-
-	rc = ioctl(dev->fd, uinput_bit, type);
-	if (rc == -1)
-		goto out;
-
-	rc = libevdev_enable_event_type(dev, type);
-	if (rc == -1)
-		goto out;
-
-	/* FIXME: can't back out of this if it fails */
-	if (type == EV_ABS)
-		rc = libevdev_kernel_set_abs_value(dev, code, (const struct input_absinfo*)data);
-
-out:
-	return (rc != -1) ? 0 : -errno;
-}
-
-int
 libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs)
 {
 	int rc;
@@ -914,7 +855,7 @@ libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const str
 	if (code > ABS_MAX)
 		return -EINVAL;
 
-	rc = ioctl(dev->fd, EVIOCSABS(code), *abs);
+	rc = ioctl(dev->fd, EVIOCSABS(code), abs);
 	if (rc < 0)
 		rc = -errno;
 	else
