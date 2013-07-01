@@ -736,6 +736,9 @@ int libevdev_enable_event_type(struct libevdev *dev, unsigned int type);
  * In most cases, a caller likely only wants to disable a single code, not
  * the whole type. Use libevdev_disable_event_code() for that.
  *
+ * Disabling EV_SYN will not work. Don't shoot yourself in the foot.
+ * It hurts.
+ *
  * This is a local modification only affecting only this representation of
  * this device.
  *
@@ -792,6 +795,9 @@ int libevdev_enable_event_code(struct libevdev *dev, unsigned int type, unsigned
  *
  * This is a local modification only affecting only this representation of
  * this device.
+ *
+ * Disabling EV_SYN will not work. Don't shoot yourself in the foot.
+ * It hurts.
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type to disable (EV_ABS, EV_KEY, ...)

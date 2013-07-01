@@ -795,7 +795,7 @@ libevdev_enable_event_type(struct libevdev *dev, unsigned int type)
 int
 libevdev_disable_event_type(struct libevdev *dev, unsigned int type)
 {
-	if (type > EV_MAX)
+	if (type > EV_MAX || type == EV_SYN)
 		return -1;
 
 	clear_bit(dev->bits, type);
