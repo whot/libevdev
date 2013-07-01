@@ -626,6 +626,39 @@ START_TEST(test_device_kernel_change_axis)
 }
 END_TEST
 
+START_TEST(test_device_kernel_change_axis_invalid)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	struct input_absinfo abs;
+	int rc;
+
+	uidev = uinput_device_new("test device");
+	ck_assert(uidev != NULL);
+
+	abs.minimum = 0;
+	abs.maximum = 1000;
+	abs.fuzz = 1;
+	abs.flat = 2;
+	/* abs.resolution = 3;  FIXME: can't test resolution */
+	abs.value = 0;
+
+	uinput_device_set_abs_bit(uidev, ABS_X, &abs);
+
+	rc = uinput_device_create(uidev);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
+
+	rc = libevdev_kernel_set_abs_value(dev, ABS_MAX + 1, &abs);
+	ck_assert_int_eq(rc, -EINVAL);
+
+	libevdev_free(dev);
+	uinput_device_free(uidev);
+}
+END_TEST
+
 Suite *
 libevdev_has_event_test(void)
 {
@@ -666,6 +699,7 @@ libevdev_has_event_test(void)
 	tcase_add_test(tc, test_device_disable_bit);
 	tcase_add_test(tc, test_device_disable_bit_invalid);
 	tcase_add_test(tc, test_device_kernel_change_axis);
+	tcase_add_test(tc, test_device_kernel_change_axis_invalid);
 	suite_add_tcase(s, tc);
 
 	return s;
