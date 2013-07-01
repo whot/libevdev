@@ -192,6 +192,7 @@ enum EvdevReadFlags {
 	LIBEVDEV_FORCE_SYNC		= 4, /**< Pretend the next event is a SYN_DROPPED. There is
 					          no reason to ever use this except for
 						  automated tests, so don't. */
+	LIBEVDEV_READ_BLOCKING		= 8, /**< The fd is not in O_NONBLOCK and a read may block */
 };
 
 /**

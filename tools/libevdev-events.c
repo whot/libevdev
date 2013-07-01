@@ -145,7 +145,7 @@ main(int argc, char **argv)
 		goto out;
 
 	file = argv[1];
-	fd = open(file, O_RDONLY | O_NONBLOCK);
+	fd = open(file, O_RDONLY);
 	if (fd < 0) {
 		perror("Failed to open device");
 		goto out;
@@ -170,7 +170,7 @@ main(int argc, char **argv)
 
 	do {
 		struct input_event ev;
-		rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+		rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL|LIBEVDEV_READ_BLOCKING, &ev);
 		if (rc == 1) {
 			printf("::::::::::::::::::::: dropped ::::::::::::::::::::::\n");
 			while (rc == 1) {

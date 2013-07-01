@@ -556,18 +556,21 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 			update_state(dev, &e);
 	}
 
-	/* FIXME: check for O_NONBLOCK and if not set, skip if we have an
-	 * event in the queue from the previous read.
-	 */
-
 	/* FIXME: if the first event after syncing is a SYN_DROPPED, log this */
 
 	/* Always read in some more events. Best case this smoothes over a potential SYN_DROPPED,
-	   worst case we don't read fast enough and end up with SYN_DROPPED anyway */
+	   worst case we don't read fast enough and end up with SYN_DROPPED anyway.
+
+	   Except if the fd is in blocking mode and we still have events from the last read, don't
+	   read in any more.
+	 */
 	do {
-		rc = read_more_events(dev);
-		if (rc < 0 && rc != -EAGAIN)
-			goto out;
+		if (!(flags & LIBEVDEV_READ_BLOCKING) ||
+		    queue_num_elements(dev) == 0) {
+			rc = read_more_events(dev);
+			if (rc < 0 && rc != -EAGAIN)
+				goto out;
+		}
 
 		if (flags & LIBEVDEV_FORCE_SYNC) {
 			dev->need_sync = 1;
