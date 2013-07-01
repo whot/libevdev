@@ -352,6 +352,9 @@ sync_mt_state(struct libevdev *dev)
 		if (i == ABS_MT_SLOT)
 			continue;
 
+		if (!libevdev_has_event_code(dev, EV_ABS, i))
+			continue;
+
 		idx = i - ABS_MT_MIN;
 		mt_state[idx].code = i;
 		rc = ioctl(dev->fd, EVIOCGMTSLOTS(sizeof(struct mt_state)), &mt_state[idx]);
@@ -369,6 +372,9 @@ sync_mt_state(struct libevdev *dev)
 			int jdx = j - ABS_MT_MIN;
 
 			if (j == ABS_MT_SLOT)
+				continue;
+
+			if (!libevdev_has_event_code(dev, EV_ABS, j))
 				continue;
 
 			if (dev->mt_slot_vals[i][jdx] == mt_state[jdx].val[i])
