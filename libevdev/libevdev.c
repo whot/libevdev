@@ -556,21 +556,25 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 
 	/* Always read in some more events. Best case this smoothes over a potential SYN_DROPPED,
 	   worst case we don't read fast enough and end up with SYN_DROPPED anyway */
-	rc = read_more_events(dev);
-	if (rc < 0 && rc != -EAGAIN)
-		goto out;
+	do {
+		rc = read_more_events(dev);
+		if (rc < 0 && rc != -EAGAIN)
+			goto out;
 
-	if (flags & LIBEVDEV_FORCE_SYNC) {
-		dev->need_sync = 1;
-		rc = 1;
-		goto out;
-	}
+		if (flags & LIBEVDEV_FORCE_SYNC) {
+			dev->need_sync = 1;
+			rc = 1;
+			goto out;
+		}
 
 
-	if (queue_shift(dev, ev) != 0)
-		return -EAGAIN;
+		if (queue_shift(dev, ev) != 0)
+			return -EAGAIN;
 
-	update_state(dev, ev);
+		update_state(dev, ev);
+
+	/* if we disabled a code, get the next event instead */
+	} while(!libevdev_has_event_code(dev, ev->type, ev->code));
 
 	rc = 0;
 	if (ev->type == EV_SYN && ev->code == SYN_DROPPED) {
