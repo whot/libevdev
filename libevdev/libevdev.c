@@ -548,10 +548,12 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 				return rc;
 		}
 	} else if (dev->need_sync) {
-		/* FIXME: still need to call update_state for all events
-		 * here, otherwise the library has the wrong view of the
-		 * device too */
-		queue_shift_multiple(dev, dev->queue_nsync, NULL);
+		struct input_event e;
+
+		/* call update_state for all events here, otherwise the library has the wrong view
+		   of the device too */
+		while (queue_shift(dev, &e) == 0)
+			update_state(dev, &e);
 	}
 
 	/* FIXME: check for O_NONBLOCK and if not set, skip if we have an
