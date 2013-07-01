@@ -130,6 +130,7 @@ Functions</h2></td></tr>
 <p>If a device needs to be synced by the caller but the caller does not call with the LIBEVDEV_READ_SYNC flag set, all events from the diff are dropped and event processing continues as normal.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device, already initialized with <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a> </td></tr>
     <tr><td class="paramname">flags</td><td>Set of flags to determine behaviour. If LIBEVDEV_READ_NORMAL is set, the next event is read in normal mode. If LIBEVDEV_READ_SYNC is set, the next event is read in sync mode. </td></tr>
     <tr><td class="paramname">ev</td><td>On success, set to the current event. </td></tr>
   </table>

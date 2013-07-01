@@ -97,12 +97,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga6199a7c8144f54e092e913c2d2df16de"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__kernel.html#ga6199a7c8144f54e092e913c2d2df16de">libevdev_disable_event_code</a> (struct libevdev *dev, unsigned int type, unsigned int code)</td></tr>
 <tr class="memdesc:ga6199a7c8144f54e092e913c2d2df16de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forcibly disable an event code on this device, even if the underlying device provides it, effectively muting this key or axis.  <a href="#ga6199a7c8144f54e092e913c2d2df16de">More...</a><br/></td></tr>
 <tr class="separator:ga6199a7c8144f54e092e913c2d2df16de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7742145da063f9cdb2410c824b5f900b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__kernel.html#ga7742145da063f9cdb2410c824b5f900b">libevdev_kernel_enable_event_type</a> (struct libevdev *dev, unsigned int type)</td></tr>
-<tr class="memdesc:ga7742145da063f9cdb2410c824b5f900b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forcibly enable an event type on this device, even if the underlying device does not support it.  <a href="#ga7742145da063f9cdb2410c824b5f900b">More...</a><br/></td></tr>
-<tr class="separator:ga7742145da063f9cdb2410c824b5f900b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gafede6aa8ae77c3b0b235988600a09c4b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__kernel.html#gafede6aa8ae77c3b0b235988600a09c4b">libevdev_kernel_enable_event_code</a> (struct libevdev *dev, unsigned int type, unsigned int code)</td></tr>
-<tr class="memdesc:gafede6aa8ae77c3b0b235988600a09c4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forcibly enable an event code on this device, even if the underlying device does not support it.  <a href="#gafede6aa8ae77c3b0b235988600a09c4b">More...</a><br/></td></tr>
-<tr class="separator:gafede6aa8ae77c3b0b235988600a09c4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga608f18f6cf7c0db1e904311e380b5288"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__kernel.html#ga608f18f6cf7c0db1e904311e380b5288">libevdev_kernel_set_abs_value</a> (struct libevdev *dev, unsigned int code, const struct input_absinfo *abs)</td></tr>
 <tr class="memdesc:ga608f18f6cf7c0db1e904311e380b5288"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the device's EV_ABS axis to the value defined in the abs parameter.  <a href="#ga608f18f6cf7c0db1e904311e380b5288">More...</a><br/></td></tr>
 <tr class="separator:ga608f18f6cf7c0db1e904311e380b5288"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -147,8 +141,10 @@ Functions</h2></td></tr>
 <p>libevdev will filter any events matching this type and code and none will reach the caller. <a class="el" href="group__bits.html#gab2ab9dad417f33daa79fa0c3d682df0b">libevdev_has_event_code()</a> will return false for this code combination.</p>
 <p>Disabling all event codes for a given type will not disable the event type. Use <a class="el" href="group__kernel.html#gabbacb53b66882b5335055c0fd1f40d9a" title="Forcibly disable an event type on this device, even if the underlying device provides it...">libevdev_disable_event_type()</a> for that.</p>
 <p>This is a local modification only affecting only this representation of this device.</p>
+<p>Disabling EV_SYN will not work. Don't shoot yourself in the foot. It hurts.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device, already initialized with <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a> </td></tr>
     <tr><td class="paramname">type</td><td>The event type to disable (EV_ABS, EV_KEY, ...) </td></tr>
     <tr><td class="paramname">code</td><td>The event code to disable (ABS_X, REL_X, etc.)</td></tr>
   </table>
@@ -188,9 +184,11 @@ Functions</h2></td></tr>
 <p>Forcibly disable an event type on this device, even if the underlying device provides it, effectively muting all keys or axes. </p>
 <p>libevdev will filter any events matching this type and none will reach the caller. <a class="el" href="group__bits.html#ga398bef155fa4a0cfb832de30723ebd14">libevdev_has_event_type()</a> will return false for this type.</p>
 <p>In most cases, a caller likely only wants to disable a single code, not the whole type. Use <a class="el" href="group__kernel.html#ga6199a7c8144f54e092e913c2d2df16de" title="Forcibly disable an event code on this device, even if the underlying device provides it...">libevdev_disable_event_code()</a> for that.</p>
+<p>Disabling EV_SYN will not work. Don't shoot yourself in the foot. It hurts.</p>
 <p>This is a local modification only affecting only this representation of this device.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device, already initialized with <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a> </td></tr>
     <tr><td class="paramname">type</td><td>The event type to disable (EV_ABS, EV_KEY, ...)</td></tr>
   </table>
   </dd>
@@ -242,16 +240,17 @@ Functions</h2></td></tr>
 <p>While this cannot make the device actually report such events, it will now return true for <a class="el" href="group__bits.html#gab2ab9dad417f33daa79fa0c3d682df0b">libevdev_has_event_code()</a>.</p>
 <p>The last argument depends on the type and code:</p>
 <ul>
-<li>If type is EV_ABS, the vararg must be a pointer to a struct input_absinfo containing the data for this axis.</li>
-<li>For all other types, the argument is ignored.</li>
+<li>If type is EV_ABS, data must be a pointer to a struct input_absinfo containing the data for this axis.</li>
+<li>For all other types, the argument must be NULL.</li>
 </ul>
 <p>This function calls <a class="el" href="group__kernel.html#ga59ef78b1557f9543d0060ab25b0167ca" title="Forcibly enable an event type on this device, even if the underlying device does not support it...">libevdev_enable_event_type()</a> if necessary.</p>
 <p>This is a local modification only affecting only this representation of this device.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device, already initialized with <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a> </td></tr>
     <tr><td class="paramname">type</td><td>The event type to enable (EV_ABS, EV_KEY, ...) </td></tr>
     <tr><td class="paramname">code</td><td>The event code to enable (ABS_X, REL_X, etc.) </td></tr>
-    <tr><td class="paramname">data</td><td>Axis/key data, depending on type and code</td></tr>
+    <tr><td class="paramname">data</td><td>If type is EV_ABS, data points to a struct input_absinfo. Otherwise, data must be NULL</td></tr>
   </table>
   </dd>
 </dl>
@@ -289,95 +288,13 @@ Functions</h2></td></tr>
 <p>This is a local modification only affecting only this representation of this device.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device, already initialized with <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a> </td></tr>
     <tr><td class="paramname">type</td><td>The event type to enable (EV_ABS, EV_KEY, ...)</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>0 on success or -1 otherwise</dd></dl>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__bits.html#ga398bef155fa4a0cfb832de30723ebd14">libevdev_has_event_type</a> </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="gafede6aa8ae77c3b0b235988600a09c4b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int libevdev_kernel_enable_event_code </td>
-          <td>(</td>
-          <td class="paramtype">struct libevdev *&#160;</td>
-          <td class="paramname"><em>dev</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned int&#160;</td>
-          <td class="paramname"><em>type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned int&#160;</td>
-          <td class="paramname"><em>code</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Forcibly enable an event code on this device, even if the underlying device does not support it. </p>
-<p>While this cannot make the device actually report such events, it will now return true for <a class="el" href="group__bits.html#gab2ab9dad417f33daa79fa0c3d682df0b">libevdev_has_event_code()</a>.</p>
-<p>This will be written to the kernel.</p>
-<p>This cannot be undone, the kernel only allows to enable axes, not disable them.</p>
-<p>This function calls <a class="el" href="group__kernel.html#ga7742145da063f9cdb2410c824b5f900b" title="Forcibly enable an event type on this device, even if the underlying device does not support it...">libevdev_kernel_enable_event_type()</a> if necessary.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">type</td><td>The event type to enable (EV_ABS, EV_KEY, ...) </td></tr>
-    <tr><td class="paramname">code</td><td>The event code to enable (ABS_X, REL_X, etc.) </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a class="anchor" id="ga7742145da063f9cdb2410c824b5f900b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int libevdev_kernel_enable_event_type </td>
-          <td>(</td>
-          <td class="paramtype">struct libevdev *&#160;</td>
-          <td class="paramname"><em>dev</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned int&#160;</td>
-          <td class="paramname"><em>type</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Forcibly enable an event type on this device, even if the underlying device does not support it. </p>
-<p>While this cannot make the device actually report such events, it will now return true for <a class="el" href="group__bits.html#gab2ab9dad417f33daa79fa0c3d682df0b">libevdev_has_event_code()</a>.</p>
-<p>This will be written to the kernel.</p>
-<p>This cannot be undone, the kernel only allows to enable axes, not disable them.</p>
-<p>This function calls <a class="el" href="group__kernel.html#ga7742145da063f9cdb2410c824b5f900b" title="Forcibly enable an event type on this device, even if the underlying device does not support it...">libevdev_kernel_enable_event_type()</a> if necessary.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">type</td><td>The event type to enable (EV_ABS, EV_KEY, ...) </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -413,6 +330,14 @@ Functions</h2></td></tr>
 
 <p>Set the device's EV_ABS axis to the value defined in the abs parameter. </p>
 <p>This will be written to the kernel.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device, already initialized with <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a> </td></tr>
+    <tr><td class="paramname">code</td><td>The EV_ABS event code to modify, one of ABS_X, ABS_Y, etc. </td></tr>
+    <tr><td class="paramname">abs</td><td>Axis info to set the kernel axis to</td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>zero on success, or a negative errno on failure</dd></dl>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="group__kernel.html#ga51cfda33fd526549046399aadd764fca" title="Forcibly enable an event type on this device, even if the underlying device does not support it...">libevdev_enable_event_code</a> </dd></dl>
 

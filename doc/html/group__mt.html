@@ -145,7 +145,16 @@ Functions</h2></td></tr>
 <div class="line">    <a class="code" href="group__bits.html#gab2ab9dad417f33daa79fa0c3d682df0b">libevdev_has_event_code</a>(dev, EV_ABS, c) &amp;&amp;</div>
 <div class="line">    slot &lt; device-&gt;number_of_slots)</div>
 <div class="line">    val = <a class="code" href="group__mt.html#ga8c6303391cb4f90b2d46763cf4eb8bc8" title="Return the current value of the code for the given slot.">libevdev_get_slot_value</a>(dev, slot, c);</div>
-</div><!-- fragment --><dl class="section return"><dt>Returns</dt><dd>If the device supports this event code, the return value is non-zero and value is set to the current value of this axis. Otherwise, or if the event code is not an ABS_MT_* event code, zero is returned and value is unmodified.</dd></dl>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">dev</td><td>The evdev device, already initialized with <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a> </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">slot</td><td>The numerical slot number, must be smaller than the total number of slots on this * device </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">value</td><td>The current value of this axis returned.</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">code</td><td>The event code to query for, one of ABS_MT_POSITION_X, etc. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>If the device supports this event code, the return value is non-zero and value is set to the current value of this axis. Otherwise, or if the event code is not an ABS_MT_* event code, zero is returned and value is unmodified.</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This function is signal-safe. </dd></dl>
 
 </div>
@@ -166,6 +175,12 @@ Functions</h2></td></tr>
 
 <p>Get the currently active slot. </p>
 <p>This may differ from the value an ioctl may return at this time as events may have been read off the fd since changing the slot value but those events are still in the buffer waiting to be processed. The returned value is the value a caller would see if it were to process events manually one-by-one.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device, already initialized with <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a></td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>the currently active slot (logically) </dd></dl>
 
 </div>
@@ -185,6 +200,12 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get the number of slots supported by this device. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device, already initialized with <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a></td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>The number of slots supported, or -1 if the device does not provide any slots</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>A device may provide ABS_MT_SLOT but a total number of 0 slots. Hence the return value of -1 for "device does not provide slots at all" </dd></dl>
 
@@ -222,6 +243,14 @@ Functions</h2></td></tr>
 
 <p>Return the current value of the code for the given slot. </p>
 <p>The return value is undefined for a slot exceeding the available slots on the device, for a code that is not in the permitted ABS_MT range or for a device that does not have slots.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device, already initialized with <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a> </td></tr>
+    <tr><td class="paramname">slot</td><td>The numerical slot number, must be smaller than the total number of slots on this * device </td></tr>
+    <tr><td class="paramname">code</td><td>The event code to query for, one of ABS_MT_POSITION_X, etc.</td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section note"><dt>Note</dt><dd>This function is signal-safe. </dd>
 <dd>
 The value for events other than ABS_MT_ is undefined, use libevdev_fetch_value() instead</dd></dl>

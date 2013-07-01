@@ -106,7 +106,8 @@ Typedefs</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
 <tr class="memitem:a91c53c94148902faf9391bb4aa320299"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299">EvdevReadFlags</a> { <a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299a7f050f41c99aaffc5e19a43316a9d6cd">LIBEVDEV_READ_SYNC</a> = 1, 
-<a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299a7d73c32e0a017a2816dfeff0b8f7343b">LIBEVDEV_READ_NORMAL</a> = 2
+<a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299a7d73c32e0a017a2816dfeff0b8f7343b">LIBEVDEV_READ_NORMAL</a> = 2, 
+<a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299ab2b7a16634fc66bdee1d4b600ed3ee52">LIBEVDEV_FORCE_SYNC</a> = 4
  }</td></tr>
 <tr class="separator:a91c53c94148902faf9391bb4aa320299"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ed340121b7f4d56223dff90b964a010"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="libevdev_8h.html#a8ed340121b7f4d56223dff90b964a010">EvdevGrabModes</a> { <a class="el" href="libevdev_8h.html#a8ed340121b7f4d56223dff90b964a010ad3ac6f5f3ebf7d38a6aad74a88396c88">LIBEVDEV_GRAB</a> = 3, 
@@ -166,16 +167,22 @@ Functions</h2></td></tr>
 <tr class="memitem:gab2ab9dad417f33daa79fa0c3d682df0b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bits.html#gab2ab9dad417f33daa79fa0c3d682df0b">libevdev_has_event_code</a> (const struct libevdev *dev, unsigned int type, unsigned int code)</td></tr>
 <tr class="separator:gab2ab9dad417f33daa79fa0c3d682df0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad4a42ecc4e1594cc87dbcbebdc7da295"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bits.html#gad4a42ecc4e1594cc87dbcbebdc7da295">libevdev_get_abs_min</a> (const struct libevdev *dev, unsigned int code)</td></tr>
+<tr class="memdesc:gad4a42ecc4e1594cc87dbcbebdc7da295"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the minimum axis value for the given axis, as advertised by the kernel.  <a href="group__bits.html#gad4a42ecc4e1594cc87dbcbebdc7da295">More...</a><br/></td></tr>
 <tr class="separator:gad4a42ecc4e1594cc87dbcbebdc7da295"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3b5a76cbca132314d4cc97e0544b51be"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bits.html#ga3b5a76cbca132314d4cc97e0544b51be">libevdev_get_abs_max</a> (const struct libevdev *dev, unsigned int code)</td></tr>
+<tr class="memdesc:ga3b5a76cbca132314d4cc97e0544b51be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum axis value for the given axis, as advertised by the kernel.  <a href="group__bits.html#ga3b5a76cbca132314d4cc97e0544b51be">More...</a><br/></td></tr>
 <tr class="separator:ga3b5a76cbca132314d4cc97e0544b51be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1a3dfeb3bb2db0b4323c836c7ab10f1a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bits.html#ga1a3dfeb3bb2db0b4323c836c7ab10f1a">libevdev_get_abs_fuzz</a> (const struct libevdev *dev, unsigned int code)</td></tr>
+<tr class="memdesc:ga1a3dfeb3bb2db0b4323c836c7ab10f1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the axis fuzz for the given axis, as advertised by the kernel.  <a href="group__bits.html#ga1a3dfeb3bb2db0b4323c836c7ab10f1a">More...</a><br/></td></tr>
 <tr class="separator:ga1a3dfeb3bb2db0b4323c836c7ab10f1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6b3f7ebae2324524dc41384acd724b92"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bits.html#ga6b3f7ebae2324524dc41384acd724b92">libevdev_get_abs_flat</a> (const struct libevdev *dev, unsigned int code)</td></tr>
+<tr class="memdesc:ga6b3f7ebae2324524dc41384acd724b92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the axis flat for the given axis, as advertised by the kernel.  <a href="group__bits.html#ga6b3f7ebae2324524dc41384acd724b92">More...</a><br/></td></tr>
 <tr class="separator:ga6b3f7ebae2324524dc41384acd724b92"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga75751e637a845201b6d1c419ecfa6ba4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bits.html#ga75751e637a845201b6d1c419ecfa6ba4">libevdev_get_abs_resolution</a> (const struct libevdev *dev, unsigned int code)</td></tr>
+<tr class="memdesc:ga75751e637a845201b6d1c419ecfa6ba4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the axis resolution for the given axis, as advertised by the kernel.  <a href="group__bits.html#ga75751e637a845201b6d1c419ecfa6ba4">More...</a><br/></td></tr>
 <tr class="separator:ga75751e637a845201b6d1c419ecfa6ba4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaec1fa45bf9a6d686470f51adbbeb9edb"><td class="memItemLeft" align="right" valign="top">struct input_absinfo *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bits.html#gaec1fa45bf9a6d686470f51adbbeb9edb">libevdev_get_abs_info</a> (const struct libevdev *dev, unsigned int code)</td></tr>
+<tr class="memdesc:gaec1fa45bf9a6d686470f51adbbeb9edb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the axis info for the given axis, as advertised by the kernel.  <a href="group__bits.html#gaec1fa45bf9a6d686470f51adbbeb9edb">More...</a><br/></td></tr>
 <tr class="separator:gaec1fa45bf9a6d686470f51adbbeb9edb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6259f4c6bdba950329ff9cd48c2ef8a3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__bits.html#ga6259f4c6bdba950329ff9cd48c2ef8a3">libevdev_get_event_value</a> (const struct libevdev *dev, unsigned int type, unsigned int code)</td></tr>
 <tr class="memdesc:ga6259f4c6bdba950329ff9cd48c2ef8a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Behaviour of this function is undefined if the device does not provide the event.  <a href="group__bits.html#ga6259f4c6bdba950329ff9cd48c2ef8a3">More...</a><br/></td></tr>
@@ -207,12 +214,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga6199a7c8144f54e092e913c2d2df16de"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__kernel.html#ga6199a7c8144f54e092e913c2d2df16de">libevdev_disable_event_code</a> (struct libevdev *dev, unsigned int type, unsigned int code)</td></tr>
 <tr class="memdesc:ga6199a7c8144f54e092e913c2d2df16de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forcibly disable an event code on this device, even if the underlying device provides it, effectively muting this key or axis.  <a href="group__kernel.html#ga6199a7c8144f54e092e913c2d2df16de">More...</a><br/></td></tr>
 <tr class="separator:ga6199a7c8144f54e092e913c2d2df16de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7742145da063f9cdb2410c824b5f900b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__kernel.html#ga7742145da063f9cdb2410c824b5f900b">libevdev_kernel_enable_event_type</a> (struct libevdev *dev, unsigned int type)</td></tr>
-<tr class="memdesc:ga7742145da063f9cdb2410c824b5f900b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forcibly enable an event type on this device, even if the underlying device does not support it.  <a href="group__kernel.html#ga7742145da063f9cdb2410c824b5f900b">More...</a><br/></td></tr>
-<tr class="separator:ga7742145da063f9cdb2410c824b5f900b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gafede6aa8ae77c3b0b235988600a09c4b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__kernel.html#gafede6aa8ae77c3b0b235988600a09c4b">libevdev_kernel_enable_event_code</a> (struct libevdev *dev, unsigned int type, unsigned int code)</td></tr>
-<tr class="memdesc:gafede6aa8ae77c3b0b235988600a09c4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forcibly enable an event code on this device, even if the underlying device does not support it.  <a href="group__kernel.html#gafede6aa8ae77c3b0b235988600a09c4b">More...</a><br/></td></tr>
-<tr class="separator:gafede6aa8ae77c3b0b235988600a09c4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga608f18f6cf7c0db1e904311e380b5288"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__kernel.html#ga608f18f6cf7c0db1e904311e380b5288">libevdev_kernel_set_abs_value</a> (struct libevdev *dev, unsigned int code, const struct input_absinfo *abs)</td></tr>
 <tr class="memdesc:ga608f18f6cf7c0db1e904311e380b5288"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the device's EV_ABS axis to the value defined in the abs parameter.  <a href="group__kernel.html#ga608f18f6cf7c0db1e904311e380b5288">More...</a><br/></td></tr>
 <tr class="separator:ga608f18f6cf7c0db1e904311e380b5288"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -287,6 +288,10 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="a91c53c94148902faf9391bb4aa320299a7d73c32e0a017a2816dfeff0b8f7343b"></a>LIBEVDEV_READ_NORMAL</em>&nbsp;</td><td class="fielddoc">
 <p>Process data in normal mode. </p>
 </td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="a91c53c94148902faf9391bb4aa320299ab2b7a16634fc66bdee1d4b600ed3ee52"></a>LIBEVDEV_FORCE_SYNC</em>&nbsp;</td><td class="fielddoc">
+<p>Pretend the next event is a SYN_DROPPED. </p>
+<p>There is no reason to ever use this except for automated tests, so don't. </p>
+</td></tr>
 </table>
 
 </div>
@@ -305,6 +310,12 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device</td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>The previously set fd, or -1 if none had been set previously. </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This function may be called before <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a>. </dd></dl>
 
@@ -340,6 +351,7 @@ Functions</h2></td></tr>
 <p>Grabbing an already grabbed device, or ungrabbing an ungrabbed device is a noop and always succeeds.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device, already initialized with <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a> </td></tr>
     <tr><td class="paramname">grab</td><td>If true, grab the device. Otherwise ungrab the device.</td></tr>
   </table>
   </dd>
@@ -373,6 +385,14 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Set a printf-style logging handler for library-internal logging. </p>
+<p>The default logging function is a noop.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dev</td><td>The evdev device </td></tr>
+    <tr><td class="paramname">logfunc</td><td>The logging function for this device. If NULL, the current logging function is unset.</td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section note"><dt>Note</dt><dd>This function may be called before <a class="el" href="group__init.html#ga6658ac490d68c307ff8b8d1536c12b44" title="Set the fd for this struct and initialize internal data.">libevdev_set_fd()</a>. </dd></dl>
 
 </div>

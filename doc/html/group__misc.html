@@ -121,6 +121,13 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>The event type for the code to query (EV_SYN, EV_REL, etc.) </td></tr>
+    <tr><td class="paramname">code</td><td>The event code to return the name for (e.g. ABS_X)</td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>The name of the given event code (e.g. ABS_X) or NULL for an invalid type or code</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>The list of names is compiled into libevdev. If the kernel adds new defines for new properties libevdev will not automatically pick these up. </dd></dl>
 
@@ -139,6 +146,12 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>The event type to return the maximum for (EV_ABS, EV_REL, etc.). No max is defined for EV_SYN.</td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>The max value defined for the given event type, e.g. ABS_MAX for a type of EV_ABS, or -1 for an invalid type.</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>The max value is compiled into libevdev. If the kernel changes the max value, libevdev will not automatically pick these up. </dd></dl>
 
@@ -157,6 +170,12 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>The event type to return the name for.</td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>The name of the given event type (e.g. EV_ABS) or NULL for an invalid type</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>The list of names is compiled into libevdev. If the kernel adds new defines for new properties libevdev will not automatically pick these up. </dd></dl>
 
@@ -175,6 +194,12 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">prop</td><td>The input prop to return the name for (e.g. INPUT_PROP_BUTTONPAD)</td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>The name of the given input prop (e.g. INPUT_PROP_BUTTONPAD) or NULL for an invalid property</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>The list of names is compiled into libevdev. If the kernel adds new defines for new properties libevdev will not automatically pick these up. </dd>
 <dd>
