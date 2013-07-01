@@ -122,6 +122,83 @@ START_TEST(test_syn_event)
 }
 END_TEST
 
+START_TEST(test_event_type_filtered)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+
+	rc = test_create_device(&uidev, &dev,
+				EV_REL, REL_X,
+				EV_REL, REL_Y,
+				EV_KEY, BTN_LEFT,
+				-1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	libevdev_disable_event_type(dev, EV_REL);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	uinput_device_event(uidev, EV_REL, REL_X, 1);
+	uinput_device_event(uidev, EV_KEY, REL_Y, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(ev.type, EV_SYN);
+	ck_assert_int_eq(ev.code, SYN_REPORT);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	libevdev_free(dev);
+	uinput_device_free(uidev);
+
+}
+END_TEST
+START_TEST(test_event_code_filtered)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+
+	rc = test_create_device(&uidev, &dev,
+				EV_REL, REL_X,
+				EV_REL, REL_Y,
+				EV_KEY, BTN_LEFT,
+				-1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	libevdev_disable_event_code(dev, EV_REL, REL_X);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	uinput_device_event(uidev, EV_REL, REL_X, 1);
+	uinput_device_event(uidev, EV_REL, REL_Y, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(ev.type, EV_REL);
+	ck_assert_int_eq(ev.code, REL_Y);
+	ck_assert_int_eq(ev.value, 1);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(ev.type, EV_SYN);
+	ck_assert_int_eq(ev.code, SYN_REPORT);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	libevdev_free(dev);
+	uinput_device_free(uidev);
+
+}
+END_TEST
+
 START_TEST(test_syn_delta_button)
 {
 	struct uinput_device* uidev;
@@ -181,12 +258,13 @@ libevdev_events(void)
 	TCase *tc = tcase_create("event polling");
 	tcase_add_test(tc, test_next_event);
 	tcase_add_test(tc, test_syn_event);
+	tcase_add_test(tc, test_event_type_filtered);
+	tcase_add_test(tc, test_event_code_filtered);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("SYN_DROPPED deltas");
 	tcase_add_test(tc, test_syn_delta_button);
 	suite_add_tcase(s, tc);
-
 
 	return s;
 }
