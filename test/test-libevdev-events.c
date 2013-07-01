@@ -364,6 +364,123 @@ START_TEST(test_event_values_invalid)
 
 }
 END_TEST
+
+START_TEST(test_mt_event_values)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+	struct input_absinfo abs[5];
+	int value;
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+	abs[1].value = ABS_MT_POSITION_X;
+	abs[1].maximum = 1000;
+
+	abs[2].value = ABS_Y;
+	abs[2].maximum = 1000;
+	abs[3].value = ABS_MT_POSITION_Y;
+	abs[3].maximum = 1000;
+
+	abs[4].value = ABS_MT_SLOT;
+	abs[4].maximum = 2;
+
+	rc = test_create_abs_device(&uidev, &dev,
+				    5, abs,
+				    EV_SYN, SYN_REPORT,
+				    -1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 0);
+	uinput_device_event(uidev, EV_ABS, ABS_X, 100);
+	uinput_device_event(uidev, EV_ABS, ABS_Y, 500);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 100);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 500);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_X, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_Y, 5);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 5);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	/* must still be on old values */
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 0);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 0, ABS_MT_POSITION_X), 0);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 0, ABS_MT_POSITION_Y), 0);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 1, ABS_MT_POSITION_X), 0);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 1, ABS_MT_POSITION_Y), 0);
+
+	do {
+		rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+	} while (rc == 0);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 1);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 0, ABS_MT_POSITION_X), 100);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 0, ABS_MT_POSITION_Y), 500);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 1, ABS_MT_POSITION_X), 1);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 1, ABS_MT_POSITION_Y), 5);
+
+	ck_assert_int_eq(libevdev_fetch_slot_value(dev, 0, ABS_MT_POSITION_X, &value), 1);
+	ck_assert_int_eq(value, 100);
+	ck_assert_int_eq(libevdev_fetch_slot_value(dev, 0, ABS_MT_POSITION_Y, &value), 1);
+	ck_assert_int_eq(value, 500);
+	ck_assert_int_eq(libevdev_fetch_slot_value(dev, 1, ABS_MT_POSITION_X, &value), 1);
+	ck_assert_int_eq(value, 1);
+	ck_assert_int_eq(libevdev_fetch_slot_value(dev, 1, ABS_MT_POSITION_Y, &value), 1);
+	ck_assert_int_eq(value, 5);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+
+}
+END_TEST
+
+START_TEST(test_mt_event_values_invalid)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_absinfo abs[5];
+	int value;
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+	abs[1].value = ABS_MT_POSITION_X;
+	abs[1].maximum = 1000;
+
+	abs[2].value = ABS_Y;
+	abs[2].maximum = 1000;
+	abs[3].value = ABS_MT_POSITION_Y;
+	abs[3].maximum = 1000;
+
+	abs[4].value = ABS_MT_SLOT;
+	abs[4].maximum = 2;
+
+	rc = test_create_abs_device(&uidev, &dev,
+				    5, abs,
+				    EV_SYN, SYN_REPORT,
+				    -1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 0);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 0, ABS_MT_TOUCH_MINOR), 0);
+	value = 0xab;
+	ck_assert_int_eq(libevdev_fetch_slot_value(dev, 0, ABS_MT_TOUCH_MINOR, &value), 0);
+	ck_assert_int_eq(value, 0xab);
+
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 10, ABS_MT_POSITION_X), 0);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 0, ABS_X), 0);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 Suite *
 libevdev_events(void)
 {
@@ -383,6 +500,8 @@ libevdev_events(void)
 	tc = tcase_create("event values");
 	tcase_add_test(tc, test_event_values);
 	tcase_add_test(tc, test_event_values_invalid);
+	tcase_add_test(tc, test_mt_event_values);
+	tcase_add_test(tc, test_mt_event_values_invalid);
 	suite_add_tcase(s, tc);
 
 	return s;
