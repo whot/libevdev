@@ -34,5 +34,10 @@
 int test_create_device(struct uinput_device **uidev,
 		       struct libevdev **dev,
 		       ...);
+int test_create_abs_device(struct uinput_device **uidev,
+		           struct libevdev **dev,
+			   int nabs,
+			   struct input_absinfo *abs,
+			   ...);
 
 #endif /* _TEST_COMMON_H_ */
