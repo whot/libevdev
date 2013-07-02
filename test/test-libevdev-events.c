@@ -414,6 +414,127 @@ START_TEST(test_syn_delta_mt)
 }
 END_TEST
 
+START_TEST(test_skipped_sync)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+	struct input_absinfo abs[2];
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+
+	abs[1].value = ABS_Y;
+	abs[1].maximum = 1000;
+
+	rc = test_create_abs_device(&uidev, &dev,
+				    2, abs,
+				    EV_SYN, SYN_REPORT,
+				    EV_SYN, SYN_DROPPED,
+				    EV_KEY, BTN_LEFT,
+				    EV_KEY, BTN_MIDDLE,
+				    EV_KEY, BTN_RIGHT,
+				    -1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_X, 100);
+	uinput_device_event(uidev, EV_ABS, ABS_Y, 500);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
+	ck_assert_int_eq(rc, 1);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_KEY, BTN_LEFT), 1);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_ABS, ABS_X), 100);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_ABS, ABS_Y), 500);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
+START_TEST(test_incomplete_sync)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+	struct input_absinfo abs[2];
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+
+	abs[1].value = ABS_Y;
+	abs[1].maximum = 1000;
+
+	rc = test_create_abs_device(&uidev, &dev,
+				    2, abs,
+				    EV_SYN, SYN_REPORT,
+				    EV_SYN, SYN_DROPPED,
+				    EV_KEY, BTN_LEFT,
+				    EV_KEY, BTN_MIDDLE,
+				    EV_KEY, BTN_RIGHT,
+				    -1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_X, 100);
+	uinput_device_event(uidev, EV_ABS, ABS_Y, 500);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
+	ck_assert_int_eq(rc, 1);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
+	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(ev.type, EV_KEY);
+	ck_assert_int_eq(ev.code, BTN_LEFT);
+	ck_assert_int_eq(ev.value, 1);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_KEY, BTN_LEFT), 1);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_ABS, ABS_X), 100);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_ABS, ABS_Y), 500);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
+START_TEST(test_empty_sync)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+
+	rc = test_create_device(&uidev, &dev,
+				EV_SYN, SYN_REPORT,
+				EV_SYN, SYN_DROPPED,
+				EV_KEY, BTN_LEFT,
+				EV_KEY, BTN_MIDDLE,
+				EV_KEY, BTN_RIGHT,
+				-1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
+	ck_assert_int_eq(rc, 1);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_event_values)
 {
 	struct uinput_device* uidev;
@@ -662,6 +783,12 @@ libevdev_events(void)
 	tcase_add_test(tc, test_syn_delta_button);
 	tcase_add_test(tc, test_syn_delta_abs);
 	tcase_add_test(tc, test_syn_delta_mt);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("skipped syncs");
+	tcase_add_test(tc, test_skipped_sync);
+	tcase_add_test(tc, test_incomplete_sync);
+	tcase_add_test(tc, test_empty_sync);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("event values");
