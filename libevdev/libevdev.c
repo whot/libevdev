@@ -426,10 +426,13 @@ sync_state(struct libevdev *dev)
 	if (rc == 0 && libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT))
 		rc = sync_mt_state(dev);
 
-	ev = queue_push(dev);
-	init_event(dev, ev, EV_SYN, SYN_REPORT, 0);
-
 	dev->queue_nsync = queue_num_elements(dev);
+
+	if (dev->queue_nsync > 0) {
+		ev = queue_push(dev);
+		init_event(dev, ev, EV_SYN, SYN_REPORT, 0);
+		dev->queue_nsync++;
+	}
 
 	return rc;
 }
