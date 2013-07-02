@@ -51,6 +51,23 @@
 		_a > _b ? _a : _b; \
 		})
 
+/**
+ * Sync state machine:
+ * default state: SYNC_NONE
+ *
+ * SYNC_NONE → SYN_DROPPED or forced sync → SYNC_NEEDED
+ * SYNC_NEEDED → libevdev_next_event(LIBEVDEV_READ_SYNC) → SYNC_IN_PROGRESS
+ * SYNC_NEEDED → libevdev_next_event(LIBEVDEV_READ_SYNC_NONE) → SYNC_NONE
+ * SYNC_IN_PROGRESS → libevdev_next_event(LIBEVDEV_READ_SYNC_NONE) → SYNC_NONE
+ * SYNC_IN_PROGRESS → no sync events left → SYNC_NONE
+ *
+ */
+enum SyncState {
+	SYNC_NONE,
+	SYNC_NEEDED,
+	SYNC_IN_PROGRESS,
+};
+
 struct libevdev {
 	int fd;
 	libevdev_log_func_t log;
@@ -78,7 +95,7 @@ struct libevdev {
 	int current_slot;
 	int rep_values[2];
 
-	int need_sync;
+	enum SyncState sync_state;
 	int grabbed;
 
 	struct input_event *queue;

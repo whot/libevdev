@@ -74,6 +74,7 @@ libevdev_new(void)
 	dev->current_slot = -1;
 	dev->log = libevdev_noop_log_func;
 	dev->grabbed = LIBEVDEV_UNGRAB;
+	dev->sync_state = SYNC_NONE;
 
 	return dev;
 }
@@ -401,7 +402,7 @@ sync_state(struct libevdev *dev)
 	/* FIXME: if we have events in the queue after the SYN_DROPPED (which was
 	   queue[0]) we need to shift this backwards. Except that chances are that the
 	   queue may be either full or too full to prepend all the events needed for
-	   syncing.
+	   SYNC_IN_PROGRESS.
 
 	   so we search for the last sync event in the queue and drop everything before
 	   including that event and rely on the kernel to tell us the right value for that
@@ -429,7 +430,6 @@ sync_state(struct libevdev *dev)
 	init_event(dev, ev, EV_SYN, SYN_REPORT, 0);
 
 	dev->queue_nsync = queue_num_elements(dev);
-	dev->need_sync = 0;
 
 	return rc;
 }
@@ -540,23 +540,32 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 		return -EINVAL;
 
 	if (flags & LIBEVDEV_READ_SYNC) {
-		if (!dev->need_sync && dev->queue_nsync == 0)
-			return -EAGAIN;
-		else if (dev->need_sync) {
+		if (dev->sync_state == SYNC_NEEDED) {
 			rc = sync_state(dev);
 			if (rc != 0)
 				return rc;
+			dev->sync_state = SYNC_IN_PROGRESS;
 		}
-	} else if (dev->need_sync) {
+
+		if (dev->queue_nsync == 0) {
+			dev->sync_state = SYNC_NONE;
+			return -EAGAIN;
+		}
+
+	} else if (dev->sync_state != SYNC_NONE) {
 		struct input_event e;
 
 		/* call update_state for all events here, otherwise the library has the wrong view
 		   of the device too */
-		while (queue_shift(dev, &e) == 0)
+		while (queue_shift(dev, &e) == 0) {
+			dev->queue_nsync--;
 			update_state(dev, &e);
+		}
+
+		dev->sync_state = SYNC_NONE;
 	}
 
-	/* FIXME: if the first event after syncing is a SYN_DROPPED, log this */
+	/* FIXME: if the first event after SYNC_IN_PROGRESS is a SYN_DROPPED, log this */
 
 	/* Always read in some more events. Best case this smoothes over a potential SYN_DROPPED,
 	   worst case we don't read fast enough and end up with SYN_DROPPED anyway.
@@ -573,7 +582,7 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 		}
 
 		if (flags & LIBEVDEV_FORCE_SYNC) {
-			dev->need_sync = 1;
+			dev->sync_state = SYNC_NEEDED;
 			rc = 1;
 			goto out;
 		}
@@ -589,13 +598,15 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 
 	rc = 0;
 	if (ev->type == EV_SYN && ev->code == SYN_DROPPED) {
-		dev->need_sync = 1;
+		dev->sync_state = SYNC_NEEDED;
 		rc = 1;
 	}
 
 	if (flags & LIBEVDEV_READ_SYNC && dev->queue_nsync > 0) {
 		dev->queue_nsync--;
 		rc = 1;
+		if (dev->queue_nsync == 0)
+			dev->sync_state = SYNC_NONE;
 	}
 
 out:
