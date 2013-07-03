@@ -85,6 +85,46 @@
  *
  * libevdev does **not** have knowledge of X clients or Wayland clients, it is
  * too low in the stack.
+ *
+ * Example
+ * =======
+ * Below is a simple example that shows how libevdev could be used. This example
+ * opens a device, checks for relative axes and a left mouse button and if it
+ * finds them monitors the device to print the event.
+ *
+ *      struct libevdev *dev = NULL;
+ *      int fd;
+ *      int rc = 1;
+ *
+ *      fd = open("/dev/input/event0", O_RDONLY|O_NONBLOCK);
+ *      rc = libevdev_new_from_fd(fd, &dev);
+ *      if (rc < 0) {
+ *              fprintf(stderr, "Failed to init libevdev (%s)\n", strerror(-rc));
+ *              exit(1);
+ *      }
+ *      printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
+ *      printf("Input device ID: bus %#x vendor %#x product %#x\n",
+ *                      libevdev_get_bustype(dev),
+ *                      libevdev_get_vendor_id(dev),
+ *                      libevdev_get_product_id(dev));
+ *      if (!libevdev_has_event_type(dev, EV_REL) ||
+ *          !libevdev_has_event_code(dev, EV_KEY, BTN_LEFT)) {
+ *              printf("This device does not look like a mouse\n");
+ *              exit(1);
+ *      }
+ *
+ *      do {
+ *              struct input_event ev;
+ *              rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+ *              if (rc == 0)
+ *                      printf("Event: %s %s %d\n",
+ *                                      libevdev_get_event_type_name(ev.type),
+ *                                      libevdev_get_event_code_name(ev.type, ev.code),
+ *                                      ev.value);
+ *      } while (rc == 1 || rc == 0 || rc == -EAGAIN);
+ *
+ * A more complete example is available with the libevdev-events tool here:
+ * https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c
  */
 
 /**
