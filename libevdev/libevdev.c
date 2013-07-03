@@ -35,6 +35,8 @@
 
 #define MAXEVENTS 64
 
+static int sync_mt_state(struct libevdev *dev, int create_events);
+
 static int
 init_event_queue(struct libevdev *dev)
 {
@@ -249,16 +251,19 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 		}
 	}
 
+	dev->fd = fd;
+	sync_mt_state(dev, 0);
+
 	rc = init_event_queue(dev);
-	if (rc < 0)
+	if (rc < 0) {
+		dev->fd = -1;
 		return -rc;
+	}
 
 	/* not copying key state because we won't know when we'll start to
 	 * use this fd and key's are likely to change state by then.
 	 * Same with the valuators, really, but they may not change.
 	 */
-
-	dev->fd = fd;
 
 out:
 	return rc ? -errno : 0;
@@ -339,7 +344,7 @@ out:
 }
 
 static int
-sync_mt_state(struct libevdev *dev)
+sync_mt_state(struct libevdev *dev, int create_events)
 {
 	int rc;
 	int i;
@@ -367,8 +372,11 @@ sync_mt_state(struct libevdev *dev)
 		int j;
 		struct input_event *ev;
 
-		ev = queue_push(dev);
-		init_event(dev, ev, EV_ABS, ABS_MT_SLOT, i);
+		if (create_events) {
+			ev = queue_push(dev);
+			init_event(dev, ev, EV_ABS, ABS_MT_SLOT, i);
+		}
+
 		for (j = ABS_MT_MIN; j < ABS_MT_MAX; j++) {
 			int jdx = j - ABS_MT_MIN;
 
@@ -381,8 +389,10 @@ sync_mt_state(struct libevdev *dev)
 			if (dev->mt_slot_vals[i][jdx] == mt_state[jdx].val[i])
 				continue;
 
-			ev = queue_push(dev);
-			init_event(dev, ev, EV_ABS, j, mt_state[jdx].val[i]);
+			if (create_events) {
+				ev = queue_push(dev);
+				init_event(dev, ev, EV_ABS, j, mt_state[jdx].val[i]);
+			}
 			dev->mt_slot_vals[i][jdx] = mt_state[jdx].val[i];
 		}
 	}
@@ -424,7 +434,7 @@ sync_state(struct libevdev *dev)
 	if (rc == 0 && libevdev_has_event_type(dev, EV_ABS))
 		rc = sync_abs_state(dev);
 	if (rc == 0 && libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT))
-		rc = sync_mt_state(dev);
+		rc = sync_mt_state(dev, 1);
 
 	dev->queue_nsync = queue_num_elements(dev);
 
