@@ -73,15 +73,15 @@
  * the kernel and that process. In the simplest case, e.g. an evtest-like tool
  * the stack would look like this:
  *
- * kernel → libevdev → evtest
+ *      kernel → libevdev → evtest
  *
  * For X.Org input modules, the stack would look like this:
  *
- * kernel → libevdev → xf86-input-evdev → X server → X client
+ *      kernel → libevdev → xf86-input-evdev → X server → X client
  *
  * For Weston/Wayland, the stack would look like this:
  *
- * kernel → libevdev → Weston → Wayland client
+ *      kernel → libevdev → Weston → Wayland client
  *
  * libevdev does **not** have knowledge of X clients or Wayland clients, it is
  * too low in the stack.
