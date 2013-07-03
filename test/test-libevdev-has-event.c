@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <limits.h>
+#include <fcntl.h>
 
 #include "test-common.h"
 
@@ -222,6 +223,84 @@ START_TEST(test_input_props)
 	ck_assert_int_eq(libevdev_has_property(dev, INPUT_PROP_MAX), 0);
 	ck_assert_int_eq(libevdev_has_property(dev, INPUT_PROP_BUTTONPAD), 0);
 	/* FIXME: no idea how to set props on uinput devices */
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
+START_TEST(test_slot_init_value)
+{
+	struct uinput_device *uidev;
+	struct libevdev *dev;
+	int rc;
+	const int nabs = 6;
+	struct input_absinfo abs[nabs];
+	int i;
+	int fd;
+
+	uidev = uinput_device_new("test device");
+	rc = uinput_device_set_event_bits(uidev,
+			EV_ABS, ABS_X,
+			EV_ABS, ABS_Y,
+			EV_ABS, ABS_MT_SLOT,
+			EV_ABS, ABS_MT_TRACKING_ID,
+			EV_ABS, ABS_MT_POSITION_X,
+			EV_ABS, ABS_MT_POSITION_Y,
+			-1);
+	ck_assert_int_eq(rc, 0);
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+	abs[1].value = ABS_MT_POSITION_X;
+	abs[1].maximum = 1000;
+
+	abs[2].value = ABS_Y;
+	abs[2].maximum = 1000;
+	abs[3].value = ABS_MT_POSITION_Y;
+	abs[3].maximum = 1000;
+
+	abs[4].value = ABS_MT_SLOT;
+	abs[4].maximum = 1;
+	abs[5].value = ABS_MT_TRACKING_ID;
+	abs[5].minimum = -1;
+	abs[5].maximum = 2;
+
+	for (i = 0; i < nabs; i++) {
+		rc = uinput_device_set_abs_bit(uidev, abs[i].value, &abs[i]);
+		ck_assert_int_eq(rc, 0);
+	}
+
+	rc = uinput_device_create(uidev);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+
+	fd = uinput_device_get_fd(uidev);
+	rc = fcntl(fd, F_SETFL, O_NONBLOCK);
+	ck_assert_msg(rc == 0, "fcntl failed: %s", strerror(errno));
+
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 0);
+	uinput_device_event(uidev, EV_ABS, ABS_X, 100);
+	uinput_device_event(uidev, EV_ABS, ABS_Y, 500);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 100);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 500);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_X, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_Y, 5);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 5);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 2);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	rc = libevdev_new_from_fd(fd, &dev);
+	ck_assert_int_eq(rc, 0);
+
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 1);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 0, ABS_MT_POSITION_X), 100);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 0, ABS_MT_POSITION_Y), 500);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 1, ABS_MT_POSITION_X), 1);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 1, ABS_MT_POSITION_Y), 5);
 
 	uinput_device_free(uidev);
 	libevdev_free(dev);
@@ -686,6 +765,7 @@ libevdev_has_event_test(void)
 	tc = tcase_create("multitouch info");
 	tcase_add_test(tc, test_no_slots);
 	tcase_add_test(tc, test_slot_number);
+	tcase_add_test(tc, test_slot_init_value);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("device info");
