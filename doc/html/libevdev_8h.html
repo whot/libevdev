@@ -107,7 +107,8 @@ Typedefs</h2></td></tr>
 Enumerations</h2></td></tr>
 <tr class="memitem:a91c53c94148902faf9391bb4aa320299"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299">EvdevReadFlags</a> { <a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299a7f050f41c99aaffc5e19a43316a9d6cd">LIBEVDEV_READ_SYNC</a> = 1, 
 <a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299a7d73c32e0a017a2816dfeff0b8f7343b">LIBEVDEV_READ_NORMAL</a> = 2, 
-<a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299ab2b7a16634fc66bdee1d4b600ed3ee52">LIBEVDEV_FORCE_SYNC</a> = 4
+<a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299ab2b7a16634fc66bdee1d4b600ed3ee52">LIBEVDEV_FORCE_SYNC</a> = 4, 
+<a class="el" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299a093c57956b416da7ff70e52669570ffa">LIBEVDEV_READ_BLOCKING</a> = 8
  }</td></tr>
 <tr class="separator:a91c53c94148902faf9391bb4aa320299"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ed340121b7f4d56223dff90b964a010"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="libevdev_8h.html#a8ed340121b7f4d56223dff90b964a010">EvdevGrabModes</a> { <a class="el" href="libevdev_8h.html#a8ed340121b7f4d56223dff90b964a010ad3ac6f5f3ebf7d38a6aad74a88396c88">LIBEVDEV_GRAB</a> = 3, 
@@ -291,6 +292,9 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="a91c53c94148902faf9391bb4aa320299ab2b7a16634fc66bdee1d4b600ed3ee52"></a>LIBEVDEV_FORCE_SYNC</em>&nbsp;</td><td class="fielddoc">
 <p>Pretend the next event is a SYN_DROPPED. </p>
 <p>There is no reason to ever use this except for automated tests, so don't. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="a91c53c94148902faf9391bb4aa320299a093c57956b416da7ff70e52669570ffa"></a>LIBEVDEV_READ_BLOCKING</em>&nbsp;</td><td class="fielddoc">
+<p>The fd is not in O_NONBLOCK and a read may block. </p>
 </td></tr>
 </table>
 
