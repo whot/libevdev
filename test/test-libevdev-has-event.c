@@ -424,7 +424,7 @@ START_TEST(test_device_get_abs_info)
 	abs.maximum = 1000;
 	abs.fuzz = 1;
 	abs.flat = 2;
-	/* abs.resolution = 3;  FIXME: can't test resolution */
+	abs.resolution = 3;
 	abs.value = 0;
 
 	uinput_device_set_abs_bit(uidev, ABS_X, &abs);
@@ -434,7 +434,7 @@ START_TEST(test_device_get_abs_info)
 	abs.maximum = 500;
 	abs.fuzz = 10;
 	abs.flat = 20;
-	/* abs.resolution = 30;  FIXME: can't test resolution */
+	abs.resolution = 30;
 	abs.value = 0;
 
 	uinput_device_set_abs_bit(uidev, ABS_Y, &abs);
@@ -457,53 +457,53 @@ START_TEST(test_device_get_abs_info)
 	ck_assert_int_eq(libevdev_get_abs_max(dev, ABS_X), 1000);
 	ck_assert_int_eq(libevdev_get_abs_fuzz(dev, ABS_X), 1);
 	ck_assert_int_eq(libevdev_get_abs_flat(dev, ABS_X), 2);
-	/*ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_X), 3);*/
+	ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_X), 3);
 	a = libevdev_get_abs_info(dev, ABS_X);
 	ck_assert(a != NULL);
 	ck_assert_int_eq(a->minimum, 0);
 	ck_assert_int_eq(a->maximum, 1000);
 	ck_assert_int_eq(a->fuzz, 1);
 	ck_assert_int_eq(a->flat, 2);
-	/*ck_assert_int_eq(a->resolution, 3);*/
+	ck_assert_int_eq(a->resolution, 3);
 
 	ck_assert_int_eq(libevdev_get_abs_min(dev, ABS_MT_POSITION_X), 0);
 	ck_assert_int_eq(libevdev_get_abs_max(dev, ABS_MT_POSITION_X), 1000);
 	ck_assert_int_eq(libevdev_get_abs_fuzz(dev, ABS_MT_POSITION_X), 1);
 	ck_assert_int_eq(libevdev_get_abs_flat(dev, ABS_MT_POSITION_X), 2);
-	/*ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_MT_POSITION_X), 3);*/
+	ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_MT_POSITION_X), 3);
 	a = libevdev_get_abs_info(dev, ABS_MT_POSITION_X);
 	ck_assert(a != NULL);
 	ck_assert_int_eq(a->minimum, 0);
 	ck_assert_int_eq(a->maximum, 1000);
 	ck_assert_int_eq(a->fuzz, 1);
 	ck_assert_int_eq(a->flat, 2);
-	/*ck_assert_int_eq(a->resolution, 3);*/
+	ck_assert_int_eq(a->resolution, 3);
 
 	ck_assert_int_eq(libevdev_get_abs_min(dev, ABS_Y), -500);
 	ck_assert_int_eq(libevdev_get_abs_max(dev, ABS_Y), 500);
 	ck_assert_int_eq(libevdev_get_abs_fuzz(dev, ABS_Y), 10);
 	ck_assert_int_eq(libevdev_get_abs_flat(dev, ABS_Y), 20);
-	/*ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_Y), 30);*/
+	ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_Y), 30);
 	a = libevdev_get_abs_info(dev, ABS_Y);
 	ck_assert(a != NULL);
 	ck_assert_int_eq(a->minimum, -500);
 	ck_assert_int_eq(a->maximum, 500);
 	ck_assert_int_eq(a->fuzz, 10);
 	ck_assert_int_eq(a->flat, 20);
-	/*ck_assert_int_eq(a->resolution, 30);*/
+	ck_assert_int_eq(a->resolution, 30);
 
 	ck_assert_int_eq(libevdev_get_abs_min(dev, ABS_MT_POSITION_Y), -500);
 	ck_assert_int_eq(libevdev_get_abs_max(dev, ABS_MT_POSITION_Y), 500);
 	ck_assert_int_eq(libevdev_get_abs_fuzz(dev, ABS_MT_POSITION_Y), 10);
 	ck_assert_int_eq(libevdev_get_abs_flat(dev, ABS_MT_POSITION_Y), 20);
-	/*ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_MT_POSITION_Y), 30);*/
+	ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_MT_POSITION_Y), 30);
 	a = libevdev_get_abs_info(dev, ABS_MT_POSITION_Y);
 	ck_assert(a != NULL);
 	ck_assert_int_eq(a->minimum, -500);
 	ck_assert_int_eq(a->maximum, 500);
 	ck_assert_int_eq(a->fuzz, 10);
 	ck_assert_int_eq(a->flat, 20);
-	/*ck_assert_int_eq(a->resolution, 30);*/
+	ck_assert_int_eq(a->resolution, 30);
 
 	uinput_device_free(uidev);
 	libevdev_free(dev);
@@ -663,7 +663,7 @@ START_TEST(test_device_kernel_change_axis)
 	abs.maximum = 1000;
 	abs.fuzz = 1;
 	abs.flat = 2;
-	/* abs.resolution = 3;  FIXME: can't test resolution */
+	abs.resolution = 3;
 	abs.value = 0;
 
 	uinput_device_set_abs_bit(uidev, ABS_X, &abs);
@@ -678,11 +678,13 @@ START_TEST(test_device_kernel_change_axis)
 	ck_assert_int_eq(libevdev_get_abs_max(dev, ABS_X), 1000);
 	ck_assert_int_eq(libevdev_get_abs_fuzz(dev, ABS_X), 1);
 	ck_assert_int_eq(libevdev_get_abs_flat(dev, ABS_X), 2);
+	ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_X), 3);
 
 	abs.minimum = 500;
 	abs.maximum = 5000;
 	abs.fuzz = 10;
 	abs.flat = 20;
+	abs.resolution = 30;
 	rc = libevdev_kernel_set_abs_value(dev, ABS_X, &abs);
 	ck_assert_int_eq(rc, 0);
 
@@ -690,6 +692,7 @@ START_TEST(test_device_kernel_change_axis)
 	ck_assert_int_eq(libevdev_get_abs_max(dev, ABS_X), 5000);
 	ck_assert_int_eq(libevdev_get_abs_fuzz(dev, ABS_X), 10);
 	ck_assert_int_eq(libevdev_get_abs_flat(dev, ABS_X), 20);
+	ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_X), 30);
 
 	/* make sure kernel device is changed */
 	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev2);
@@ -698,6 +701,7 @@ START_TEST(test_device_kernel_change_axis)
 	ck_assert_int_eq(libevdev_get_abs_max(dev2, ABS_X), 5000);
 	ck_assert_int_eq(libevdev_get_abs_fuzz(dev2, ABS_X), 10);
 	ck_assert_int_eq(libevdev_get_abs_flat(dev2, ABS_X), 20);
+	ck_assert_int_eq(libevdev_get_abs_resolution(dev2, ABS_X), 30);
 	libevdev_free(dev2);
 
 	libevdev_free(dev);
