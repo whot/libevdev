@@ -232,31 +232,31 @@ event_name_suite(void)
 {
 	Suite *s = suite_create("Event names");
 
-	TCase *tc_limits = tcase_create("type limits");
-	tcase_add_test(tc_limits, test_limits);
-	tcase_add_test(tc_limits, test_syn_max);
-	tcase_add_test(tc_limits, test_event_type_max);
-	suite_add_tcase(s, tc_limits);
+	TCase *tc = tcase_create("type limits");
+	tcase_add_test(tc, test_limits);
+	tcase_add_test(tc, test_syn_max);
+	tcase_add_test(tc, test_event_type_max);
+	suite_add_tcase(s, tc);
 
-	TCase *tc_tname = tcase_create("type names");
-	tcase_add_test(tc_tname, test_type_name);
-	suite_add_tcase(s, tc_tname);
+	tc = tcase_create("type names");
+	tcase_add_test(tc, test_type_name);
+	suite_add_tcase(s, tc);
 
-	TCase *tc_cname = tcase_create("code names");
-	tcase_add_test(tc_tname, test_code_abs_name);
-	tcase_add_test(tc_tname, test_code_rel_name);
-	tcase_add_test(tc_tname, test_code_key_name);
-	tcase_add_test(tc_tname, test_code_led_name);
-	tcase_add_test(tc_tname, test_code_snd_name);
-	tcase_add_test(tc_tname, test_code_msc_name);
-	tcase_add_test(tc_tname, test_code_sw_name);
-	tcase_add_test(tc_tname, test_code_ff_name);
-	tcase_add_test(tc_tname, test_code_syn_name);
-	suite_add_tcase(s, tc_cname);
+	tc = tcase_create("code names");
+	tcase_add_test(tc, test_code_abs_name);
+	tcase_add_test(tc, test_code_rel_name);
+	tcase_add_test(tc, test_code_key_name);
+	tcase_add_test(tc, test_code_led_name);
+	tcase_add_test(tc, test_code_snd_name);
+	tcase_add_test(tc, test_code_msc_name);
+	tcase_add_test(tc, test_code_sw_name);
+	tcase_add_test(tc, test_code_ff_name);
+	tcase_add_test(tc, test_code_syn_name);
+	suite_add_tcase(s, tc);
 
-	TCase *tc_pname = tcase_create("prop names");
-	tcase_add_test(tc_pname, test_prop_name);
-	suite_add_tcase(s, tc_pname);
+	tc = tcase_create("prop names");
+	tcase_add_test(tc, test_prop_name);
+	suite_add_tcase(s, tc);
 
 	return s;
 }
