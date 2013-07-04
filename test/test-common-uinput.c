@@ -185,7 +185,7 @@ inotify_setup()
 int
 uinput_device_create(struct uinput_device* d)
 {
-	int type;
+	int type, code;
 	struct uinput_user_dev dev;
 	int rc;
 	int fd;
@@ -203,7 +203,6 @@ uinput_device_create(struct uinput_device* d)
 	dev.id = d->d.ids;
 
 	for (type = 0; type < EV_MAX; type++) {
-		int code;
 		int max;
 		int uinput_bit;
 		const unsigned long *mask;
@@ -246,7 +245,8 @@ uinput_device_create(struct uinput_device* d)
 				dev.absmax[code] = d->d.abs_info[code].maximum;
 				dev.absfuzz[code] = d->d.abs_info[code].fuzz;
 				dev.absflat[code] = d->d.abs_info[code].flat;
-				/* FIXME: uinput has no resolution */
+				/* uinput has no resolution in the device struct, we use
+				 * EVIOCSABS below */
 			}
 		}
 
@@ -273,6 +273,27 @@ uinput_device_create(struct uinput_device* d)
 	d->dev_fd = open(d->devnode, O_RDWR);
 	if (d->dev_fd == -1)
 		goto error;
+
+	/* write abs resolution now */
+	if (bit_is_set(d->d.bits, EV_ABS)) {
+		for (code = 0; code < ABS_MAX; code++ ) {
+			struct input_absinfo *abs;
+
+			/* can't change slots */
+			if (code == ABS_MT_SLOT)
+				continue;
+
+			if (!bit_is_set(d->d.abs_bits, code))
+				continue;
+
+			abs = &d->d.abs_info[code];
+			rc = ioctl(d->dev_fd, EVIOCSABS(code), abs);
+			if (rc < 0) {
+				printf("error %s for code %d\n", strerror(-rc), code);
+				goto error;
+			}
+		}
+	}
 
 	return 0;
 
