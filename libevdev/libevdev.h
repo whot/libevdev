@@ -92,6 +92,7 @@
  * opens a device, checks for relative axes and a left mouse button and if it
  * finds them monitors the device to print the event.
  *
+ * @code
  *      struct libevdev *dev = NULL;
  *      int fd;
  *      int rc = 1;
@@ -122,6 +123,7 @@
  *                                      libevdev_get_event_code_name(ev.type, ev.code),
  *                                      ev.value);
  *      } while (rc == 1 || rc == 0 || rc == -EAGAIN);
+ * @endcode
  *
  * A more complete example is available with the libevdev-events tool here:
  * https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c
@@ -140,11 +142,11 @@
  *
  * dev = libevdev_new();
  * if (!dev)
- *    return ENOSPC;
-
+ *         return ENOSPC;
+ *
  * err = libevdev_set_fd(dev, fd);
  * if (err < 0) {
- *	printf("Failed (errno %d): %s\n", -err, strerror(-err));
+ *         printf("Failed (errno %d): %s\n", -err, strerror(-err));
  *
  * libevdev_free(dev);
  * @endcode
