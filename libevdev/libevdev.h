@@ -127,6 +127,48 @@
  *
  * A more complete example is available with the libevdev-events tool here:
  * https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c
+ *
+ * libevdev internal test suite
+ * ============================
+ *
+ * libevdev's internal test suite uses the
+ * [Check unit testing framework](http://check.sourceforge.net/). Tests are
+ * divided into test suites and test cases. Most tests create a uinput device,
+ * so you'll need to run as root.
+ *
+ * To run a specific suite only:
+ *
+ *     export CK_RUN_SUITE="suite name"
+ *
+ * To run a specific test case only:
+ *
+ *     export CK_RUN_TEST="test case name"
+ *
+ * To get a list of all suites or tests:
+ *
+ *     git grep "suite_create"
+ *     git grep "tcase_create"
+ *
+ * By default, check forks, making debugging harder. Run gdb as below to avoid
+ * forking.
+ *
+ *     sudo CK_FORK=no CK_RUN_TEST="test case name" gdb ./test/test-libevdev
+ *
+ * A special target `make gcov-report.txt` exists that runs gcov and leaves a
+ * `libevdev.c.gcov` file. Check that for test coverage.
+ *
+ * `make check` is hooked up to run the test and gcov (again, needs root).
+ *
+ * The test suite creates a lot of devices, very quickly. Add the following
+ * xorg.conf.d snippet to avoid the devices being added as X devices (at the
+ * time of writing, mutter can't handle these devices and exits).
+ *
+ *     $ cat /etc/X11/xorg.conf.d/99-ignore-libevdev-devices.conf
+ *     Section "InputClass"
+ *             Identifier "Ignore libevdev test devices"
+ *             MatchProduct "libevdev test device"
+ *             Option "Ignore" "on"
+ *     EndSection
  */
 
 /**
