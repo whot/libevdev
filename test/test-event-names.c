@@ -227,6 +227,46 @@ START_TEST(test_event_type_max)
 }
 END_TEST
 
+START_TEST(test_event_type)
+{
+	struct input_event ev;
+	int i = 0;
+
+	ev.type = EV_REL;
+
+	ck_assert_int_eq(libevdev_is_event_type(&ev, EV_REL), 1);
+	for (i = 0; i < EV_MAX; i++) {
+		if (i == ev.type)
+			continue;
+		ck_assert_int_eq(libevdev_is_event_type(&ev, i), 0);
+	}
+	ck_assert_int_eq(libevdev_is_event_type(&ev, EV_MAX + 1), 0);
+}
+END_TEST
+
+START_TEST(test_event_code)
+{
+	struct input_event ev;
+	int i = 0;
+
+	ev.type = EV_REL;
+	ev.code = REL_Y;
+
+	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_REL, REL_Y), 1);
+	for (i = 0; i < EV_MAX; i++) {
+		int j;
+		if (i == ev.type || i == EV_SYN)
+			continue;
+
+		for (j = 0; j < libevdev_get_event_type_max(i); i++) {
+			ck_assert_int_eq(libevdev_is_event_code(&ev, i, j), 0);
+		}
+	}
+	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_MAX + 1, ev.code), 0);
+	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_REL, REL_MAX + 1), 0);
+}
+END_TEST
+
 Suite *
 event_name_suite(void)
 {
@@ -256,6 +296,11 @@ event_name_suite(void)
 
 	tc = tcase_create("prop names");
 	tcase_add_test(tc, test_prop_name);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("event values");
+	tcase_add_test(tc, test_event_type);
+	tcase_add_test(tc, test_event_code);
 	suite_add_tcase(s, tc);
 
 	return s;
