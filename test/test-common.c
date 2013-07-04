@@ -75,7 +75,14 @@ int test_create_abs_device(struct uinput_device **uidev_return,
 	va_end(args);
 
 	while (--nabs >= 0) {
-		rc = uinput_device_set_abs_bit(uidev, abs[nabs].value, &abs[nabs]);
+		int code;
+		struct input_absinfo a;
+
+		code = abs[nabs].value;
+		a = abs[nabs];
+		a.value = 0;
+
+		rc = uinput_device_set_abs_bit(uidev, code, &a);
 		ck_assert_msg(rc == 0, "for abs field %d\n", nabs);
 	}
 
