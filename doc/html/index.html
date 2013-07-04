@@ -23,7 +23,9 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">libevdev
+   &#160;<span id="projectnumber">0.1</span>
    </div>
+   <div id="projectbrief">A wrapper library for evdev devices</div>
   </td>
  </tr>
  </tbody>
@@ -94,42 +96,42 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <pre class="fragment"> kernel → libevdev → Weston → Wayland client
 </pre><p>libevdev does <b>not</b> have knowledge of X clients or Wayland clients, it is too low in the stack.</p>
 <h1>Example</h1>
-<p>Below is a simple example that shows how libevdev could be used. This example opens a device, checks for relative axes and a left mouse button and if it finds them monitors the device to print the event. </p>
-<pre class="fragment"> struct libevdev *dev = NULL;
- int fd;
- int rc = 1;
-
- fd = open("/dev/input/event0", O_RDONLY|O_NONBLOCK);
- rc = libevdev_new_from_fd(fd, &amp;dev);
- if (rc &lt; 0) {
-         fprintf(stderr, "Failed to init libevdev (%s)\n", strerror(-rc));
-         exit(1);
- }
- printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
- printf("Input device ID: bus %#x vendor %#x product %#x\n",
-                 libevdev_get_bustype(dev),
-                 libevdev_get_vendor_id(dev),
-                 libevdev_get_product_id(dev));
- if (!libevdev_has_event_type(dev, EV_REL) ||
-     !libevdev_has_event_code(dev, EV_KEY, BTN_LEFT)) {
-         printf("This device does not look like a mouse\n");
-         exit(1);
- }
-
- do {
-         struct input_event ev;
-         rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &amp;ev);
-         if (rc == 0)
-                 printf("Event: %s %s %d\n",
-                                 libevdev_get_event_type_name(ev.type),
-                                 libevdev_get_event_code_name(ev.type, ev.code),
-                                 ev.value);
- } while (rc == 1 || rc == 0 || rc == -EAGAIN);
-</pre><p>A more complete example is available with the libevdev-events tool here: <a href="https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c">https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c</a> </p>
+<p>Below is a simple example that shows how libevdev could be used. This example opens a device, checks for relative axes and a left mouse button and if it finds them monitors the device to print the event.</p>
+<div class="fragment"><div class="line"><span class="keyword">struct </span>libevdev *dev = NULL;</div>
+<div class="line"><span class="keywordtype">int</span> fd;</div>
+<div class="line"><span class="keywordtype">int</span> rc = 1;</div>
+<div class="line"></div>
+<div class="line">fd = open(<span class="stringliteral">&quot;/dev/input/event0&quot;</span>, O_RDONLY|O_NONBLOCK);</div>
+<div class="line">rc = <a class="code" href="group__init.html#ga89bb5bce1c23e293293484b05b12aaf4" title="Initialize a new libevdev device from the given fd.">libevdev_new_from_fd</a>(fd, &amp;dev);</div>
+<div class="line"><span class="keywordflow">if</span> (rc &lt; 0) {</div>
+<div class="line">        fprintf(stderr, <span class="stringliteral">&quot;Failed to init libevdev (%s)\n&quot;</span>, strerror(-rc));</div>
+<div class="line">        exit(1);</div>
+<div class="line">}</div>
+<div class="line">printf(<span class="stringliteral">&quot;Input device name: \&quot;%s\&quot;\n&quot;</span>, <a class="code" href="group__bits.html#gaed0328c67b7a78422636d9fe09a73f12">libevdev_get_name</a>(dev));</div>
+<div class="line">printf(<span class="stringliteral">&quot;Input device ID: bus %#x vendor %#x product %#x\n&quot;</span>,</div>
+<div class="line">                <a class="code" href="group__bits.html#gae830487f7b51b8365a8ea5d6c4c4f5d3">libevdev_get_bustype</a>(dev),</div>
+<div class="line">                <a class="code" href="group__bits.html#ga2246b7c4dd03b739a60933eb3110be1d">libevdev_get_vendor_id</a>(dev),</div>
+<div class="line">                <a class="code" href="group__bits.html#ga45f43e6dcab864c565391ffd8e02e2b1">libevdev_get_product_id</a>(dev));</div>
+<div class="line"><span class="keywordflow">if</span> (!<a class="code" href="group__bits.html#ga398bef155fa4a0cfb832de30723ebd14">libevdev_has_event_type</a>(dev, EV_REL) ||</div>
+<div class="line">    !<a class="code" href="group__bits.html#gab2ab9dad417f33daa79fa0c3d682df0b">libevdev_has_event_code</a>(dev, EV_KEY, BTN_LEFT)) {</div>
+<div class="line">        printf(<span class="stringliteral">&quot;This device does not look like a mouse\n&quot;</span>);</div>
+<div class="line">        exit(1);</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordflow">do</span> {</div>
+<div class="line">        <span class="keyword">struct </span>input_event ev;</div>
+<div class="line">        rc = <a class="code" href="group__events.html#gabb96c864e836c0b98788f4ab771c3a76" title="Get the next event from the device.">libevdev_next_event</a>(dev, <a class="code" href="libevdev_8h.html#a91c53c94148902faf9391bb4aa320299a7d73c32e0a017a2816dfeff0b8f7343b" title="Process data in normal mode.">LIBEVDEV_READ_NORMAL</a>, &amp;ev);</div>
+<div class="line">        <span class="keywordflow">if</span> (rc == 0)</div>
+<div class="line">                printf(<span class="stringliteral">&quot;Event: %s %s %d\n&quot;</span>,</div>
+<div class="line">                                <a class="code" href="group__misc.html#ga51b8e608d734e1c64eb2e3de61ddf6ed">libevdev_get_event_type_name</a>(ev.type),</div>
+<div class="line">                                <a class="code" href="group__misc.html#ga610a6eeabce2de2e2cef66a26d9cd7dc">libevdev_get_event_code_name</a>(ev.type, ev.code),</div>
+<div class="line">                                ev.value);</div>
+<div class="line">} <span class="keywordflow">while</span> (rc == 1 || rc == 0 || rc == -EAGAIN);</div>
+</div><!-- fragment --><p>A more complete example is available with the libevdev-events tool here: <a href="https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c">https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c</a> </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jul 4 2013 12:05:30 for libevdev by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>
