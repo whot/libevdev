@@ -85,6 +85,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ga9fcc508c24a8c82e8b44f7a28e23e062"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__misc.html#ga9fcc508c24a8c82e8b44f7a28e23e062">libevdev_is_event_type</a> (const struct input_event *ev, unsigned int type)</td></tr>
+<tr class="memdesc:ga9fcc508c24a8c82e8b44f7a28e23e062"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to check if an event is of a specific type.  <a href="#ga9fcc508c24a8c82e8b44f7a28e23e062">More...</a><br/></td></tr>
+<tr class="separator:ga9fcc508c24a8c82e8b44f7a28e23e062"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf25e405a2393340988297eb949dcab7e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__misc.html#gaf25e405a2393340988297eb949dcab7e">libevdev_is_event_code</a> (const struct input_event *ev, unsigned int type, unsigned int code)</td></tr>
+<tr class="memdesc:gaf25e405a2393340988297eb949dcab7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to check if an event is of a specific type and code.  <a href="#gaf25e405a2393340988297eb949dcab7e">More...</a><br/></td></tr>
+<tr class="separator:gaf25e405a2393340988297eb949dcab7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga51b8e608d734e1c64eb2e3de61ddf6ed"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__misc.html#ga51b8e608d734e1c64eb2e3de61ddf6ed">libevdev_get_event_type_name</a> (unsigned int type)</td></tr>
 <tr class="separator:ga51b8e608d734e1c64eb2e3de61ddf6ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga610a6eeabce2de2e2cef66a26d9cd7dc"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__misc.html#ga610a6eeabce2de2e2cef66a26d9cd7dc">libevdev_get_event_code_name</a> (unsigned int type, unsigned int code)</td></tr>
@@ -204,6 +210,91 @@ Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>The list of names is compiled into libevdev. If the kernel adds new defines for new properties libevdev will not automatically pick these up. </dd>
 <dd>
 On older kernels input properties may not be defined and <a class="el" href="group__misc.html#gac0e96c7f08d9e34a035e374bd86491bb">libevdev_get_input_prop_name()</a> will always return NULL </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="gaf25e405a2393340988297eb949dcab7e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int libevdev_is_event_code </td>
+          <td>(</td>
+          <td class="paramtype">const struct input_event *&#160;</td>
+          <td class="paramname"><em>ev</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>code</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Helper function to check if an event is of a specific type and code. </p>
+<p>This is virtually the same as: </p>
+<pre class="fragment"> ev-&gt;type == type &amp;&amp; ev-&gt;code == code
+</pre><p>with the exception that some sanity checks are performed to ensure type and code are valid.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ev</td><td>The input event to check </td></tr>
+    <tr><td class="paramname">type</td><td>Input event type to compare the event against (EV_REL, EV_ABS, etc.) </td></tr>
+    <tr><td class="paramname">code</td><td>Input event code to compare the event against (ABS_X, REL_X, etc.)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>1 if the event type matches the given type and code, 0 otherwise (or if type/code are invalid) </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ga9fcc508c24a8c82e8b44f7a28e23e062"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int libevdev_is_event_type </td>
+          <td>(</td>
+          <td class="paramtype">const struct input_event *&#160;</td>
+          <td class="paramname"><em>ev</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>type</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Helper function to check if an event is of a specific type. </p>
+<p>This is virtually the same as: </p>
+<pre class="fragment"> ev-&gt;type == type
+</pre><p>with the exception that some sanity checks are performed to ensure type is valid.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ev</td><td>The input event to check </td></tr>
+    <tr><td class="paramname">type</td><td>Input event type to compare the event against (EV_REL, EV_ABS, etc.)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>1 if the event type matches the given type, 0 otherwise (or if type is invalid) </dd></dl>
 
 </div>
 </div>

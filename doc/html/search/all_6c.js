@@ -38,6 +38,8 @@ var searchData=
   ['libevdev_5fhas_5fevent_5fcode',['libevdev_has_event_code',['../group__bits.html#gab2ab9dad417f33daa79fa0c3d682df0b',1,'libevdev.h']]],
   ['libevdev_5fhas_5fevent_5ftype',['libevdev_has_event_type',['../group__bits.html#ga398bef155fa4a0cfb832de30723ebd14',1,'libevdev.h']]],
   ['libevdev_5fhas_5fproperty',['libevdev_has_property',['../group__bits.html#ga36d529ea53f4522004bc7d16c051464b',1,'libevdev.h']]],
+  ['libevdev_5fis_5fevent_5fcode',['libevdev_is_event_code',['../group__misc.html#gaf25e405a2393340988297eb949dcab7e',1,'libevdev.h']]],
+  ['libevdev_5fis_5fevent_5ftype',['libevdev_is_event_type',['../group__misc.html#ga9fcc508c24a8c82e8b44f7a28e23e062',1,'libevdev.h']]],
   ['libevdev_5fkernel_5fset_5fabs_5fvalue',['libevdev_kernel_set_abs_value',['../group__kernel.html#ga608f18f6cf7c0db1e904311e380b5288',1,'libevdev.h']]],
   ['libevdev_5flog_5ffunc_5ft',['libevdev_log_func_t',['../libevdev_8h.html#a1a8f38e7e9dfbafa140dcd0286f14a26',1,'libevdev.h']]],
   ['libevdev_5fnew',['libevdev_new',['../group__init.html#ga332c8ee260b4ef864345abe5d04e820c',1,'libevdev.h']]],
