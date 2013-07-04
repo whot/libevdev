@@ -127,11 +127,24 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">                                <a class="code" href="group__misc.html#ga610a6eeabce2de2e2cef66a26d9cd7dc">libevdev_get_event_code_name</a>(ev.type, ev.code),</div>
 <div class="line">                                ev.value);</div>
 <div class="line">} <span class="keywordflow">while</span> (rc == 1 || rc == 0 || rc == -EAGAIN);</div>
-</div><!-- fragment --><p>A more complete example is available with the libevdev-events tool here: <a href="https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c">https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c</a> </p>
-</div></div><!-- contents -->
+</div><!-- fragment --><p>A more complete example is available with the libevdev-events tool here: <a href="https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c">https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c</a></p>
+<h1>libevdev internal test suite</h1>
+<p>libevdev's internal test suite uses the Check unit testing framework (<a href="http://check.sourceforge.net/">http://check.sourceforge.net/</a>). Tests are divided into test suites and test cases. Most tests create a uinput device, so you'll need to run as root.</p>
+<p>To run a specific suite only, export <code>CK_RUN_SUITE="suite name"</code>. To run a specific test case only, export <code>CK_RUN_TEST="test case name"</code>.</p>
+<p>To get a list of all suites or tests, run <code>git grep suite_create</code> or <code>git grep tcase_create</code>, respectively.</p>
+<p>By default, check forks, making debugging harder. Run gdb as below to avoid forking. sudo CK_FORK=no CK_RUN_TEST="test case name" gdb ./test/test-libevdev</p>
+<p>A special target <code>make gcov-report.txt</code> exists that runs gcov and leaves a <code>libevdev.c.gcov</code> file. Check that for test coverage.</p>
+<p><code>make check</code> is hooked up to run the test and gcov (again, needs root).</p>
+<p>The test suite creates a lot of devices, very quickly. Add the following xorg.conf.d snippet to avoid the devices being added as X devices (at the time of writing, mutter can't handle these devices and exits). </p>
+<pre class="fragment">$ cat /etc/X11/xorg.conf.d/99-ignore-libevdev-devices.conf
+     Section "InputClass"
+             Identifier "Ignore libevdev test devices"
+             MatchProduct "libevdev test device"
+             Option "Ignore" "on"
+     EndSection</pre> </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 4 2013 12:05:30 for libevdev by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jul 5 2013 09:26:29 for libevdev by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>
