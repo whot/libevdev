@@ -59,7 +59,7 @@ int test_create_device(struct uinput_device **uidev_return,
 int test_create_abs_device(struct uinput_device **uidev_return,
 			   struct libevdev **dev_return,
 			   int nabs,
-			   struct input_absinfo *abs,
+			   const struct input_absinfo *abs,
 			   ...)
 {
 	int rc, fd;
