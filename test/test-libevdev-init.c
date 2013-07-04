@@ -70,7 +70,7 @@ START_TEST(test_init_and_change_fd)
 	ck_assert_int_eq(libevdev_change_fd(dev, -1), -1);
 
 	rc = uinput_device_new_with_events(&uidev,
-					   "test device", DEFAULT_IDS,
+					   TEST_DEVICE_NAME, DEFAULT_IDS,
 					   EV_SYN, SYN_REPORT,
 					   EV_REL, REL_X,
 					   EV_REL, REL_Y,
@@ -124,7 +124,7 @@ START_TEST(test_device_init)
 	int rc;
 
 	rc = uinput_device_new_with_events(&uidev,
-					   "test device", DEFAULT_IDS,
+					   TEST_DEVICE_NAME, DEFAULT_IDS,
 					   EV_SYN, SYN_REPORT,
 					   EV_REL, REL_X,
 					   EV_REL, REL_Y,
@@ -152,7 +152,7 @@ START_TEST(test_device_init_from_fd)
 	int rc;
 
 	rc = uinput_device_new_with_events(&uidev,
-					   "test device", DEFAULT_IDS,
+					   TEST_DEVICE_NAME, DEFAULT_IDS,
 					   EV_SYN, SYN_REPORT,
 					   EV_REL, REL_X,
 					   EV_REL, REL_Y,

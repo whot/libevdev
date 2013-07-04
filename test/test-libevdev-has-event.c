@@ -176,7 +176,7 @@ START_TEST(test_ev_rep)
 
 	/* EV_REP is special, it's always fully set if set at all,
 	   can't test this through uinput though */
-	rc = uinput_device_new_with_events(&uidev, "test device", DEFAULT_IDS,
+	rc = uinput_device_new_with_events(&uidev, TEST_DEVICE_NAME, DEFAULT_IDS,
 					   EV_REP, 0,
 					   -1);
 	ck_assert_int_eq(rc, -EINVAL);
@@ -239,7 +239,7 @@ START_TEST(test_slot_init_value)
 	int i;
 	int fd;
 
-	uidev = uinput_device_new("test device");
+	uidev = uinput_device_new(TEST_DEVICE_NAME);
 	rc = uinput_device_set_event_bits(uidev,
 			EV_ABS, ABS_X,
 			EV_ABS, ABS_Y,
@@ -381,7 +381,7 @@ START_TEST(test_device_name)
 	ck_assert(str != NULL);
 	ck_assert_int_eq(strlen(str), 0);
 
-	rc = uinput_device_new_with_events(&uidev, "test device", &ids,
+	rc = uinput_device_new_with_events(&uidev, TEST_DEVICE_NAME, &ids,
 					   EV_ABS, ABS_X,
 					   -1);
 	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
@@ -389,7 +389,7 @@ START_TEST(test_device_name)
 	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
 
 	str = libevdev_get_name(dev);
-	ck_assert_int_eq(strcmp(str, "test device"), 0);
+	ck_assert_int_eq(strcmp(str, TEST_DEVICE_NAME), 0);
 
 	str = libevdev_get_phys(dev);
 	ck_assert(str == NULL);
@@ -416,7 +416,7 @@ START_TEST(test_device_get_abs_info)
 	const struct input_absinfo *a;
 	int rc;
 
-	uidev = uinput_device_new("test device");
+	uidev = uinput_device_new(TEST_DEVICE_NAME);
 	ck_assert(uidev != NULL);
 
 
@@ -631,7 +631,7 @@ START_TEST(test_device_disable_bit_invalid)
 	struct libevdev *dev;
 	int rc;
 
-	rc = uinput_device_new_with_events(&uidev, "test device", DEFAULT_IDS,
+	rc = uinput_device_new_with_events(&uidev, TEST_DEVICE_NAME, DEFAULT_IDS,
 					   EV_ABS, ABS_X,
 					   -1);
 	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
@@ -656,7 +656,7 @@ START_TEST(test_device_kernel_change_axis)
 	struct input_absinfo abs;
 	int rc;
 
-	uidev = uinput_device_new("test device");
+	uidev = uinput_device_new(TEST_DEVICE_NAME);
 	ck_assert(uidev != NULL);
 
 	abs.minimum = 0;
@@ -716,7 +716,7 @@ START_TEST(test_device_kernel_change_axis_invalid)
 	struct input_absinfo abs;
 	int rc;
 
-	uidev = uinput_device_new("test device");
+	uidev = uinput_device_new(TEST_DEVICE_NAME);
 	ck_assert(uidev != NULL);
 
 	abs.minimum = 0;

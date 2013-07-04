@@ -28,6 +28,8 @@
 #ifndef _TEST_COMMON_H_
 #define _TEST_COMMON_H_
 
+#define TEST_DEVICE_NAME "libevdev test device"
+
 #include "test-common-uinput.h"
 
 

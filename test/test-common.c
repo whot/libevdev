@@ -38,7 +38,7 @@ int test_create_device(struct uinput_device **uidev_return,
 
 	va_start(args, dev_return);
 
-	rc = uinput_device_new_with_events_v(&uidev, "test device", DEFAULT_IDS, args);
+	rc = uinput_device_new_with_events_v(&uidev, TEST_DEVICE_NAME, DEFAULT_IDS, args);
 	va_end(args);
 
 	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
@@ -67,7 +67,7 @@ int test_create_abs_device(struct uinput_device **uidev_return,
 	struct libevdev *dev;
 	va_list args;
 
-	uidev = uinput_device_new("test device");
+	uidev = uinput_device_new(TEST_DEVICE_NAME);
 	ck_assert(uidev != NULL);
 
 	va_start(args, abs);
