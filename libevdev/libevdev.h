@@ -870,6 +870,48 @@ int libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const
 /**
  * @ingroup misc
  *
+ * Helper function to check if an event is of a specific type. This is
+ * virtually the same as:
+ *
+ *      ev->type == type
+ *
+ * with the exception that some sanity checks are performed to ensure type
+ * is valid.
+ *
+ * @param ev The input event to check
+ * @param type Input event type to compare the event against (EV_REL, EV_ABS,
+ * etc.)
+ *
+ * @return 1 if the event type matches the given type, 0 otherwise (or if
+ * type is invalid)
+ */
+int libevdev_is_event_type(const struct input_event *ev, unsigned int type);
+
+/**
+ * @ingroup misc
+ *
+ * Helper function to check if an event is of a specific type and code. This
+ * is virtually the same as:
+ *
+ *      ev->type == type && ev->code == code
+ *
+ * with the exception that some sanity checks are performed to ensure type and
+ * code are valid.
+ *
+ * @param ev The input event to check
+ * @param type Input event type to compare the event against (EV_REL, EV_ABS,
+ * etc.)
+ * @param code Input event code to compare the event against (ABS_X, REL_X,
+ * etc.)
+ *
+ * @return 1 if the event type matches the given type and code, 0 otherwise
+ * (or if type/code are invalid)
+ */
+int libevdev_is_event_code(const struct input_event *ev, unsigned int type, unsigned int code);
+
+/**
+ * @ingroup misc
+ *
  * @param type The event type to return the name for.
  *
  * @return The name of the given event type (e.g. EV_ABS) or NULL for an

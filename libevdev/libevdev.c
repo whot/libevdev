@@ -928,6 +928,21 @@ libevdev_grab(struct libevdev *dev, int grab)
 	return rc < 0 ? -errno : 0;
 }
 
+int
+libevdev_is_event_type(const struct input_event *ev, unsigned int type)
+{
+	return type < EV_MAX && ev->type == type;
+}
+
+int
+libevdev_is_event_code(const struct input_event *ev, unsigned int type, unsigned int code)
+{
+	return type < EV_MAX &&
+		ev->type == type &&
+		(type == EV_SYN || code <= libevdev_get_event_type_max(type)) &&
+		ev->code == code;
+}
+
 const char*
 libevdev_get_event_type_name(unsigned int type)
 {
