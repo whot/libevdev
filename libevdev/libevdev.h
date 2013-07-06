@@ -68,7 +68,7 @@
  * Where does libevdev sit?
  * ========================
  *
- * libevdev is essentially a read(2) on steroids for /dev/input/eventX
+ * libevdev is essentially a `read(2)` on steroids for `/dev/input/eventX
  * devices. It sits below the process that handles input events, in between
  * the kernel and that process. In the simplest case, e.g. an evtest-like tool
  * the stack would look like this:
@@ -105,9 +105,9 @@
  *      }
  *      printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
  *      printf("Input device ID: bus %#x vendor %#x product %#x\n",
- *                      libevdev_get_bustype(dev),
- *                      libevdev_get_vendor_id(dev),
- *                      libevdev_get_product_id(dev));
+ *             libevdev_get_bustype(dev),
+ *             libevdev_get_vendor_id(dev),
+ *             libevdev_get_product_id(dev));
  *      if (!libevdev_has_event_type(dev, EV_REL) ||
  *          !libevdev_has_event_code(dev, EV_KEY, BTN_LEFT)) {
  *              printf("This device does not look like a mouse\n");
@@ -119,9 +119,9 @@
  *              rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
  *              if (rc == 0)
  *                      printf("Event: %s %s %d\n",
- *                                      libevdev_get_event_type_name(ev.type),
- *                                      libevdev_get_event_code_name(ev.type, ev.code),
- *                                      ev.value);
+ *                             libevdev_get_event_type_name(ev.type),
+ *                             libevdev_get_event_code_name(ev.type, ev.code),
+ *                             ev.value);
  *      } while (rc == 1 || rc == 0 || rc == -EAGAIN);
  * @endcode
  *
@@ -161,7 +161,8 @@
  *
  * The test suite creates a lot of devices, very quickly. Add the following
  * xorg.conf.d snippet to avoid the devices being added as X devices (at the
- * time of writing, mutter can't handle these devices and exits).
+ * time of writing, mutter can't handle these devices and exits after getting
+ * a BadDevice error).
  *
  *     $ cat /etc/X11/xorg.conf.d/99-ignore-libevdev-devices.conf
  *     Section "InputClass"
@@ -169,6 +170,11 @@
  *             MatchProduct "libevdev test device"
  *             Option "Ignore" "on"
  *     EndSection
+ *
+ * License information
+ * ===================
+ * libevdev is licensed under the
+ * [X11 license](http://github.com/whot/libevdev/blob/master/COPYING).
  */
 
 /**
