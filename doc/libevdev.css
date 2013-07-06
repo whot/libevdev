@@ -13,6 +13,7 @@ h1 {
 	margin-right: auto;
 	padding: 0px 10px 15px 10px;
 	border: none;
+	border-bottom: 1px solid #879ECB;
 }
 
 #projectname {
@@ -41,12 +42,17 @@ h1 {
 	color: #354C7B;
 }
 
+#MSearchBox {
+	display: none;
+}
+
 #titlearea table {
 	margin-left: auto;
 	margin-right: auto;
 }
 
 #navrow1, #navrow2, #navrow3, #navrow4, #navpath {
+	width: 600px;
 	width: -moz-max-content;
 	margin-left: auto;
 	margin-right: auto;
@@ -54,6 +60,7 @@ h1 {
 
 /* in file list, appears under the nav bars */
 .navpath ul, .navpath li {
+	width: 600px;
 	width: -moz-max-content;
 	margin-left: auto;
 	margin-right: auto;
@@ -65,11 +72,6 @@ h1 {
 .navpath li.navelem a {
 	text-shadow: none;
 	outline: none;
-}
-
-
-#MSearchBox {
-	float: left;
 }
 
 .tabs, .tabs2, .tabs3 {
@@ -187,6 +189,7 @@ div.memdoc {
 div.contents {
 	margin-left: auto;
 	margin-right: auto;
+	width: 600px;
 	width: -moz-max-content;
 }
 
