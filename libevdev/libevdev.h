@@ -23,7 +23,6 @@
 #ifndef libevdev_H
 #define libevdev_H
 
-#include <config.h>
 #include <linux/input.h>
 #include <stdarg.h>
 
