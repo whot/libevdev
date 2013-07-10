@@ -212,17 +212,31 @@ START_TEST(test_input_props)
 {
 	struct uinput_device* uidev;
 	struct libevdev *dev;
-	int rc;
+	int rc, i;
 
-	rc = test_create_device(&uidev, &dev,
-				EV_ABS, ABS_X,
-				-1);
+	uidev = uinput_device_new(TEST_DEVICE_NAME);
+	rc = uinput_device_set_event_bits(uidev,
+					  EV_ABS, ABS_X,
+					  -1);
+	ck_assert_int_eq(rc, 0);
+	uinput_device_set_prop(uidev, INPUT_PROP_DIRECT);
+	uinput_device_set_prop(uidev, INPUT_PROP_BUTTONPAD);
+	rc = uinput_device_create(uidev);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
 	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+
+	for (i = 0; i < INPUT_PROP_MAX; i++) {
+		if (i == INPUT_PROP_DIRECT || i == INPUT_PROP_BUTTONPAD)
+			ck_assert_int_eq(libevdev_has_property(dev, i), 1);
+		else
+			ck_assert_int_eq(libevdev_has_property(dev, i), 0);
+	}
 
 	ck_assert_int_eq(libevdev_has_property(dev, INPUT_PROP_MAX + 1), 0);
 	ck_assert_int_eq(libevdev_has_property(dev, INPUT_PROP_MAX), 0);
-	ck_assert_int_eq(libevdev_has_property(dev, INPUT_PROP_BUTTONPAD), 0);
-	/* FIXME: no idea how to set props on uinput devices */
 
 	uinput_device_free(uidev);
 	libevdev_free(dev);

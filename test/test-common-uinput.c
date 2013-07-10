@@ -185,7 +185,7 @@ inotify_setup()
 int
 uinput_device_create(struct uinput_device* d)
 {
-	int type, code;
+	int type, code, prop;
 	struct uinput_user_dev dev;
 	int rc;
 	int fd;
@@ -250,6 +250,15 @@ uinput_device_create(struct uinput_device* d)
 			}
 		}
 
+	}
+
+	for (prop = 0; prop < INPUT_PROP_MAX; prop++) {
+		if (!bit_is_set(d->d.props, prop))
+			continue;
+
+		rc = ioctl(fd, UI_SET_PROPBIT, prop);
+		if (rc == -1)
+			goto error;
 	}
 
 	rc = write(fd, &dev, sizeof(dev));
@@ -331,6 +340,19 @@ uinput_device_set_bit(struct uinput_device* dev, unsigned int bit)
 		return -EINVAL;
 
 	set_bit(dev->d.bits, bit);
+	return 0;
+}
+
+int
+uinput_device_set_prop(struct uinput_device *dev, unsigned int prop)
+{
+	if (!dev)
+		return -EINVAL;
+
+	if (prop > INPUT_PROP_MAX)
+		return -EINVAL;
+
+	set_bit(dev->d.props, prop);
 	return 0;
 }
 

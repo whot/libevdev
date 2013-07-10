@@ -35,6 +35,7 @@ int uinput_device_create(struct uinput_device* dev);
 int uinput_device_set_name(struct uinput_device* dev, const char *name);
 int uinput_device_set_ids(struct uinput_device* dev, const struct input_id *ids);
 int uinput_device_set_bit(struct uinput_device* dev, unsigned int bit);
+int uinput_device_set_prop(struct uinput_device *dev, unsigned int prop);
 int uinput_device_set_event_bit(struct uinput_device* dev, unsigned int type, unsigned int code);
 int uinput_device_set_event_bits(struct uinput_device* dev, ...);
 int uinput_device_set_event_bits_v(struct uinput_device* dev, va_list args);
