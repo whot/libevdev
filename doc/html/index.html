@@ -128,7 +128,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">                       <a class="code" href="group__misc.html#ga610a6eeabce2de2e2cef66a26d9cd7dc">libevdev_get_event_code_name</a>(ev.type, ev.code),</div>
 <div class="line">                       ev.value);</div>
 <div class="line">} <span class="keywordflow">while</span> (rc == 1 || rc == 0 || rc == -EAGAIN);</div>
-</div><!-- fragment --><p>A more complete example is available with the libevdev-events tool here: <a href="https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c">https://github.com/whot/libevdev/blob/master/tools/libevdev-events.c</a></p>
+</div><!-- fragment --><p>A more complete example is available with the libevdev-events tool here: <a href="http://cgit.freedesktop.org/libevdev/tree/tools/libevdev-events.c">http://cgit.freedesktop.org/libevdev/tree/tools/libevdev-events.c</a></p>
 <h1>libevdev internal test suite</h1>
 <p>libevdev's internal test suite uses the <a href="http://check.sourceforge.net/">Check unit testing framework</a>. Tests are divided into test suites and test cases. Most tests create a uinput device, so you'll need to run as root.</p>
 <p>To run a specific suite only: </p>
@@ -150,11 +150,13 @@ Section "InputClass"
         Option "Ignore" "on"
 EndSection
 </pre><h1>License information</h1>
-<p>libevdev is licensed under the <a href="http://github.com/whot/libevdev/blob/master/COPYING">X11 license</a>. </p>
+<p>libevdev is licensed under the [X11 licensed(<a href="http://cgit.freedesktop.org/libevdev/tree/COPYING">http://cgit.freedesktop.org/libevdev/tree/COPYING</a>).</p>
+<h1>Reporting bugs</h1>
+<p>Please report bugs in the freedesktop.org bugzilla under the libevdev product: <a href="https://bugs.freedesktop.org/enter_bug.cgi?product=libevdev">https://bugs.freedesktop.org/enter_bug.cgi?product=libevdev</a> </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jul 6 2013 10:39:15 for libevdev by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Jul 17 2013 11:09:09 for libevdev by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>
