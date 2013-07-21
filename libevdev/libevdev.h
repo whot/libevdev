@@ -33,6 +33,10 @@
  * the ioctls through type-safe interfaces and provides functions to change
  * the appearance of the device.
  *
+ * Development of libevdev is discussed on
+ * [input-tools@lists.freedesktop.org](http://lists.freedesktop.org/mailman/listinfo/input-tools)
+ * Please submit patches, questions or general comments there.
+ *
  * Handling events and SYN_DROPPED
  * ===============================
  *

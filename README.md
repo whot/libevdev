@@ -18,3 +18,7 @@ http://whot.github.io/libevdev/
 
 File bugs in the freedesktop.org bugzilla:
 https://bugs.freedesktop.org/enter_bug.cgi?product=libevdev
+
+Patches, questions and general comments should be submitted to the input-tools@lists.freedesktop.org
+mailing list:
+http://lists.freedesktop.org/mailman/listinfo/input-tools
