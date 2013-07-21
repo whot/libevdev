@@ -1,11 +1,7 @@
 #!/bin/bash
 
-git checkout master
+set -e
+
 make
-mv doc/html doc/publish
-git checkout gh-pages
-rm -rf doc/html
-mv doc/publish doc/html
-git add doc/html
-git commit -asm "Documentation update for `git log -n 1 --format="format:%h" master`"
-git checkout master
+rsync --delete -avz doc/html/ freedesktop.org:/srv/www.freedesktop.org/www/software/libevdev/doc/latest
+

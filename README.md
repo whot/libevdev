@@ -14,7 +14,7 @@ The eventual goal is that libevdev wraps all ioctls available to evdev
 devices, thus making direct access unnecessary.
 
 Go here for the API documentation:
-http://whot.github.io/libevdev/
+http://www.freedesktop.org/software/libevdev/doc/latest/
 
 File bugs in the freedesktop.org bugzilla:
 https://bugs.freedesktop.org/enter_bug.cgi?product=libevdev
