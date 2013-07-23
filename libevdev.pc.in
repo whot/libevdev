@@ -3,8 +3,8 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: evdev_read
+Name: libevdev
 Description: Handler library for evdev events
-Version: @EVDEV_READ_VERSION@
+Version: @VERSION@
 Cflags: -I${includedir}/libevdev-1.0/
 Libs: -L${libdir} -levdev
