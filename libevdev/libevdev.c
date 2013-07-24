@@ -22,6 +22,7 @@
 
 #include <config.h>
 #include <errno.h>
+#include <poll.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -624,6 +625,21 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 
 out:
 	return rc;
+}
+
+int libevdev_has_event_pending(struct libevdev *dev)
+{
+	struct pollfd fds = { dev->fd, POLLIN, 0 };
+	int rc;
+
+	if (dev->fd < 0)
+		return -EBADF;
+
+	if (queue_num_elements(dev) != 0)
+		return 1;
+
+	rc = poll(&fds, 1, 0);
+	return (rc >= 0) ? rc : -errno;
 }
 
 const char *
