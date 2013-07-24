@@ -821,6 +821,28 @@ ABS_GETTER(fuzz, fuzz)
 ABS_GETTER(flat, flat)
 ABS_GETTER(resolution, resolution)
 
+#define ABS_SETTER(field) \
+void libevdev_set_abs_##field(struct libevdev *dev, unsigned int code, int val) \
+{ \
+	if (!libevdev_has_event_code(dev, EV_ABS, code)) \
+		return; \
+	dev->abs_info[code].field = val; \
+}
+
+ABS_SETTER(maximum)
+ABS_SETTER(minimum)
+ABS_SETTER(fuzz)
+ABS_SETTER(flat)
+ABS_SETTER(resolution)
+
+void libevdev_set_abs_info(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs)
+{
+	if (!libevdev_has_event_code(dev, EV_ABS, code))
+		return;
+
+	dev->abs_info[code] = *abs;
+}
+
 int
 libevdev_enable_event_type(struct libevdev *dev, unsigned int type)
 {
