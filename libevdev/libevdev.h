@@ -832,6 +832,60 @@ int libevdev_get_current_slot(const struct libevdev *dev);
 /**
  * @ingroup kernel
  *
+ * Change the minimum for the given EV_ABS event code, if the code exists.
+ * This function has no effect if libevdev_has_event_code() returns false for
+ * this code.
+ */
+void libevdev_set_abs_min(struct libevdev *dev, unsigned int code, int min);
+
+/**
+ * @ingroup kernel
+ *
+ * Change the maximum for the given EV_ABS event code, if the code exists.
+ * This function has no effect if libevdev_has_event_code() returns false for
+ * this code.
+ */
+void libevdev_set_abs_max(struct libevdev *dev, unsigned int code, int max);
+
+/**
+ * @ingroup kernel
+ *
+ * Change the fuzz for the given EV_ABS event code, if the code exists.
+ * This function has no effect if libevdev_has_event_code() returns false for
+ * this code.
+ */
+void libevdev_set_abs_fuzz(struct libevdev *dev, unsigned int code, int fuzz);
+
+/**
+ * @ingroup kernel
+ *
+ * Change the flat for the given EV_ABS event code, if the code exists.
+ * This function has no effect if libevdev_has_event_code() returns false for
+ * this code.
+ */
+void libevdev_set_abs_flat(struct libevdev *dev, unsigned int code, int flat);
+
+/**
+ * @ingroup kernel
+ *
+ * Change the resolution for the given EV_ABS event code, if the code exists.
+ * This function has no effect if libevdev_has_event_code() returns false for
+ * this code.
+ */
+void libevdev_set_abs_resolution(struct libevdev *dev, unsigned int code, int resolution);
+
+/**
+ * @ingroup kernel
+ *
+ * Change the abs info for the given EV_ABS event code, if the code exists.
+ * This function has no effect if libevdev_has_event_code() returns false for
+ * this code.
+ */
+void libevdev_set_abs_info(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs);
+
+/**
+ * @ingroup kernel
+ *
  * Forcibly enable an event type on this device, even if the underlying
  * device does not support it. While this cannot make the device actually
  * report such events, it will now return true for libevdev_has_event_type().

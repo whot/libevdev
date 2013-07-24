@@ -509,6 +509,70 @@ START_TEST(test_device_get_abs_info)
 }
 END_TEST
 
+START_TEST(test_device_set_abs)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	struct input_absinfo abs[2];
+	struct input_absinfo a;
+	int rc;
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+
+	abs[1].value = ABS_Y;
+	abs[1].maximum = 1000;
+
+	rc = test_create_abs_device(&uidev, &dev,
+				    2, abs,
+				    EV_SYN,
+				    -1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	libevdev_set_abs_min(dev, ABS_X, 1);
+	libevdev_set_abs_min(dev, ABS_Y, 5);
+	ck_assert_int_eq(libevdev_get_abs_min(dev, ABS_X),  1);
+	ck_assert_int_eq(libevdev_get_abs_min(dev, ABS_Y),  5);
+
+	libevdev_set_abs_max(dev, ABS_X, 3000);
+	libevdev_set_abs_max(dev, ABS_Y, 5000);
+	ck_assert_int_eq(libevdev_get_abs_max(dev, ABS_X),  3000);
+	ck_assert_int_eq(libevdev_get_abs_max(dev, ABS_Y),  5000);
+
+	libevdev_set_abs_fuzz(dev, ABS_X, 3);
+	libevdev_set_abs_fuzz(dev, ABS_Y, 5);
+	ck_assert_int_eq(libevdev_get_abs_fuzz(dev, ABS_X),  3);
+	ck_assert_int_eq(libevdev_get_abs_fuzz(dev, ABS_Y),  5);
+
+	libevdev_set_abs_flat(dev, ABS_X, 8);
+	libevdev_set_abs_flat(dev, ABS_Y, 15);
+	ck_assert_int_eq(libevdev_get_abs_flat(dev, ABS_X),  8);
+	ck_assert_int_eq(libevdev_get_abs_flat(dev, ABS_Y),  15);
+
+	libevdev_set_abs_resolution(dev, ABS_X, 80);
+	libevdev_set_abs_resolution(dev, ABS_Y, 150);
+	ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_X),  80);
+	ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_Y),  150);
+
+	a.minimum = 10;
+	a.maximum = 100;
+	a.fuzz = 13;
+	a.flat = 1;
+	a.resolution = 16;
+
+	libevdev_set_abs_info(dev, ABS_X, &a);
+	ck_assert_int_eq(memcmp(&a, libevdev_get_abs_info(dev, ABS_X), sizeof(a)), 0);
+
+	libevdev_set_abs_min(dev, ABS_Z, 10);
+	ck_assert_int_eq(libevdev_has_event_code(dev, EV_ABS, ABS_Z),  0);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
+
 START_TEST(test_device_enable_bit)
 {
 	struct uinput_device* uidev;
@@ -780,6 +844,7 @@ libevdev_has_event_test(void)
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("device bit manipulation");
+	tcase_add_test(tc, test_device_set_abs);
 	tcase_add_test(tc, test_device_enable_bit);
 	tcase_add_test(tc, test_device_enable_bit_invalid);
 	tcase_add_test(tc, test_device_disable_bit);
