@@ -1,7 +1,7 @@
 AC_PREREQ([2.64])
 
 AC_INIT([libevdev],
-        [0.2],
+        [0.2.1],
         [],
         [libevdev],
         [])
