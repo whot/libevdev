@@ -483,6 +483,30 @@ int libevdev_get_fd(const struct libevdev* dev);
 int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event *ev);
 
 /**
+ * @ingroup events
+ *
+ * Check if there are events waiting for us. This does not read an event off
+ * the fd and may not access the fd at all. If there are events queued
+ * internally this function will return non-zero. If the internal queue is empty,
+ * this function will poll the file descriptor for data.
+ *
+ * This is a convenience function for simple processes, most complex programs
+ * are expected to use select(2) or poll(2) on the file descriptor. The kernel
+ * guarantees that if data is available, it is a multiple of sizeof(struct
+ * input_event), and thus calling libevdev_next_event() when select(2) or
+ * poll(2) return is safe. You do not need libevdev_has_event_pending() if
+ * you're using select(2) or poll(2).
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @return On failure, a negative errno is returned.
+ * @retval 0 No event is currently available
+ * @retval 1 One or more events are available on the fd
+ *
+ * @note This function is signal-safe.
+ */
+int libevdev_has_event_pending(struct libevdev *dev);
+
+/**
  * @ingroup bits
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
