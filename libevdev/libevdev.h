@@ -687,6 +687,19 @@ int libevdev_get_driver_version(const struct libevdev *dev);
 int libevdev_has_property(const struct libevdev *dev, unsigned int prop);
 
 /**
+ * @ingroup kernel
+ *
+ * @param dev The evdev device
+ * @param prop The input property to enable, one of INPUT_PROP_...
+ *
+ * @return 0 on success or -1 on failure
+ *
+ * @note This function may be called before libevdev_set_fd(). A call to
+ * libevdev_set_fd() will overwrite any previously set value.
+ */
+int libevdev_enable_property(struct libevdev *dev, unsigned int prop);
+
+/**
  * @ingroup bits
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()

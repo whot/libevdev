@@ -243,6 +243,40 @@ START_TEST(test_input_props)
 }
 END_TEST
 
+START_TEST(test_set_input_props)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc, fd;
+
+	dev = libevdev_new();
+	ck_assert_int_eq(libevdev_enable_property(dev, INPUT_PROP_MAX + 1), -1);
+	ck_assert_int_eq(libevdev_enable_property(dev, INPUT_PROP_DIRECT), 0);
+	ck_assert_int_eq(libevdev_enable_property(dev, INPUT_PROP_BUTTONPAD), 0);
+	ck_assert_int_eq(libevdev_has_property(dev, INPUT_PROP_DIRECT), 1);
+	ck_assert_int_eq(libevdev_has_property(dev, INPUT_PROP_BUTTONPAD), 1);
+
+	uidev = uinput_device_new(TEST_DEVICE_NAME);
+	rc = uinput_device_set_event_bits(uidev,
+					  EV_ABS, ABS_X,
+					  -1);
+	ck_assert_int_eq(rc, 0);
+	uinput_device_set_prop(uidev, INPUT_PROP_BUTTONPAD);
+	rc = uinput_device_create(uidev);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+
+	fd = uinput_device_get_fd(uidev);
+	rc = libevdev_set_fd(dev, fd);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	ck_assert_int_eq(libevdev_has_property(dev, INPUT_PROP_DIRECT), 0);
+	ck_assert_int_eq(libevdev_has_property(dev, INPUT_PROP_BUTTONPAD), 1);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_slot_init_value)
 {
 	struct uinput_device *uidev;
@@ -913,6 +947,7 @@ libevdev_has_event_test(void)
 
 	tc = tcase_create("input properties");
 	tcase_add_test(tc, test_input_props);
+	tcase_add_test(tc, test_set_input_props);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("multitouch info");
