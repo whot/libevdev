@@ -4,8 +4,11 @@ TESTS = $(noinst_PROGRAMS)
 
 libevdev_sources = $(top_srcdir)/libevdev/libevdev.c \
 		   $(top_srcdir)/libevdev/libevdev.h \
+		   $(top_srcdir)/libevdev/libevdev-uinput.h \
+		   $(top_srcdir)/libevdev/libevdev-uinput.c \
 		   $(top_srcdir)/libevdev/libevdev-util.h \
 		   $(top_srcdir)/libevdev/libevdev-int.h
+		   $(top_srcdir)/libevdev/libevdev-uinput-int.h
 common_sources = $(libevdev_sources) \
 		 test-common-uinput.c \
 		 test-common-uinput.h \
