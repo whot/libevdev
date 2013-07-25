@@ -441,6 +441,53 @@ START_TEST(test_device_name)
 }
 END_TEST
 
+START_TEST(test_device_set_name)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	struct input_id ids = {1, 2, 3, 4};
+	const char *str;
+	int rc;
+
+	dev = libevdev_new();
+
+	libevdev_set_name(dev, "the name");
+	libevdev_set_phys(dev, "the phys");
+	libevdev_set_uniq(dev, "the uniq");
+
+	str = libevdev_get_name(dev);
+	ck_assert(str != NULL);
+	ck_assert_int_eq(strcmp(str, "the name"), 0);
+
+	str = libevdev_get_phys(dev);
+	ck_assert(str != NULL);
+	ck_assert_int_eq(strcmp(str, "the phys"), 0);
+
+	str = libevdev_get_uniq(dev);
+	ck_assert(str != NULL);
+	ck_assert_int_eq(strcmp(str, "the uniq"), 0);
+
+	rc = uinput_device_new_with_events(&uidev, TEST_DEVICE_NAME, &ids,
+					   EV_ABS, ABS_X,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+	rc = libevdev_set_fd(dev, uinput_device_get_fd(uidev));
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
+
+	str = libevdev_get_name(dev);
+	ck_assert_int_eq(strcmp(str, TEST_DEVICE_NAME), 0);
+
+	str = libevdev_get_phys(dev);
+	ck_assert(str == NULL);
+
+	str = libevdev_get_uniq(dev);
+	ck_assert(str == NULL);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_device_get_abs_info)
 {
 	struct uinput_device* uidev;
@@ -876,6 +923,7 @@ libevdev_has_event_test(void)
 
 	tc = tcase_create("device info");
 	tcase_add_test(tc, test_device_name);
+	tcase_add_test(tc, test_device_set_name);
 	tcase_add_test(tc, test_device_get_abs_info);
 	suite_add_tcase(s, tc);
 

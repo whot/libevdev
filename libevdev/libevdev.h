@@ -519,6 +519,17 @@ int libevdev_has_event_pending(struct libevdev *dev);
 const char* libevdev_get_name(const struct libevdev *dev);
 
 /**
+ * @ingroup kernel
+ *
+ * @param dev The evdev device
+ * @param name The new, non-NULL, name to assign to this device.
+ *
+ * @note This function may be called before libevdev_set_fd(). A call to
+ * libevdev_set_fd() will overwrite any previously set value.
+ */
+void libevdev_set_name(struct libevdev *dev, const char *name);
+
+/**
  * @ingroup bits
  *
  * Virtual devices such as uinput devices have no phys location.
@@ -532,6 +543,17 @@ const char* libevdev_get_name(const struct libevdev *dev);
 const char * libevdev_get_phys(const struct libevdev *dev);
 
 /**
+ * @ingroup kernel
+ *
+ * @param dev The evdev device
+ * @param phys The new, non-NULL, phys to assign to this device.
+ *
+ * @note This function may be called before libevdev_set_fd(). A call to
+ * libevdev_set_fd() will overwrite any previously set value.
+ */
+void libevdev_set_phys(struct libevdev *dev, const char *phys);
+
+/**
  * @ingroup bits
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
@@ -541,6 +563,17 @@ const char * libevdev_get_phys(const struct libevdev *dev);
  * @note This function is signal safe.
  */
 const char * libevdev_get_uniq(const struct libevdev *dev);
+
+/**
+ * @ingroup kernel
+ *
+ * @param dev The evdev device
+ * @param uniq The new, non-NULL, uniq to assign to this device.
+ *
+ * @note This function may be called before libevdev_set_fd(). A call to
+ * libevdev_set_fd() will overwrite any previously set value.
+ */
+void libevdev_set_uniq(struct libevdev *dev, const char *uniq);
 
 /**
  * @ingroup bits

@@ -150,12 +150,15 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	if (rc < 0)
 		goto out;
 
+	free(dev->name);
 	dev->name = strdup(buf);
 	if (!dev->name) {
 		errno = ENOSPC;
 		goto out;
 	}
 
+	free(dev->phys);
+	dev->phys = NULL;
 	memset(buf, 0, sizeof(buf));
 	rc = ioctl(fd, EVIOCGPHYS(sizeof(buf) - 1), buf);
 	if (rc < 0) {
@@ -170,6 +173,8 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 		}
 	}
 
+	free(dev->uniq);
+	dev->uniq = NULL;
 	memset(buf, 0, sizeof(buf));
 	rc = ioctl(fd, EVIOCGUNIQ(sizeof(buf) - 1), buf);
 	if (rc < 0) {
@@ -659,6 +664,19 @@ libevdev_get_uniq(const struct libevdev *dev)
 {
 	return dev->uniq;
 }
+
+#define STRING_SETTER(field) \
+void libevdev_set_##field(struct libevdev *dev, const char *field) \
+{ \
+	if (field == NULL) \
+		return; \
+	free(dev->field); \
+	dev->field = strdup(field); \
+}
+
+STRING_SETTER(name);
+STRING_SETTER(phys);
+STRING_SETTER(uniq);
 
 int libevdev_get_product_id(const struct libevdev *dev)
 {
