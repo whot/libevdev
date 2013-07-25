@@ -454,6 +454,42 @@ START_TEST(test_device_set_name)
 }
 END_TEST
 
+START_TEST(test_device_set_ids)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	struct input_id ids = {1, 2, 3, 4};
+	int rc;
+
+	dev = libevdev_new();
+
+	libevdev_set_product_id(dev, 10);
+	libevdev_set_vendor_id(dev, 20);
+	libevdev_set_bustype(dev, 30);
+	libevdev_set_version(dev, 40);
+
+	ck_assert_int_eq(libevdev_get_product_id(dev), 10);
+	ck_assert_int_eq(libevdev_get_vendor_id(dev), 20);
+	ck_assert_int_eq(libevdev_get_bustype(dev), 30);
+	ck_assert_int_eq(libevdev_get_version(dev), 40);
+
+	rc = uinput_device_new_with_events(&uidev, TEST_DEVICE_NAME, &ids,
+					   EV_ABS, ABS_X,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+	rc = libevdev_set_fd(dev, uinput_device_get_fd(uidev));
+	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
+
+	ck_assert_int_eq(libevdev_get_bustype(dev), ids.bustype);
+	ck_assert_int_eq(libevdev_get_vendor_id(dev), ids.vendor);
+	ck_assert_int_eq(libevdev_get_product_id(dev), ids.product);
+	ck_assert_int_eq(libevdev_get_version(dev), ids.version);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_device_get_abs_info)
 {
 	struct uinput_device* uidev;
@@ -888,6 +924,7 @@ libevdev_has_event_test(void)
 	tc = tcase_create("device info");
 	tcase_add_test(tc, test_device_name);
 	tcase_add_test(tc, test_device_set_name);
+	tcase_add_test(tc, test_device_set_ids);
 	tcase_add_test(tc, test_device_get_abs_info);
 	suite_add_tcase(s, tc);
 

@@ -678,6 +678,17 @@ STRING_SETTER(name);
 STRING_SETTER(phys);
 STRING_SETTER(uniq);
 
+#define PRODUCT_SETTER(name, field) \
+void libevdev_set_##name(struct libevdev *dev, int field) \
+{ \
+	dev->ids.field = field;\
+}
+
+PRODUCT_SETTER(product_id, product);
+PRODUCT_SETTER(vendor_id, vendor);
+PRODUCT_SETTER(bustype, bustype);
+PRODUCT_SETTER(version, version);
+
 int libevdev_get_product_id(const struct libevdev *dev)
 {
 	return dev->ids.product;
