@@ -806,45 +806,19 @@ libevdev_get_abs_info(const struct libevdev *dev, unsigned int code)
 	return &dev->abs_info[code];
 }
 
-int
-libevdev_get_abs_min(const struct libevdev *dev, unsigned int code)
-{
-	const struct input_absinfo *absinfo = libevdev_get_abs_info(dev, code);
-
-	return absinfo ? absinfo->minimum : 0;
+#define ABS_GETTER(name, field) \
+int libevdev_get_abs_##name(const struct libevdev *dev, unsigned int code) \
+{ \
+	const struct input_absinfo *absinfo = libevdev_get_abs_info(dev, code); \
+	return absinfo ? absinfo->field : 0; \
 }
 
-int
-libevdev_get_abs_max(const struct libevdev *dev, unsigned int code)
-{
-	const struct input_absinfo *absinfo = libevdev_get_abs_info(dev, code);
+ABS_GETTER(max, maximum);
+ABS_GETTER(min, minimum);
+ABS_GETTER(fuzz, fuzz)
+ABS_GETTER(flat, flat)
+ABS_GETTER(resolution, resolution)
 
-	return absinfo ? absinfo->maximum : 0;
-}
-
-int
-libevdev_get_abs_fuzz(const struct libevdev *dev, unsigned int code)
-{
-	const struct input_absinfo *absinfo = libevdev_get_abs_info(dev, code);
-
-	return absinfo ? absinfo->fuzz : 0;
-}
-
-int
-libevdev_get_abs_flat(const struct libevdev *dev, unsigned int code)
-{
-	const struct input_absinfo *absinfo = libevdev_get_abs_info(dev, code);
-
-	return absinfo ? absinfo->flat : 0;
-}
-
-int
-libevdev_get_abs_resolution(const struct libevdev *dev, unsigned int code)
-{
-	const struct input_absinfo *absinfo = libevdev_get_abs_info(dev, code);
-
-	return absinfo ? absinfo->resolution : 0;
-}
 
 int
 libevdev_enable_event_type(struct libevdev *dev, unsigned int type)
