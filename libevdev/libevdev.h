@@ -587,6 +587,17 @@ void libevdev_set_uniq(struct libevdev *dev, const char *uniq);
 int libevdev_get_id_product(const struct libevdev *dev);
 
 /**
+ * @ingroup kernel
+ *
+ * @param dev The evdev device
+ * @param product_id The product ID to assign to this device
+ *
+ * @note This function may be called before libevdev_set_fd(). A call to
+ * libevdev_set_fd() will overwrite any previously set value.
+ */
+void libevdev_set_id_product(struct libevdev *dev, int product_id);
+
+/**
  * @ingroup bits
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
@@ -596,6 +607,17 @@ int libevdev_get_id_product(const struct libevdev *dev);
  * @note This function is signal-safe.
  */
 int libevdev_get_id_vendor(const struct libevdev *dev);
+
+/**
+ * @ingroup kernel
+ *
+ * @param dev The evdev device
+ * @param vendor_id The vendor ID to assign to this device
+ *
+ * @note This function may be called before libevdev_set_fd(). A call to
+ * libevdev_set_fd() will overwrite any previously set value.
+ */
+void libevdev_set_id_vendor(struct libevdev *dev, int vendor_id);
 
 /**
  * @ingroup bits
@@ -609,6 +631,17 @@ int libevdev_get_id_vendor(const struct libevdev *dev);
 int libevdev_get_id_bustype(const struct libevdev *dev);
 
 /**
+ * @ingroup kernel
+ *
+ * @param dev The evdev device
+ * @param bustype The bustype to assign to this device
+ *
+ * @note This function may be called before libevdev_set_fd(). A call to
+ * libevdev_set_fd() will overwrite any previously set value.
+ */
+void libevdev_set_id_bustype(struct libevdev *dev, int bustype);
+
+/**
  * @ingroup bits
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
@@ -618,6 +651,17 @@ int libevdev_get_id_bustype(const struct libevdev *dev);
  * @note This function is signal-safe.
  */
 int libevdev_get_id_version(const struct libevdev *dev);
+
+/**
+ * @ingroup kernel
+ *
+ * @param dev The evdev device
+ * @param version The version to assign to this device
+ *
+ * @note This function may be called before libevdev_set_fd(). A call to
+ * libevdev_set_fd() will overwrite any previously set value.
+ */
+void libevdev_set_id_version(struct libevdev *dev, int version);
 
 /**
  * @ingroup bits

@@ -678,6 +678,7 @@ STRING_SETTER(name);
 STRING_SETTER(phys);
 STRING_SETTER(uniq);
 
+
 #define PRODUCT_GETTER(name, field) \
 int libevdev_get_##name(const struct libevdev *dev) \
 { \
@@ -693,6 +694,17 @@ PRODUCT_GETTER(id_product, product);
 PRODUCT_GETTER(id_vendor, vendor);
 PRODUCT_GETTER(id_bustype, bustype);
 PRODUCT_GETTER(id_version, version);
+
+#define PRODUCT_SETTER(field) \
+void libevdev_set_id_##field(struct libevdev *dev, int field) \
+{ \
+	dev->ids.field = field;\
+}
+
+PRODUCT_SETTER(product);
+PRODUCT_SETTER(vendor);
+PRODUCT_SETTER(bustype);
+PRODUCT_SETTER(version);
 
 int libevdev_get_driver_version(const struct libevdev *dev)
 {
