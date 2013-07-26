@@ -571,6 +571,8 @@ START_TEST(test_device_enable_bit_invalid)
 	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_MAX + 1, ABS_MAX + 1, &abs), -1);
 	ck_assert_int_eq(libevdev_enable_event_type(dev, EV_MAX + 1), -1);
 
+	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_ABS, ABS_Y, NULL), -1);
+
 	uinput_device_free(uidev);
 	libevdev_free(dev);
 }
