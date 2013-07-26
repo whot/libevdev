@@ -855,6 +855,9 @@ libevdev_enable_event_code(struct libevdev *dev, unsigned int type,
 	if (type != EV_ABS && data != NULL)
 		return -1;
 
+	if (type == EV_SYN)
+		return 0;
+
 	max = type_to_mask(dev, type, &mask);
 
 	if (code > max)
