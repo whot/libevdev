@@ -28,6 +28,7 @@ extern Suite *libevdev_init_test(void);
 extern Suite *queue_suite(void);
 extern Suite *libevdev_has_event_test(void);
 extern Suite *libevdev_events(void);
+extern Suite *uinput_suite(void);
 
 int main(int argc, char **argv)
 {
@@ -38,6 +39,7 @@ int main(int argc, char **argv)
 	srunner_add_suite(sr, libevdev_init_test());
 	srunner_add_suite(sr, queue_suite());
 	srunner_add_suite(sr, event_name_suite());
+	srunner_add_suite(sr, uinput_suite());
 	srunner_run_all(sr, CK_NORMAL);
 
 	failed = srunner_ntests_failed(sr);
