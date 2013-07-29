@@ -1,3 +1,4 @@
+if BUILD_TESTS
 noinst_PROGRAMS = test-libevdev
 
 TESTS = $(noinst_PROGRAMS)
@@ -71,3 +72,4 @@ endif
 clean-local: gcov-clean
 	rm -f *.gcno *.gcda
 
+endif

@@ -33,7 +33,11 @@ LT_PREREQ([2.2])
 LT_INIT
 
 PKG_PROG_PKG_CONFIG()
-PKG_CHECK_MODULES(CHECK, [check])
+PKG_CHECK_MODULES(CHECK, [check], [HAVE_CHECK="yes"], [HAVE_CHECK="no"])
+if test "x$HAVE_CHECK" != "xyes"; then
+	AC_MSG_WARN([check not found - skipping building unit tests])
+fi
+AM_CONDITIONAL(BUILD_TESTS, [test "x$HAVE_CHECK" = "xyes"])
 
 if test "x$GCC" = "xyes"; then
 	GCC_CFLAGS="-Wall -Wextra -Wno-unused-parameter -g -Wstrict-prototypes -Wmissing-prototypes -fvisibility=hidden"
