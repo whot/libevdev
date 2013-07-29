@@ -195,15 +195,38 @@ END_TEST
 
 START_TEST(test_ev_rep)
 {
+	struct libevdev *dev;
 	struct uinput_device* uidev;
 	int rc;
+	int rep, delay;
+	const int KERNEL_DEFAULT_REP = 250;
+	const int KERNEL_DEFAULT_DELAY = 33;
 
 	/* EV_REP is special, it's always fully set if set at all,
 	   can't test this through uinput though */
-	rc = uinput_device_new_with_events(&uidev, TEST_DEVICE_NAME, DEFAULT_IDS,
-					   EV_REP, 0,
-					   -1);
-	ck_assert_int_eq(rc, -EINVAL);
+	uidev = uinput_device_new(TEST_DEVICE_NAME);
+	ck_assert(uidev != NULL);
+	rc = uinput_device_set_bit(uidev, EV_REP);
+	ck_assert_int_eq(rc, 0);
+
+	rc = uinput_device_create(uidev);
+	ck_assert_int_eq(rc, 0);
+
+	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
+	ck_assert_int_eq(rc, 0);
+
+	ck_assert_int_eq(libevdev_has_event_type(dev, EV_REP), 1);
+	ck_assert_int_eq(libevdev_has_event_code(dev, EV_REP, REP_DELAY), 1);
+	ck_assert_int_eq(libevdev_has_event_code(dev, EV_REP, REP_PERIOD), 1);
+
+	ck_assert_int_eq(libevdev_get_repeat(dev, &rep, &delay), 0);
+	/* default values as set by the kernel,
+	   see drivers/input/input.c:input_register_device() */
+	ck_assert_int_eq(rep, KERNEL_DEFAULT_REP);
+	ck_assert_int_eq(delay, KERNEL_DEFAULT_DELAY);
+
+	libevdev_free(dev);
+	uinput_device_free(uidev);
 }
 END_TEST
 
