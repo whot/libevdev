@@ -415,7 +415,7 @@ START_TEST(test_device_name)
 	ck_assert_int_eq(strlen(str), 0);
 
 	rc = uinput_device_new_with_events(&uidev, TEST_DEVICE_NAME, &ids,
-					   EV_ABS, ABS_X,
+					   EV_REL, REL_X,
 					   -1);
 	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
 	rc = libevdev_set_fd(dev, uinput_device_get_fd(uidev));
@@ -468,7 +468,7 @@ START_TEST(test_device_set_name)
 	ck_assert_int_eq(strcmp(str, "the uniq"), 0);
 
 	rc = uinput_device_new_with_events(&uidev, TEST_DEVICE_NAME, &ids,
-					   EV_ABS, ABS_X,
+					   EV_REL, REL_X,
 					   -1);
 	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
 	rc = libevdev_set_fd(dev, uinput_device_get_fd(uidev));
@@ -508,7 +508,7 @@ START_TEST(test_device_set_ids)
 	ck_assert_int_eq(libevdev_get_id_version(dev), 40);
 
 	rc = uinput_device_new_with_events(&uidev, TEST_DEVICE_NAME, &ids,
-					   EV_ABS, ABS_X,
+					   EV_REL, REL_X,
 					   -1);
 	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
 	rc = libevdev_set_fd(dev, uinput_device_get_fd(uidev));
