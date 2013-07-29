@@ -28,7 +28,7 @@ test_libevdev_SOURCES = \
 			test-uinput.c \
 			$(common_sources)
 
-test_libevdev_LDADD =  $(CHECK_LIBS) $(GCOV_LDFLAGS)
+test_libevdev_LDADD =  $(CHECK_LIBS) $(GCOV_LDFLAGS) $(LIBUDEV_LIBS)
 
 if GCOV_ENABLED
 

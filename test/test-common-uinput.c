@@ -30,10 +30,13 @@
 #include <errno.h>
 #include <linux/uinput.h>
 #include <sys/inotify.h>
+#include <libudev.h>
+#include <dirent.h>
 
 #include <libevdev/libevdev.h>
 #include <libevdev/libevdev-int.h>
 #include <libevdev/libevdev-util.h>
+#include <libevdev/libevdev-uinput.h>
 
 #include "test-common-uinput.h"
 
@@ -42,9 +45,11 @@
 
 struct uinput_device
 {
-	struct libevdev d; /* lazy, it has all the accessors */
+	struct libevdev *d; /* lazy, it has all the accessors */
+	struct libevdev_uinput *uidev;
 	char *devnode; /* path after creation */
 	int dev_fd; /* open fd to the devnode */
+	int uinput_fd;
 };
 
 struct uinput_device*
@@ -56,11 +61,12 @@ uinput_device_new(const char *name)
 	if (!dev)
 		return NULL;
 
-	dev->d.fd = -1;
+	dev->d = libevdev_new();
 	dev->dev_fd = -1;
+	dev->uinput_fd = -1;
 
 	if (name)
-		dev->d.name = strdup(name);
+		libevdev_set_name(dev->d, name);
 
 	return dev;
 }
@@ -110,14 +116,13 @@ uinput_device_free(struct uinput_device *dev)
 	if (!dev)
 		return;
 
-	if (dev->d.fd != -1) {
-		ioctl(dev->d.fd, UI_DEV_DESTROY, NULL);
-		close(dev->d.fd);
+	if (dev->uinput_fd != -1) {
+		ioctl(dev->uinput_fd, UI_DEV_DESTROY, NULL);
+		close(dev->uinput_fd);
 	}
 	if (dev->dev_fd != -1)
 		close(dev->dev_fd);
-	free(dev->d.name);
-	free(dev->devnode);
+	libevdev_free(dev->d);
 	free(dev);
 }
 
@@ -127,155 +132,53 @@ uinput_device_get_fd(const struct uinput_device *dev)
 	return dev->dev_fd;
 }
 
-
-static char*
-wait_for_inotify(int fd)
+static char* get_devnode(struct uinput_device *d)
 {
+	const char *syspath = libevdev_uinput_get_syspath(d->uidev);
+	DIR *dir;
+	struct dirent *dp;
+	struct udev *udev;
+	struct udev_device *udev_device;
 	char *devnode = NULL;
-	int found = 0;
-	char buf[1024];
-	size_t bufidx = 0;
-	struct pollfd pfd;
 
-	pfd.fd = fd;
-	pfd.events = POLLIN;
+	udev = udev_new();
+	dir = opendir(syspath);
+	while ((dp = readdir(dir)) && devnode == NULL) {
+		char *path;
 
-	while (!found && poll(&pfd, 1, 2000) > 0) {
-		struct inotify_event *e;
-		ssize_t r;
+		if (strncmp(dp->d_name, "event", 5) != 0)
+			continue;
 
-		r = read(fd, buf + bufidx, sizeof(buf) - bufidx);
-		if (r == -1 && errno != EAGAIN)
-			return NULL;
-
-		bufidx += r;
-
-		e = (struct inotify_event*)buf;
-
-		while (bufidx > sizeof(*e) && bufidx >= sizeof(*e) + e->len) {
-			if (strncmp(e->name, "event", 5) == 0) {
-				asprintf(&devnode, "%s%s", DEV_INPUT_DIR, e->name);
-				found = 1;
-				break;
-			}
-
-			/* this packet didn't contain what we're looking for */
-			int len = sizeof(*e) + e->len;
-			memmove(buf, buf + len, bufidx - len);
-			bufidx -= len;
-		}
+		asprintf(&path, "%s/%s", syspath, dp->d_name);
+		udev_device = udev_device_new_from_syspath(udev, path);
+		devnode = strdup(udev_device_get_devnode(udev_device));
+		udev_device_unref(udev_device);
+		free(path);
 	}
+
+	closedir(dir);
+	udev_unref(udev);
 
 	return devnode;
-}
-
-static int
-inotify_setup()
-{
-	int ifd = inotify_init1(IN_NONBLOCK);
-	if (ifd == -1 || inotify_add_watch(ifd, DEV_INPUT_DIR, IN_CREATE) == -1) {
-		if (ifd != -1)
-			close(ifd);
-		ifd = -1;
-	}
-
-	return ifd;
 }
 
 int
 uinput_device_create(struct uinput_device* d)
 {
-	int type, code, prop;
-	struct uinput_user_dev dev;
 	int rc;
 	int fd;
-	int ifd = -1; /* inotify fd */
 
 	fd = open("/dev/uinput", O_RDWR);
 	if (fd < 0)
 		goto error;
 
-	d->d.fd = fd;
+	d->uinput_fd = fd;
 
-	memset(&dev, 0, sizeof(dev));
-	if (d->d.name)
-		strncpy(dev.name, d->d.name, UINPUT_MAX_NAME_SIZE - 1);
-	dev.id = d->d.ids;
-
-	for (type = 0; type < EV_MAX; type++) {
-		int max;
-		int uinput_bit;
-		const unsigned long *mask;
-
-		if (!bit_is_set(d->d.bits, type))
-			continue;
-
-		rc = ioctl(fd, UI_SET_EVBIT, type);
-		if (rc == -1)
-			goto error;
-
-		max = type_to_mask_const(&d->d, type, &mask);
-		if (max == -1)
-			continue;
-
-		switch(type) {
-			case EV_KEY: uinput_bit = UI_SET_KEYBIT; break;
-			case EV_REL: uinput_bit = UI_SET_RELBIT; break;
-			case EV_ABS: uinput_bit = UI_SET_ABSBIT; break;
-			case EV_MSC: uinput_bit = UI_SET_MSCBIT; break;
-			case EV_LED: uinput_bit = UI_SET_LEDBIT; break;
-			case EV_SND: uinput_bit = UI_SET_SNDBIT; break;
-			case EV_FF: uinput_bit = UI_SET_FFBIT; break;
-			case EV_SW: uinput_bit = UI_SET_SWBIT; break;
-			default:
-				    errno = EINVAL;
-				    goto error;
-		}
-
-		for (code = 0; code < max; code++) {
-			if (!bit_is_set(mask, code))
-				continue;
-
-			rc = ioctl(fd, uinput_bit, code);
-			if (rc == -1)
-				goto error;
-
-			if (type == EV_ABS) {
-				dev.absmin[code] = d->d.abs_info[code].minimum;
-				dev.absmax[code] = d->d.abs_info[code].maximum;
-				dev.absfuzz[code] = d->d.abs_info[code].fuzz;
-				dev.absflat[code] = d->d.abs_info[code].flat;
-				/* uinput has no resolution in the device struct, we use
-				 * EVIOCSABS below */
-			}
-		}
-
-	}
-
-	for (prop = 0; prop < INPUT_PROP_MAX; prop++) {
-		if (!bit_is_set(d->d.props, prop))
-			continue;
-
-		rc = ioctl(fd, UI_SET_PROPBIT, prop);
-		if (rc == -1)
-			goto error;
-	}
-
-	rc = write(fd, &dev, sizeof(dev));
-	if (rc < 0)
-		goto error;
-	else if (rc < sizeof(dev)) {
-		errno = EINVAL;
-		goto error;
-	}
-
-	ifd = inotify_setup();
-
-	rc = ioctl(fd, UI_DEV_CREATE, NULL);
-	if (rc == -1)
+	rc = libevdev_uinput_create_from_device(d->d, fd, &d->uidev);
+	if (rc != 0)
 		goto error;
 
-	d->devnode = wait_for_inotify(ifd);
+	d->devnode = get_devnode(d);
 	if (d->devnode == NULL)
 		goto error;
 
@@ -284,18 +187,19 @@ uinput_device_create(struct uinput_device* d)
 		goto error;
 
 	/* write abs resolution now */
-	if (bit_is_set(d->d.bits, EV_ABS)) {
-		for (code = 0; code < ABS_MAX; code++ ) {
-			struct input_absinfo *abs;
+	if (libevdev_has_event_type(d->d, EV_ABS)) {
+		int  code;
+		for (code = 0; code < ABS_MAX; code++) {
+			const struct input_absinfo *abs;
 
 			/* can't change slots */
 			if (code == ABS_MT_SLOT)
 				continue;
 
-			if (!bit_is_set(d->d.abs_bits, code))
+			abs = libevdev_get_abs_info(d->d, code);
+			if (!abs)
 				continue;
 
-			abs = &d->d.abs_info[code];
 			rc = ioctl(d->dev_fd, EVIOCSABS(code), abs);
 			if (rc < 0) {
 				printf("error %s for code %d\n", strerror(-rc), code);
@@ -307,73 +211,45 @@ uinput_device_create(struct uinput_device* d)
 	return 0;
 
 error:
-	if (ifd != -1)
-		close(ifd);
-	if (d->d.fd != -1)
-		close(fd);
+	if (d->dev_fd != -1)
+		close(d->dev_fd);
+	if (d->uinput_fd != -1)
+		close(d->uinput_fd);
 	return -errno;
 
 }
 
 int uinput_device_set_name(struct uinput_device *dev, const char *name)
 {
-	if (dev->d.name)
-		free(dev->d.name);
-	if (name)
-		dev->d.name = strdup(name);
+	libevdev_set_name(dev->d, name);
 	return 0;
 }
 
 int uinput_device_set_ids(struct uinput_device *dev, const struct input_id *ids)
 {
-	dev->d.ids = *ids;
+	libevdev_set_id_product(dev->d, ids->product);
+	libevdev_set_id_vendor(dev->d, ids->vendor);
+	libevdev_set_id_bustype(dev->d, ids->bustype);
+	libevdev_set_id_version(dev->d, ids->version);
 	return 0;
 }
 
 int
 uinput_device_set_bit(struct uinput_device* dev, unsigned int bit)
 {
-	if (!dev)
-		return -EINVAL;
-
-	if (bit > EV_MAX)
-		return -EINVAL;
-
-	set_bit(dev->d.bits, bit);
-	return 0;
+	return libevdev_enable_event_type(dev->d, bit);
 }
 
 int
 uinput_device_set_prop(struct uinput_device *dev, unsigned int prop)
 {
-	if (!dev)
-		return -EINVAL;
-
-	if (prop > INPUT_PROP_MAX)
-		return -EINVAL;
-
-	set_bit(dev->d.props, prop);
-	return 0;
+	return libevdev_enable_property(dev->d, prop);
 }
 
 int
 uinput_device_set_event_bit(struct uinput_device* dev, unsigned int type, unsigned int code)
 {
-	int max;
-	unsigned long *mask;
-
-	if (uinput_device_set_bit(dev, type) < 0)
-		return -EINVAL;
-
-	if (type == EV_SYN)
-		return 0;
-
-	max = type_to_mask(&dev->d, type, &mask);
-	if (max == -1 || code > max)
-		return -EINVAL;
-
-	set_bit(mask, code);
-	return 0;
+	return libevdev_enable_event_code(dev->d, type, code, NULL);
 }
 
 int
@@ -389,7 +265,7 @@ uinput_device_set_event_bits_v(struct uinput_device *dev, va_list args)
 		code = va_arg(args, int);
 		if (code == -1)
 			break;
-		rc = uinput_device_set_event_bit(dev, type, code);
+		rc = libevdev_enable_event_code(dev->d, type, code, NULL);
 	} while (rc == 0);
 
 	return rc;
@@ -410,11 +286,7 @@ uinput_device_set_event_bits(struct uinput_device *dev, ...)
 int
 uinput_device_set_abs_bit(struct uinput_device* dev, unsigned int code, const struct input_absinfo *absinfo)
 {
-	if (uinput_device_set_event_bit(dev, EV_ABS, code) < 0)
-		return -EINVAL;
-
-	dev->d.abs_info[code] = *absinfo;
-	return 0;
+	return libevdev_enable_event_code(dev->d, EV_ABS, code, absinfo);
 }
 
 int
@@ -429,7 +301,7 @@ uinput_device_event(const struct uinput_device *dev, unsigned int type, unsigned
 		return -EINVAL;
 
 	if (type != EV_SYN) {
-		max = type_to_mask_const(&dev->d, type, &mask);
+		max = type_to_mask_const(dev->d, type, &mask);
 		if (max == -1 || code > max)
 			return -EINVAL;
 	}
@@ -440,7 +312,7 @@ uinput_device_event(const struct uinput_device *dev, unsigned int type, unsigned
 	ev.time.tv_sec = 0;
 	ev.time.tv_usec = 0;
 
-	rc = write(dev->d.fd, &ev, sizeof(ev));
+	rc = write(dev->dev_fd, &ev, sizeof(ev));
 
 	return (rc == -1) ? -errno : 0;
 }
