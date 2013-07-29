@@ -50,5 +50,10 @@ event-names.h
 html
 libevdev-*/
 *.gcno
+*.gcov
+*.gcda
+gcov-report.txt
 test-driver
 libevdev.doxygen
+*.announce
+tags
