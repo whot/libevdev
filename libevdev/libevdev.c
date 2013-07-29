@@ -826,8 +826,16 @@ libevdev_enable_event_type(struct libevdev *dev, unsigned int type)
 	if (type > EV_MAX)
 		return -1;
 
+	if (libevdev_has_event_type(dev, type))
+		return 0;
+
 	set_bit(dev->bits, type);
 
+	if (type == EV_REP) {
+		int delay = 0, period = 0;
+		libevdev_enable_event_code(dev, EV_REP, REP_DELAY, &delay);
+		libevdev_enable_event_code(dev, EV_REP, REP_PERIOD, &period);
+	}
 	return 0;
 }
 
@@ -852,13 +860,19 @@ libevdev_enable_event_code(struct libevdev *dev, unsigned int type,
 	if (libevdev_enable_event_type(dev, type))
 		return -1;
 
-	if (type != EV_ABS && data != NULL)
-		return -1;
-	else if (type == EV_ABS && data == NULL)
-		return -1;
-
-	if (type == EV_SYN)
-		return 0;
+	switch(type) {
+		case EV_SYN:
+			return 0;
+		case EV_ABS:
+		case EV_REP:
+			if (data == NULL)
+				return -1;
+			break;
+		default:
+			if (data != NULL)
+				return -1;
+			break;
+	}
 
 	max = type_to_mask(dev, type, &mask);
 
@@ -870,6 +884,9 @@ libevdev_enable_event_code(struct libevdev *dev, unsigned int type,
 	if (type == EV_ABS) {
 		const struct input_absinfo *abs = data;
 		dev->abs_info[code] = *abs;
+	} else if (type == EV_REP) {
+		const int *value = data;
+		dev->rep_values[code] = *value;
 	}
 
 	return 0;

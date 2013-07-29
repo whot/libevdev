@@ -871,8 +871,8 @@ int libevdev_disable_event_type(struct libevdev *dev, unsigned int type);
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type to enable (EV_ABS, EV_KEY, ...)
  * @param code The event code to enable (ABS_X, REL_X, etc.)
- * @param data If type is EV_ABS, data points to a struct input_absinfo. Otherwise, data must be
- * NULL
+ * @param data If type is EV_ABS, data points to a struct input_absinfo. If type is EV_REP, data
+ * points to an integer. Otherwise, data must be NULL.
  *
  * @return 0 on success or -1 otherwise
  *
