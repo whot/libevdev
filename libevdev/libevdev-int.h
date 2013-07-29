@@ -93,7 +93,7 @@ struct libevdev {
 	unsigned int mt_slot_vals[MAX_SLOTS][ABS_MT_CNT];
 	int num_slots; /**< valid slots in mt_slot_vals */
 	int current_slot;
-	int rep_values[2];
+	int rep_values[REP_CNT];
 
 	enum SyncState sync_state;
 	int grabbed;
