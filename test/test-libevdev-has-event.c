@@ -325,15 +325,7 @@ START_TEST(test_no_slots)
 {
 	struct uinput_device* uidev;
 	struct libevdev *dev;
-	const char *str;
 	int rc;
-
-	dev = libevdev_new();
-
-	str = libevdev_get_name(dev);
-	ck_assert(str != NULL);
-	ck_assert_int_eq(strlen(str), 0);
-
 	rc = test_create_device(&uidev, &dev,
 				EV_ABS, ABS_X,
 				EV_ABS, ABS_Y,
@@ -354,14 +346,7 @@ START_TEST(test_slot_number)
 {
 	struct uinput_device* uidev;
 	struct libevdev *dev;
-	const char *str;
 	int rc;
-
-	dev = libevdev_new();
-
-	str = libevdev_get_name(dev);
-	ck_assert(str != NULL);
-	ck_assert_int_eq(strlen(str), 0);
 
 	rc = test_create_device(&uidev, &dev,
 				EV_ABS, ABS_X,
