@@ -692,6 +692,16 @@ libevdev_has_property(const struct libevdev *dev, unsigned int prop)
 }
 
 int
+libevdev_enable_property(struct libevdev *dev, unsigned int prop)
+{
+	if (prop > INPUT_PROP_MAX)
+		return -1;
+
+	set_bit(dev->props, prop);
+	return 0;
+}
+
+int
 libevdev_has_event_type(const struct libevdev *dev, unsigned int type)
 {
 	return (type <= EV_MAX) && bit_is_set(dev->bits, type);
