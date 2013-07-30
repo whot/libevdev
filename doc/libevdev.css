@@ -216,3 +216,12 @@ code {
 img.footer {
 	width: auto;
 }
+
+/* note, see also, returns */
+dl.section {
+	width: 560px;
+}
+
+table.params {
+	width: 560px;
+}
