@@ -657,7 +657,7 @@ int libevdev_has_event_code(const struct libevdev *dev, unsigned int type, unsig
  *
  * @return axis minimum for the given axis or 0 if the axis is invalid
  */
-int libevdev_get_abs_min(const struct libevdev *dev, unsigned int code);
+int libevdev_get_abs_minimum(const struct libevdev *dev, unsigned int code);
 /**
  * @ingroup bits
  *
@@ -668,7 +668,7 @@ int libevdev_get_abs_min(const struct libevdev *dev, unsigned int code);
  *
  * @return axis maximum for the given axis or 0 if the axis is invalid
  */
-int libevdev_get_abs_max(const struct libevdev *dev, unsigned int code);
+int libevdev_get_abs_maximum(const struct libevdev *dev, unsigned int code);
 /**
  * @ingroup bits
  *
@@ -1043,7 +1043,7 @@ const char * libevdev_get_event_code_name(unsigned int type, unsigned int code);
  * @note On older kernels input properties may not be defined and
  * libevdev_get_input_prop_name() will always return NULL
  */
-const char * libevdev_get_input_prop_name(unsigned int prop);
+const char* libevdev_get_property_name(unsigned int prop);
 
 /**
  * @ingroup misc
@@ -1074,4 +1074,21 @@ int libevdev_get_event_type_max(unsigned int type);
  */
 int libevdev_get_repeat(struct libevdev *dev, int *delay, int *period);
 
+
+/********* DEPRECATED SECTION *********/
+#if defined(__GNUC__) && __GNUC__ >= 4
+#define LIBEVDEV_DEPRECATED __attribute__ ((deprecated))
+#else
+#define LIBEVDEV_DEPRECATED
+#endif
+
+/* replacement: libevdev_get_abs_minimum */
+int libevdev_get_abs_min(const struct libevdev *dev, unsigned int code) LIBEVDEV_DEPRECATED;
+/* replacement: libevdev_get_abs_maximum */
+int libevdev_get_abs_max(const struct libevdev *dev, unsigned int code) LIBEVDEV_DEPRECATED;
+
+/* replacement: libevdev_get_property_name */
+const char* libevdev_get_input_prop_name(unsigned int prop) LIBEVDEV_DEPRECATED;
+
+/**************************************/
 #endif /* libevdev_H */

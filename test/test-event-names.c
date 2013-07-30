@@ -204,14 +204,14 @@ END_TEST
 
 START_TEST(test_prop_name)
 {
-	ck_assert_str_eq(libevdev_get_input_prop_name(INPUT_PROP_POINTER), "INPUT_PROP_POINTER");
-	ck_assert_str_eq(libevdev_get_input_prop_name(INPUT_PROP_DIRECT), "INPUT_PROP_DIRECT");
-	ck_assert_str_eq(libevdev_get_input_prop_name(INPUT_PROP_BUTTONPAD), "INPUT_PROP_BUTTONPAD");
-	ck_assert_str_eq(libevdev_get_input_prop_name(INPUT_PROP_SEMI_MT), "INPUT_PROP_SEMI_MT");
-	ck_assert_str_eq(libevdev_get_input_prop_name(INPUT_PROP_MAX), "INPUT_PROP_MAX");
+	ck_assert_str_eq(libevdev_get_property_name(INPUT_PROP_POINTER), "INPUT_PROP_POINTER");
+	ck_assert_str_eq(libevdev_get_property_name(INPUT_PROP_DIRECT), "INPUT_PROP_DIRECT");
+	ck_assert_str_eq(libevdev_get_property_name(INPUT_PROP_BUTTONPAD), "INPUT_PROP_BUTTONPAD");
+	ck_assert_str_eq(libevdev_get_property_name(INPUT_PROP_SEMI_MT), "INPUT_PROP_SEMI_MT");
+	ck_assert_str_eq(libevdev_get_property_name(INPUT_PROP_MAX), "INPUT_PROP_MAX");
 
-	ck_assert(libevdev_get_input_prop_name(INPUT_PROP_MAX - 1) == NULL);
-	ck_assert(libevdev_get_input_prop_name(INPUT_PROP_MAX + 1) == NULL);
+	ck_assert(libevdev_get_property_name(INPUT_PROP_MAX - 1) == NULL);
+	ck_assert(libevdev_get_property_name(INPUT_PROP_MAX + 1) == NULL);
 }
 END_TEST
 

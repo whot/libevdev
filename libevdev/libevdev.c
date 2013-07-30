@@ -813,12 +813,13 @@ int libevdev_get_abs_##name(const struct libevdev *dev, unsigned int code) \
 	return absinfo ? absinfo->field : 0; \
 }
 
-ABS_GETTER(max, maximum);
-ABS_GETTER(min, minimum);
+ABS_GETTER(max, maximum); /* DEPRECATED */
+ABS_GETTER(min, minimum); /* DEPRECATED */
+ABS_GETTER(maximum, maximum);
+ABS_GETTER(minimum, minimum);
 ABS_GETTER(fuzz, fuzz)
 ABS_GETTER(flat, flat)
 ABS_GETTER(resolution, resolution)
-
 
 int
 libevdev_enable_event_type(struct libevdev *dev, unsigned int type)
@@ -986,8 +987,15 @@ libevdev_get_event_code_name(unsigned int type, unsigned int code)
 	return event_type_map[type][code];
 }
 
+/* DEPRECATED */
 const char*
 libevdev_get_input_prop_name(unsigned int prop)
+{
+	return libevdev_get_property_name(prop);
+}
+
+const char*
+libevdev_get_property_name(unsigned int prop)
 {
 	if (prop > INPUT_PROP_MAX)
 		return NULL;
