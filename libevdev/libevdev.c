@@ -684,10 +684,15 @@ void libevdev_set_##name(struct libevdev *dev, int field) \
 	dev->ids.field = field;\
 }
 
-PRODUCT_SETTER(product_id, product);
-PRODUCT_SETTER(vendor_id, vendor);
-PRODUCT_SETTER(bustype, bustype);
-PRODUCT_SETTER(version, version);
+PRODUCT_SETTER(product_id, product); /* DEPRECATED */
+PRODUCT_SETTER(vendor_id, vendor); /* DEPRECATED */
+PRODUCT_SETTER(bustype, bustype); /* DEPRECATED */
+PRODUCT_SETTER(version, version); /* DEPRECATED */
+
+PRODUCT_SETTER(id_product, product);
+PRODUCT_SETTER(id_vendor, vendor);
+PRODUCT_SETTER(id_bustype, bustype);
+PRODUCT_SETTER(id_version, version);
 
 #define PRODUCT_GETTER(name, field) \
 int libevdev_get_##name(const struct libevdev *dev) \
@@ -695,10 +700,15 @@ int libevdev_get_##name(const struct libevdev *dev) \
 	return dev->ids.field; \
 }
 
-PRODUCT_GETTER(product_id, product);
-PRODUCT_GETTER(vendor_id, vendor);
-PRODUCT_GETTER(bustype, bustype);
-PRODUCT_GETTER(version, version);
+PRODUCT_GETTER(product_id, product); /* DEPRECATED */
+PRODUCT_GETTER(vendor_id, vendor); /* DEPRECATED */
+PRODUCT_GETTER(bustype, bustype); /* DEPRECATED */
+PRODUCT_GETTER(version, version); /* DEPRECATED */
+
+PRODUCT_GETTER(id_product, product);
+PRODUCT_GETTER(id_vendor, vendor);
+PRODUCT_GETTER(id_bustype, bustype);
+PRODUCT_GETTER(id_version, version);
 
 int libevdev_get_driver_version(const struct libevdev *dev)
 {

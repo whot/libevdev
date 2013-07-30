@@ -584,7 +584,7 @@ void libevdev_set_uniq(struct libevdev *dev, const char *uniq);
  *
  * @note This function is signal-safe.
  */
-int libevdev_get_product_id(const struct libevdev *dev);
+int libevdev_get_id_product(const struct libevdev *dev);
 
 /**
  * @ingroup kernel
@@ -595,7 +595,7 @@ int libevdev_get_product_id(const struct libevdev *dev);
  * @note This function may be called before libevdev_set_fd(). A call to
  * libevdev_set_fd() will overwrite any previously set value.
  */
-void libevdev_set_product_id(struct libevdev *dev, int product_id);
+void libevdev_set_id_product(struct libevdev *dev, int product_id);
 
 /**
  * @ingroup bits
@@ -606,7 +606,7 @@ void libevdev_set_product_id(struct libevdev *dev, int product_id);
  *
  * @note This function is signal-safe.
  */
-int libevdev_get_vendor_id(const struct libevdev *dev);
+int libevdev_get_id_vendor(const struct libevdev *dev);
 
 /**
  * @ingroup kernel
@@ -617,7 +617,7 @@ int libevdev_get_vendor_id(const struct libevdev *dev);
  * @note This function may be called before libevdev_set_fd(). A call to
  * libevdev_set_fd() will overwrite any previously set value.
  */
-void libevdev_set_vendor_id(struct libevdev *dev, int vendor_id);
+void libevdev_set_id_vendor(struct libevdev *dev, int vendor_id);
 
 /**
  * @ingroup bits
@@ -628,7 +628,7 @@ void libevdev_set_vendor_id(struct libevdev *dev, int vendor_id);
  *
  * @note This function is signal-safe.
  */
-int libevdev_get_bustype(const struct libevdev *dev);
+int libevdev_get_id_bustype(const struct libevdev *dev);
 
 /**
  * @ingroup kernel
@@ -639,7 +639,7 @@ int libevdev_get_bustype(const struct libevdev *dev);
  * @note This function may be called before libevdev_set_fd(). A call to
  * libevdev_set_fd() will overwrite any previously set value.
  */
-void libevdev_set_bustype(struct libevdev *dev, int bustype);
+void libevdev_set_id_bustype(struct libevdev *dev, int bustype);
 
 /**
  * @ingroup bits
@@ -650,7 +650,7 @@ void libevdev_set_bustype(struct libevdev *dev, int bustype);
  *
  * @note This function is signal-safe.
  */
-int libevdev_get_version(const struct libevdev *dev);
+int libevdev_get_id_version(const struct libevdev *dev);
 
 /**
  * @ingroup kernel
@@ -661,7 +661,7 @@ int libevdev_get_version(const struct libevdev *dev);
  * @note This function may be called before libevdev_set_fd(). A call to
  * libevdev_set_fd() will overwrite any previously set value.
  */
-void libevdev_set_version(struct libevdev *dev, int version);
+void libevdev_set_id_version(struct libevdev *dev, int version);
 
 /**
  * @ingroup bits
@@ -1225,6 +1225,11 @@ void libevdev_set_abs_max(struct libevdev *dev, unsigned int code, int max) LIBE
 
 /* replacment: libevdev_get_property_name */
 const char* libevdev_get_input_prop_name(unsigned int prop) LIBEVDEV_DEPRECATED;
+
+void libevdev_set_product_id(struct libevdev *dev, int product_id) LIBEVDEV_DEPRECATED;
+void libevdev_set_vendor_id(struct libevdev *dev, int vendor_id) LIBEVDEV_DEPRECATED;
+void libevdev_set_bustype(struct libevdev *dev, int bustype) LIBEVDEV_DEPRECATED;
+void libevdev_set_version(struct libevdev *dev, int version) LIBEVDEV_DEPRECATED;
 
 /**************************************/
 #endif /* libevdev_H */
