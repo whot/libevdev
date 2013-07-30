@@ -103,7 +103,7 @@ print_props(struct libevdev *dev)
 	for (i = 0; i <= INPUT_PROP_MAX; i++) {
 		if (libevdev_has_property(dev, i))
 			printf("  Property type %d (%s)\n", i,
-					libevdev_get_input_prop_name(i));
+					libevdev_get_property_name(i));
 	}
 }
 
