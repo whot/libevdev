@@ -689,25 +689,16 @@ PRODUCT_SETTER(vendor_id, vendor);
 PRODUCT_SETTER(bustype, bustype);
 PRODUCT_SETTER(version, version);
 
-int libevdev_get_product_id(const struct libevdev *dev)
-{
-	return dev->ids.product;
+#define PRODUCT_GETTER(name, field) \
+int libevdev_get_##name(const struct libevdev *dev) \
+{ \
+	return dev->ids.field; \
 }
 
-int libevdev_get_vendor_id(const struct libevdev *dev)
-{
-	return dev->ids.vendor;
-}
-
-int libevdev_get_bustype(const struct libevdev *dev)
-{
-	return dev->ids.bustype;
-}
-
-int libevdev_get_version(const struct libevdev *dev)
-{
-	return dev->ids.version;
-}
+PRODUCT_GETTER(product_id, product);
+PRODUCT_GETTER(vendor_id, vendor);
+PRODUCT_GETTER(bustype, bustype);
+PRODUCT_GETTER(version, version);
 
 int libevdev_get_driver_version(const struct libevdev *dev)
 {
