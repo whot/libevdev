@@ -584,7 +584,7 @@ void libevdev_set_uniq(struct libevdev *dev, const char *uniq);
  *
  * @note This function is signal-safe.
  */
-int libevdev_get_product_id(const struct libevdev *dev);
+int libevdev_get_id_product(const struct libevdev *dev);
 
 /**
  * @ingroup bits
@@ -595,7 +595,7 @@ int libevdev_get_product_id(const struct libevdev *dev);
  *
  * @note This function is signal-safe.
  */
-int libevdev_get_vendor_id(const struct libevdev *dev);
+int libevdev_get_id_vendor(const struct libevdev *dev);
 
 /**
  * @ingroup bits
@@ -606,7 +606,7 @@ int libevdev_get_vendor_id(const struct libevdev *dev);
  *
  * @note This function is signal-safe.
  */
-int libevdev_get_bustype(const struct libevdev *dev);
+int libevdev_get_id_bustype(const struct libevdev *dev);
 
 /**
  * @ingroup bits
@@ -617,7 +617,7 @@ int libevdev_get_bustype(const struct libevdev *dev);
  *
  * @note This function is signal-safe.
  */
-int libevdev_get_version(const struct libevdev *dev);
+int libevdev_get_id_version(const struct libevdev *dev);
 
 /**
  * @ingroup bits
@@ -1176,6 +1176,11 @@ int libevdev_get_abs_max(const struct libevdev *dev, unsigned int code) LIBEVDEV
 
 /* replacement: libevdev_get_property_name */
 const char* libevdev_get_input_prop_name(unsigned int prop) LIBEVDEV_DEPRECATED;
+
+int libevdev_get_product_id(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
+int libevdev_get_vendor_id(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
+int libevdev_get_bustype(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
+int libevdev_get_version(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
 
 /**************************************/
 #endif /* libevdev_H */

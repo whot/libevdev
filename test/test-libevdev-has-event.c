@@ -430,10 +430,10 @@ START_TEST(test_device_name)
 	str = libevdev_get_uniq(dev);
 	ck_assert(str == NULL);
 
-	ck_assert_int_eq(libevdev_get_bustype(dev), ids.bustype);
-	ck_assert_int_eq(libevdev_get_vendor_id(dev), ids.vendor);
-	ck_assert_int_eq(libevdev_get_product_id(dev), ids.product);
-	ck_assert_int_eq(libevdev_get_version(dev), ids.version);
+	ck_assert_int_eq(libevdev_get_id_bustype(dev), ids.bustype);
+	ck_assert_int_eq(libevdev_get_id_vendor(dev), ids.vendor);
+	ck_assert_int_eq(libevdev_get_id_product(dev), ids.product);
+	ck_assert_int_eq(libevdev_get_id_version(dev), ids.version);
 	ck_assert_int_eq(libevdev_get_driver_version(dev), EV_VERSION);
 
 	uinput_device_free(uidev);

@@ -158,9 +158,9 @@ main(int argc, char **argv)
 	}
 
 	printf("Input device ID: bus %#x vendor %#x product %#x\n",
-			libevdev_get_bustype(dev),
-			libevdev_get_vendor_id(dev),
-			libevdev_get_product_id(dev));
+			libevdev_get_id_bustype(dev),
+			libevdev_get_id_vendor(dev),
+			libevdev_get_id_product(dev));
 	printf("Evdev version: %x\n", libevdev_get_driver_version(dev));
 	printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
 	printf("Phys location: %s\n", libevdev_get_phys(dev));
