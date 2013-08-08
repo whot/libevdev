@@ -20,8 +20,8 @@
  * OF THIS SOFTWARE.
  */
 
-#ifndef libevdev_H
-#define libevdev_H
+#ifndef LIBEVDEV_H
+#define LIBEVDEV_H
 
 #include <linux/input.h>
 #include <stdarg.h>
@@ -1227,4 +1227,4 @@ int libevdev_get_bustype(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
 int libevdev_get_version(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
 
 /**************************************/
-#endif /* libevdev_H */
+#endif /* LIBEVDEV_H */
