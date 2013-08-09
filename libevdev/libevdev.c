@@ -773,6 +773,29 @@ libevdev_get_event_value(const struct libevdev *dev, unsigned int type, unsigned
 	return value;
 }
 
+int libevdev_set_event_value(struct libevdev *dev, unsigned int type, unsigned int code, int value)
+{
+	int rc = 0;
+	struct input_event e;
+
+	if (!libevdev_has_event_type(dev, type) || !libevdev_has_event_code(dev, type, code))
+		return -1;
+
+	e.type = type;
+	e.code = code;
+	e.value = value;
+
+	switch(type) {
+		case EV_ABS: rc = update_abs_state(dev, &e); break;
+		case EV_KEY: rc = update_key_state(dev, &e); break;
+		default:
+			     rc = -1;
+			     break;
+	}
+
+	return rc;
+}
+
 int
 libevdev_fetch_event_value(const struct libevdev *dev, unsigned int type, unsigned int code, int *value)
 {
@@ -797,6 +820,30 @@ libevdev_get_slot_value(const struct libevdev *dev, unsigned int slot, unsigned 
 		return 0;
 
 	return dev->mt_slot_vals[slot][code - ABS_MT_MIN];
+}
+
+int
+libevdev_set_slot_value(struct libevdev *dev, unsigned int slot, unsigned int code, int value)
+{
+	if (!libevdev_has_event_type(dev, EV_ABS) || !libevdev_has_event_code(dev, EV_ABS, code))
+		return -1;
+
+	if (slot >= dev->num_slots || slot >= MAX_SLOTS)
+		return -1;
+
+	if (code > ABS_MT_MAX || code < ABS_MT_MIN)
+		return -1;
+
+	if (code == ABS_MT_SLOT) {
+		if (value < 0 || value >= libevdev_get_num_slots(dev))
+			return -1;
+		dev->current_slot = value;
+	}
+
+	dev->mt_slot_vals[slot][code - ABS_MT_MIN] = value;
+
+
+	return 0;
 }
 
 int
