@@ -814,6 +814,30 @@ const struct input_absinfo* libevdev_get_abs_info(const struct libevdev *dev, un
 int libevdev_get_event_value(const struct libevdev *dev, unsigned int type, unsigned int code);
 
 /**
+ * @ingroup kernel
+ *
+ * Set the value for a given event type and code. This only makes sense for
+ * some event types, e.g. setting the value for EV_REL is pointless.
+ *
+ * This is a local modification only affecting only this representation of
+ * this device. A future call to libevdev_get_event_value() will return this
+ * value, unless the value was overwritten by an event.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param type The event type for the code to query (EV_SYN, EV_REL, etc.)
+ * @param code The event code to set the value for, one of ABS_X, LED_NUML, etc.
+ * @param value The new value to set
+ *
+ * @return 0 on success, or -1 on failure.
+ * @retval -1 the device does not have the event type or code enabled, or the code is outside the
+ * allowed limits for the given type, or the type cannot be set.
+ *
+ * @see libevdev_set_slot_value
+ * @see libevdev_get_event_value
+ */
+int libevdev_set_event_value(struct libevdev *dev, unsigned int type, unsigned int code, int value);
+
+/**
  * @ingroup bits
  *
  * Fetch the current value of the event type. This is a shortcut for
@@ -861,6 +885,34 @@ int libevdev_fetch_event_value(const struct libevdev *dev, unsigned int type, un
  * @see libevdev_get_value
  */
 int libevdev_get_slot_value(const struct libevdev *dev, unsigned int slot, unsigned int code);
+
+/**
+ * @ingroup kernel
+ *
+ * Set the value for a given code for the given slot.
+ *
+ * This is a local modification only affecting only this representation of
+ * this device. A future call to libevdev_get_slot_value() will return this
+ * value, unless the value was overwritten by an event.
+ *
+ * This function does not set event values for axes outside the ABS_MT range,
+ * use libevdev_set_event_value() instead.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param slot The numerical slot number, must be smaller than the total number
+ * of slots on this device
+ * @param code The event code to set the value for, one of ABS_MT_POSITION_X, etc.
+ * @param value The new value to set
+ *
+ * @return 0 on success, or -1 on failure.
+ * @retval -1 the device does not have the event code enabled, or the code is
+ * outside the allowed limits for multitouch events, or the slot number is outside
+ * the limits for this device, or the device does not support multitouch events.
+ *
+ * @see libevdev_set_event_value
+ * @see libevdev_get_slot_value
+ */
+int libevdev_set_slot_value(struct libevdev *dev, unsigned int slot, unsigned int code, int value);
 
 /**
  * @ingroup mt
