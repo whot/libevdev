@@ -851,7 +851,7 @@ int libevdev_fetch_event_value(const struct libevdev *dev, unsigned int type, un
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param slot The numerical slot number, must be smaller than the total number
- * of slots on this * device
+ * of slots on this device
  * @param code The event code to query for, one of ABS_MT_POSITION_X, etc.
  *
  * @note This function is signal-safe.
