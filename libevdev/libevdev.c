@@ -1189,7 +1189,7 @@ libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum Evde
 int
 libevdev_kernel_set_led_values(struct libevdev *dev, ...)
 {
-	struct input_event ev[LED_MAX];
+	struct input_event ev[LED_MAX + 1];
 	enum EvdevLEDValues val;
 	va_list args;
 	int code;
@@ -1228,8 +1228,12 @@ libevdev_kernel_set_led_values(struct libevdev *dev, ...)
 	va_end(args);
 
 	if (rc == 0 && nleds > 0) {
+		ev[nleds].type = EV_SYN;
+		ev[nleds++].code = SYN_REPORT;
+
 		rc = write(libevdev_get_fd(dev), ev, nleds * sizeof(ev[0]));
 		if (rc > 0) {
+			nleds--; /* last is EV_SYN */
 			while (nleds--)
 				update_led_state(dev, &ev[nleds]);
 		}
