@@ -1092,7 +1092,7 @@ int libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigne
  *
  * @see libevdev_enable_event_code
  */
-int libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs);
+int libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs);
 
 /**
  * @ingroup misc
@@ -1226,6 +1226,10 @@ int libevdev_get_product_id(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
 int libevdev_get_vendor_id(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
 int libevdev_get_bustype(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
 int libevdev_get_version(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
+
+/* replacement: libevdev_kernel_set_abs_info */
+int libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs) LIBEVDEV_DEPRECATED;
+
 
 /**************************************/
 #endif /* LIBEVDEV_H */

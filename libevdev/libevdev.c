@@ -961,8 +961,15 @@ libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned in
 	return 0;
 }
 
+/* DEPRECATED */
 int
 libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs)
+{
+	return libevdev_kernel_set_abs_info(dev, code, abs);
+}
+
+int
+libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs)
 {
 	int rc;
 
