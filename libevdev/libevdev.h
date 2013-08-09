@@ -1146,6 +1146,52 @@ int libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigne
  */
 int libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs);
 
+
+enum EvdevLEDValues {
+	LIBEVDEV_LED_ON = 3,
+	LIBEVDEV_LED_OFF = 4,
+};
+
+/**
+ * @ingroup kernel
+ *
+ * Turn an LED on or off. Convenience function, if you need to modify multiple
+ * LEDs simultaneously, use libevdev_kernel_set_led_values() instead.
+ *
+ * @note enabling an LED requires write permissions on the device's file descriptor.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code The EV_LED event code to modify, one of LED_NUML, LED_CAPSL, ...
+ * @param value Specifies whether to turn the LED on or off
+ * @return zero on success, or a negative errno on failure
+ */
+int libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum EvdevLEDValues value);
+
+/**
+ * @ingroup kernel
+ *
+ * Turn multiple LEDs on or off simultaneously. This function expects a pair
+ * of LED codes and values to set them to, terminated by a -1. For example, to
+ * switch the NumLock LED on but the CapsLock LED off, use:
+ *
+ * @code
+ *     libevdev_kernel_set_led_values(dev, LED_NUML, LIBEVDEV_LED_ON,
+ *                                         LED_CAPSL, LIBEVDEV_LED_OFF,
+ *                                         -1);
+ * @endcode
+ *
+ * If any LED code or value is invalid, this function returns -EINVAL and no
+ * LEDs are modified.
+ *
+ * @note enabling an LED requires write permissions on the device's file descriptor.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param ... A pair of LED_* event codes and enum EvdevLEDValues, followed by
+ * -1 to terminate the list.
+ * @return zero on success, or a negative errno on failure
+ */
+int libevdev_kernel_set_led_values(struct libevdev *dev, ...);
+
 /**
  * @ingroup misc
  *

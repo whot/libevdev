@@ -1179,3 +1179,62 @@ libevdev_get_repeat(struct libevdev *dev, int *delay, int *period)
 
 	return 0;
 }
+
+int
+libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum EvdevLEDValues value)
+{
+	return libevdev_kernel_set_led_values(dev, code, value, -1);
+}
+
+int
+libevdev_kernel_set_led_values(struct libevdev *dev, ...)
+{
+	struct input_event ev[LED_MAX];
+	enum EvdevLEDValues val;
+	va_list args;
+	int code;
+	int rc = 0;
+	size_t nleds = 0;
+
+	memset(ev, 0, sizeof(ev));
+
+	va_start(args, dev);
+	code = va_arg(args, unsigned int);
+	while (code != -1) {
+		if (code > LED_MAX) {
+			rc = -EINVAL;
+			break;
+		}
+		val = va_arg(args, enum EvdevLEDValues);
+		if (val != LIBEVDEV_LED_ON && val != LIBEVDEV_LED_OFF) {
+			rc = -EINVAL;
+			break;
+		}
+
+		if (libevdev_has_event_code(dev, EV_LED, code)) {
+			struct input_event *e = ev;
+
+			while (e->type > 0 && e->code != code)
+				e++;
+
+			if (e->type == 0)
+				nleds++;
+			e->type = EV_LED;
+			e->code = code;
+			e->value = (val == LIBEVDEV_LED_ON);
+		}
+		code = va_arg(args, unsigned int);
+	}
+	va_end(args);
+
+	if (rc == 0 && nleds > 0) {
+		rc = write(libevdev_get_fd(dev), ev, nleds * sizeof(ev[0]));
+		if (rc > 0) {
+			while (nleds--)
+				update_led_state(dev, &ev[nleds]);
+		}
+		rc = (rc != -1) ? 0 : -errno;
+	}
+
+	return rc;
+}

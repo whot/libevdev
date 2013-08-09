@@ -923,6 +923,153 @@ START_TEST(test_device_kernel_change_axis_invalid)
 }
 END_TEST
 
+START_TEST(test_led_valid)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+
+	rc = test_create_device(&uidev, &dev,
+				EV_LED, LED_NUML,
+				EV_LED, LED_CAPSL,
+				EV_LED, LED_COMPOSE,
+				-1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	rc = libevdev_kernel_set_led_value(dev, LED_NUML, LIBEVDEV_LED_ON);
+	ck_assert_int_eq(rc, 0);
+	rc = libevdev_kernel_set_led_value(dev, LED_NUML, LIBEVDEV_LED_OFF);
+	ck_assert_int_eq(rc, 0);
+
+	rc = libevdev_kernel_set_led_values(dev,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_CAPSL, LIBEVDEV_LED_ON,
+					    LED_COMPOSE, LIBEVDEV_LED_OFF,
+					    -1);
+	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(0, libevdev_get_event_value(dev, EV_LED, LED_NUML));
+	ck_assert_int_eq(1, libevdev_get_event_value(dev, EV_LED, LED_CAPSL));
+	ck_assert_int_eq(0, libevdev_get_event_value(dev, EV_LED, LED_COMPOSE));
+
+	rc = libevdev_kernel_set_led_values(dev,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_CAPSL, LIBEVDEV_LED_OFF,
+					    LED_COMPOSE, LIBEVDEV_LED_ON,
+					    -1);
+	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(1, libevdev_get_event_value(dev, EV_LED, LED_NUML));
+	ck_assert_int_eq(0, libevdev_get_event_value(dev, EV_LED, LED_CAPSL));
+	ck_assert_int_eq(1, libevdev_get_event_value(dev, EV_LED, LED_COMPOSE));
+
+	/* make sure we ignore unset leds */
+	rc = libevdev_kernel_set_led_values(dev,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_CAPSL, LIBEVDEV_LED_OFF,
+					    LED_SCROLLL, LIBEVDEV_LED_OFF,
+					    LED_COMPOSE, LIBEVDEV_LED_ON,
+					    -1);
+	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(1, libevdev_get_event_value(dev, EV_LED, LED_NUML));
+	ck_assert_int_eq(0, libevdev_get_event_value(dev, EV_LED, LED_CAPSL));
+	ck_assert_int_eq(1, libevdev_get_event_value(dev, EV_LED, LED_COMPOSE));
+
+	libevdev_free(dev);
+	uinput_device_free(uidev);
+}
+END_TEST
+
+START_TEST(test_led_invalid)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+
+	rc = test_create_device(&uidev, &dev,
+				EV_LED, LED_NUML,
+				EV_LED, LED_CAPSL,
+				EV_LED, LED_COMPOSE,
+				-1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	rc = libevdev_kernel_set_led_value(dev, LED_MAX + 1, LIBEVDEV_LED_ON);
+	ck_assert_int_eq(rc, -EINVAL);
+
+	rc = libevdev_kernel_set_led_value(dev, LED_NUML, LIBEVDEV_LED_OFF + 1);
+	ck_assert_int_eq(rc, -EINVAL);
+
+	rc = libevdev_kernel_set_led_value(dev, LED_SCROLLL, LIBEVDEV_LED_ON);
+	ck_assert_int_eq(rc, 0);
+
+	rc = libevdev_kernel_set_led_values(dev,
+					    LED_NUML, LIBEVDEV_LED_OFF + 1,
+					    -1);
+	ck_assert_int_eq(rc, -EINVAL);
+
+	rc = libevdev_kernel_set_led_values(dev,
+					    LED_MAX + 1, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF + 1,
+					    -1);
+	ck_assert_int_eq(rc, -EINVAL);
+
+	rc = libevdev_kernel_set_led_values(dev,
+					    LED_SCROLLL, LIBEVDEV_LED_OFF,
+					    -1);
+	ck_assert_int_eq(rc, 0);
+
+	libevdev_free(dev);
+	uinput_device_free(uidev);
+}
+END_TEST
+
+START_TEST(test_led_same)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+
+	rc = test_create_device(&uidev, &dev,
+				EV_LED, LED_NUML,
+				EV_LED, LED_CAPSL,
+				EV_LED, LED_COMPOSE,
+				-1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	rc = libevdev_kernel_set_led_values(dev,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    LED_NUML, LIBEVDEV_LED_OFF,
+					    LED_NUML, LIBEVDEV_LED_ON,
+					    /* more than LED_CNT */
+					    -1);
+	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(1, libevdev_get_event_value(dev, EV_LED, LED_NUML));
+	ck_assert_int_eq(0, libevdev_get_event_value(dev, EV_LED, LED_CAPSL));
+	ck_assert_int_eq(0, libevdev_get_event_value(dev, EV_LED, LED_COMPOSE));
+
+	libevdev_free(dev);
+	uinput_device_free(uidev);
+}
+END_TEST
 Suite *
 libevdev_has_event_test(void)
 {
@@ -969,6 +1116,12 @@ libevdev_has_event_test(void)
 	tcase_add_test(tc, test_device_disable_bit_invalid);
 	tcase_add_test(tc, test_device_kernel_change_axis);
 	tcase_add_test(tc, test_device_kernel_change_axis_invalid);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("led manipulation");
+	tcase_add_test(tc, test_led_valid);
+	tcase_add_test(tc, test_led_invalid);
+	tcase_add_test(tc, test_led_same);
 	suite_add_tcase(s, tc);
 
 	return s;
