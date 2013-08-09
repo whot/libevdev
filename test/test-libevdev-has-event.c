@@ -866,7 +866,7 @@ START_TEST(test_device_kernel_change_axis)
 	abs.fuzz = 10;
 	abs.flat = 20;
 	abs.resolution = 30;
-	rc = libevdev_kernel_set_abs_value(dev, ABS_X, &abs);
+	rc = libevdev_kernel_set_abs_info(dev, ABS_X, &abs);
 	ck_assert_int_eq(rc, 0);
 
 	ck_assert_int_eq(libevdev_get_abs_minimum(dev, ABS_X), 500);
@@ -915,7 +915,7 @@ START_TEST(test_device_kernel_change_axis_invalid)
 	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
 	ck_assert_msg(rc == 0, "Failed to init device: %s", strerror(-rc));;
 
-	rc = libevdev_kernel_set_abs_value(dev, ABS_MAX + 1, &abs);
+	rc = libevdev_kernel_set_abs_info(dev, ABS_MAX + 1, &abs);
 	ck_assert_int_eq(rc, -EINVAL);
 
 	libevdev_free(dev);
