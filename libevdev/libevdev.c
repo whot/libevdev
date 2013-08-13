@@ -232,6 +232,10 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	if (rc < 0)
 		goto out;
 
+	rc = ioctl(fd, EVIOCGKEY(sizeof(dev->key_values)), dev->key_values);
+	if (rc < 0)
+		goto out;
+
 	/* rep is a special case, always set it to 1 for both values if EV_REP is set */
 	if (bit_is_set(dev->bits, EV_REP)) {
 		for (i = 0; i < REP_CNT; i++)
