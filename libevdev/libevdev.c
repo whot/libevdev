@@ -236,6 +236,10 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	if (rc < 0)
 		goto out;
 
+	rc = ioctl(fd, EVIOCGLED(sizeof(dev->led_values)), dev->led_values);
+	if (rc < 0)
+		goto out;
+
 	/* rep is a special case, always set it to 1 for both values if EV_REP is set */
 	if (bit_is_set(dev->bits, EV_REP)) {
 		for (i = 0; i < REP_CNT; i++)
@@ -321,6 +325,32 @@ out:
 	return rc ? -errno : 0;
 }
 
+static int
+sync_led_state(struct libevdev *dev)
+{
+	int rc;
+	int i;
+	unsigned long ledstate[NLONGS(LED_MAX)];
+
+	rc = ioctl(dev->fd, EVIOCGLED(sizeof(ledstate)), ledstate);
+	if (rc < 0)
+		goto out;
+
+	for (i = 0; i < LED_MAX; i++) {
+		int old, new;
+		old = bit_is_set(dev->led_values, i);
+		new = bit_is_set(ledstate, i);
+		if (old ^ new) {
+			struct input_event *ev = queue_push(dev);
+			init_event(dev, ev, EV_LED, i, new ? 1 : 0);
+		}
+		set_bit_state(dev->led_values, i, new);
+	}
+
+	rc = 0;
+out:
+	return rc ? -errno : 0;
+}
 static int
 sync_abs_state(struct libevdev *dev)
 {
@@ -441,6 +471,8 @@ sync_state(struct libevdev *dev)
 
 	if (libevdev_has_event_type(dev, EV_KEY))
 		rc = sync_key_state(dev);
+	if (libevdev_has_event_type(dev, EV_LED))
+		rc = sync_led_state(dev);
 	if (rc == 0 && libevdev_has_event_type(dev, EV_ABS))
 		rc = sync_abs_state(dev);
 	if (rc == 0 && libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT))
@@ -503,6 +535,20 @@ update_abs_state(struct libevdev *dev, const struct input_event *e)
 }
 
 static int
+update_led_state(struct libevdev *dev, const struct input_event *e)
+{
+	if (!libevdev_has_event_type(dev, EV_LED))
+		return 1;
+
+	if (e->code > LED_MAX)
+		return 1;
+
+	set_bit_state(dev->led_values, e->code, e->value != 0);
+
+	return 0;
+}
+
+static int
 update_state(struct libevdev *dev, const struct input_event *e)
 {
 	int rc = 0;
@@ -516,6 +562,9 @@ update_state(struct libevdev *dev, const struct input_event *e)
 			break;
 		case EV_ABS:
 			rc = update_abs_state(dev, e);
+			break;
+		case EV_LED:
+			rc = update_led_state(dev, e);
 			break;
 	}
 
@@ -765,6 +814,7 @@ libevdev_get_event_value(const struct libevdev *dev, unsigned int type, unsigned
 	switch (type) {
 		case EV_ABS: value = dev->abs_info[code].value; break;
 		case EV_KEY: value = bit_is_set(dev->key_values, code); break;
+		case EV_LED: value = bit_is_set(dev->led_values, code); break;
 		default:
 			value = 0;
 			break;
@@ -788,6 +838,7 @@ int libevdev_set_event_value(struct libevdev *dev, unsigned int type, unsigned i
 	switch(type) {
 		case EV_ABS: rc = update_abs_state(dev, &e); break;
 		case EV_KEY: rc = update_key_state(dev, &e); break;
+		case EV_LED: rc = update_led_state(dev, &e); break;
 		default:
 			     rc = -1;
 			     break;
