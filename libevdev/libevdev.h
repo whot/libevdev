@@ -996,9 +996,10 @@ int libevdev_enable_event_type(struct libevdev *dev, unsigned int type);
  * @ingroup kernel
  *
  * Forcibly disable an event type on this device, even if the underlying
- * device provides it, effectively muting all keys or axes. libevdev will
- * filter any events matching this type and none will reach the caller.
- * libevdev_has_event_type() will return false for this type.
+ * device provides it. This effectively mutes the respective set of
+ * events. libevdev will filter any events matching this type and none will
+ * reach the caller. libevdev_has_event_type() will return false for this
+ * type.
  *
  * In most cases, a caller likely only wants to disable a single code, not
  * the whole type. Use libevdev_disable_event_code() for that.
@@ -1052,10 +1053,10 @@ int libevdev_enable_event_code(struct libevdev *dev, unsigned int type, unsigned
  * @ingroup kernel
  *
  * Forcibly disable an event code on this device, even if the underlying
- * device provides it, effectively muting this key or axis. libevdev will
- * filter any events matching this type and code and none will reach the
- * caller.
- * libevdev_has_event_code() will return false for this code combination.
+ * device provides it. This effectively mutes the respective set of
+ * events. libevdev will filter any events matching this type and code and
+ * none will reach the caller. libevdev_has_event_code() will return false for
+ * this code.
  *
  * Disabling all event codes for a given type will not disable the event
  * type. Use libevdev_disable_event_type() for that.
