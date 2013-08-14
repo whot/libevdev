@@ -284,14 +284,14 @@
  */
 struct libevdev;
 
-enum EvdevReadFlags {
+typedef enum {
 	LIBEVDEV_READ_SYNC		= 1, /**< Process data in sync mode */
 	LIBEVDEV_READ_NORMAL		= 2, /**< Process data in normal mode */
 	LIBEVDEV_FORCE_SYNC		= 4, /**< Pretend the next event is a SYN_DROPPED. There is
 					          no reason to ever use this except for
 						  automated tests, so don't. */
 	LIBEVDEV_READ_BLOCKING		= 8, /**< The fd is not in O_NONBLOCK and a read may block */
-};
+} libevdev_read_flag_t;
 
 /**
  * @ingroup init
@@ -369,10 +369,10 @@ typedef void (*libevdev_log_func_t)(const char *format, va_list args);
 void libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc);
 
 
-enum EvdevGrabModes {
+typedef enum {
 	LIBEVDEV_GRAB = 3,
 	LIBEVDEV_UNGRAB = 4,
-};
+} libevdev_grab_mode_t;
 
 /**
  * Grab or ungrab the device through a kernel EVIOCGRAB. This prevents other
@@ -390,7 +390,7 @@ enum EvdevGrabModes {
  * @return 0 if the device was successfull grabbed or ungrabbed, or a
  * negative errno in case of failure.
  */
-int libevdev_grab(struct libevdev *dev, int grab);
+int libevdev_grab(struct libevdev *dev, libevdev_grab_mode_t grab);
 
 /**
  * @ingroup init
@@ -1147,10 +1147,10 @@ int libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigne
 int libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs);
 
 
-enum EvdevLEDValues {
+typedef enum {
 	LIBEVDEV_LED_ON = 3,
 	LIBEVDEV_LED_OFF = 4,
-};
+} libevdev_led_value_t;
 
 /**
  * @ingroup kernel
@@ -1165,7 +1165,7 @@ enum EvdevLEDValues {
  * @param value Specifies whether to turn the LED on or off
  * @return zero on success, or a negative errno on failure
  */
-int libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum EvdevLEDValues value);
+int libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, libevdev_led_value_t value);
 
 /**
  * @ingroup kernel
@@ -1186,7 +1186,7 @@ int libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum 
  * @note enabling an LED requires write permissions on the device's file descriptor.
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
- * @param ... A pair of LED_* event codes and enum EvdevLEDValues, followed by
+ * @param ... A pair of LED_* event codes and libevdev_led_value_t, followed by
  * -1 to terminate the list.
  * @return zero on success, or a negative errno on failure
  */
