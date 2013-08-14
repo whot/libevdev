@@ -1091,7 +1091,7 @@ libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const stru
 }
 
 int
-libevdev_grab(struct libevdev *dev, int grab)
+libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab)
 {
 	int rc = 0;
 
@@ -1188,7 +1188,7 @@ libevdev_get_repeat(struct libevdev *dev, int *delay, int *period)
 }
 
 int
-libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum EvdevLEDValues value)
+libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum libevdev_led_value value)
 {
 	return libevdev_kernel_set_led_values(dev, code, value, -1);
 }
@@ -1197,7 +1197,7 @@ int
 libevdev_kernel_set_led_values(struct libevdev *dev, ...)
 {
 	struct input_event ev[LED_MAX + 1];
-	enum EvdevLEDValues val;
+	enum libevdev_led_value val;
 	va_list args;
 	int code;
 	int rc = 0;
@@ -1212,7 +1212,7 @@ libevdev_kernel_set_led_values(struct libevdev *dev, ...)
 			rc = -EINVAL;
 			break;
 		}
-		val = va_arg(args, enum EvdevLEDValues);
+		val = va_arg(args, enum libevdev_led_value);
 		if (val != LIBEVDEV_LED_ON && val != LIBEVDEV_LED_OFF) {
 			rc = -EINVAL;
 			break;
