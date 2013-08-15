@@ -507,7 +507,14 @@ static int
 update_mt_state(struct libevdev *dev, const struct input_event *e)
 {
 	if (e->code == ABS_MT_SLOT) {
+		int i;
 		dev->current_slot = e->value;
+		/* sync abs_info with the current slot values */
+		for (i = ABS_MT_SLOT + 1; i <= ABS_MT_MAX; i++) {
+			if (libevdev_has_event_code(dev, EV_ABS, i))
+				dev->abs_info[i].value = dev->mt_slot_vals[dev->current_slot][i - ABS_MT_MIN];
+		}
+
 		return 0;
 	} else if (dev->current_slot == -1)
 		return 1;
@@ -527,7 +534,7 @@ update_abs_state(struct libevdev *dev, const struct input_event *e)
 		return 1;
 
 	if (e->code >= ABS_MT_MIN && e->code <= ABS_MT_MAX)
-		return update_mt_state(dev, e);
+		update_mt_state(dev, e);
 
 	dev->abs_info[e->code].value = e->value;
 

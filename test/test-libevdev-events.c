@@ -1033,6 +1033,59 @@ START_TEST(test_event_mt_value_setters_invalid)
 }
 END_TEST
 
+START_TEST(test_event_mt_value_setters_current_slot)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_absinfo abs[5];
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+	abs[1].value = ABS_MT_POSITION_X;
+	abs[1].maximum = 1000;
+
+	abs[2].value = ABS_Y;
+	abs[2].maximum = 1000;
+	abs[3].value = ABS_MT_POSITION_Y;
+	abs[3].maximum = 1000;
+
+	abs[4].value = ABS_MT_SLOT;
+	abs[4].maximum = 2;
+
+	rc = test_create_abs_device(&uidev, &dev,
+				    5, abs,
+				    EV_SYN, SYN_REPORT,
+				    -1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	/* set_event_value/get_event_value works on the current slot */
+
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 0);
+	ck_assert_int_eq(libevdev_set_event_value(dev, EV_ABS, ABS_MT_POSITION_X, 1), 0);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_ABS, ABS_MT_POSITION_X), 1);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 0, ABS_MT_POSITION_X), 1);
+
+	ck_assert_int_eq(libevdev_set_event_value(dev, EV_ABS, ABS_MT_SLOT, 1), 0);
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 1);
+	ck_assert_int_eq(libevdev_set_event_value(dev, EV_ABS, ABS_MT_POSITION_X, 2), 0);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_ABS, ABS_MT_POSITION_X), 2);
+	ck_assert_int_eq(libevdev_get_slot_value(dev, 1, ABS_MT_POSITION_X), 2);
+
+	/* set slot 0, but current is still slot 1 */
+	ck_assert_int_eq(libevdev_set_slot_value(dev, 0, ABS_MT_POSITION_X, 3), 0);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_ABS, ABS_MT_POSITION_X), 2);
+
+	ck_assert_int_eq(libevdev_set_event_value(dev, EV_ABS, ABS_MT_SLOT, 0), 0);
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 0);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_ABS, ABS_MT_POSITION_X), 3);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 Suite *
 libevdev_events(void)
 {
@@ -1071,6 +1124,7 @@ libevdev_events(void)
 	tcase_add_test(tc, test_event_value_setters_invalid);
 	tcase_add_test(tc, test_event_mt_value_setters);
 	tcase_add_test(tc, test_event_mt_value_setters_invalid);
+	tcase_add_test(tc, test_event_mt_value_setters_current_slot);
 	suite_add_tcase(s, tc);
 
 	return s;
