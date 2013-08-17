@@ -1,3 +1,4 @@
+ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 SUBDIRS = doc libevdev tools test
 
 pkgconfigdir = $(libdir)/pkgconfig
