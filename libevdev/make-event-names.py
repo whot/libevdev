@@ -45,7 +45,6 @@ def print_bits(bits, prefix):
 	if  not hasattr(bits, prefix):
 		return
 	print("static const char * const %s_map[%s_MAX + 1] = {" % (prefix, prefix.upper()))
-	print("	[0 ... %s_MAX] = NULL," % prefix.upper())
 	for val, name in list(getattr(bits, prefix).items()):
 		print("	[%s] = \"%s\"," % (name, name))
 	print("};")
@@ -65,7 +64,6 @@ def print_python_bits(bits, prefix):
 
 def print_map(bits):
 	print("static const char * const * const event_type_map[EV_MAX + 1] = {")
-	print("	[0 ... EV_MAX] = NULL,")
 
 	for prefix in prefixes:
 		if prefix == "BTN_" or prefix == "EV_" or prefix == "INPUT_PROP_":
@@ -75,6 +73,8 @@ def print_map(bits):
 	print("};")
 	print("")
 
+	print("#pragma GCC diagnostic push")
+	print("#pragma GCC diagnostic ignored \"-Woverride-init\"")
 	print("static const int ev_max[EV_MAX + 1] = {")
 	print("	[0 ... EV_MAX] = -1,")
 	for prefix in prefixes:
@@ -82,6 +82,7 @@ def print_map(bits):
 			continue
 		print("	[EV_%s] = %s_MAX," % (prefix[:-1], prefix[:-1]))
 	print("};")
+	print("#pragma GCC diagnostic pop /* \"-Woverride-init\" */")
 	print("")
 
 def print_python_map(bits):
