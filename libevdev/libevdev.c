@@ -785,16 +785,16 @@ STRING_SETTER(phys);
 STRING_SETTER(uniq);
 
 
-#define PRODUCT_GETTER(name, field) \
-int libevdev_get_##name(const struct libevdev *dev) \
+#define PRODUCT_GETTER(name) \
+int libevdev_get_id_##name(const struct libevdev *dev) \
 { \
-	return dev->ids.field; \
+	return dev->ids.name; \
 }
 
-PRODUCT_GETTER(id_product, product);
-PRODUCT_GETTER(id_vendor, vendor);
-PRODUCT_GETTER(id_bustype, bustype);
-PRODUCT_GETTER(id_version, version);
+PRODUCT_GETTER(product);
+PRODUCT_GETTER(vendor);
+PRODUCT_GETTER(bustype);
+PRODUCT_GETTER(version);
 
 #define PRODUCT_SETTER(field) \
 void libevdev_set_id_##field(struct libevdev *dev, int field) \
@@ -985,18 +985,18 @@ libevdev_get_abs_info(const struct libevdev *dev, unsigned int code)
 	return &dev->abs_info[code];
 }
 
-#define ABS_GETTER(name, field) \
+#define ABS_GETTER(name) \
 int libevdev_get_abs_##name(const struct libevdev *dev, unsigned int code) \
 { \
 	const struct input_absinfo *absinfo = libevdev_get_abs_info(dev, code); \
-	return absinfo ? absinfo->field : 0; \
+	return absinfo ? absinfo->name : 0; \
 }
 
-ABS_GETTER(maximum, maximum);
-ABS_GETTER(minimum, minimum);
-ABS_GETTER(fuzz, fuzz)
-ABS_GETTER(flat, flat)
-ABS_GETTER(resolution, resolution)
+ABS_GETTER(maximum);
+ABS_GETTER(minimum);
+ABS_GETTER(fuzz);
+ABS_GETTER(flat);
+ABS_GETTER(resolution);
 
 #define ABS_SETTER(field) \
 void libevdev_set_abs_##field(struct libevdev *dev, unsigned int code, int val) \
