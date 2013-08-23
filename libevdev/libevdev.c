@@ -791,11 +791,6 @@ int libevdev_get_##name(const struct libevdev *dev) \
 	return dev->ids.field; \
 }
 
-PRODUCT_GETTER(product_id, product); /* DEPRECATED */
-PRODUCT_GETTER(vendor_id, vendor); /* DEPRECATED */
-PRODUCT_GETTER(bustype, bustype); /* DEPRECATED */
-PRODUCT_GETTER(version, version); /* DEPRECATED */
-
 PRODUCT_GETTER(id_product, product);
 PRODUCT_GETTER(id_vendor, vendor);
 PRODUCT_GETTER(id_bustype, bustype);
@@ -997,8 +992,6 @@ int libevdev_get_abs_##name(const struct libevdev *dev, unsigned int code) \
 	return absinfo ? absinfo->field : 0; \
 }
 
-ABS_GETTER(max, maximum); /* DEPRECATED */
-ABS_GETTER(min, minimum); /* DEPRECATED */
 ABS_GETTER(maximum, maximum);
 ABS_GETTER(minimum, minimum);
 ABS_GETTER(fuzz, fuzz)
@@ -1200,13 +1193,6 @@ libevdev_get_event_code_name(unsigned int type, unsigned int code)
 		return NULL;
 
 	return event_type_map[type][code];
-}
-
-/* DEPRECATED */
-const char*
-libevdev_get_input_prop_name(unsigned int prop)
-{
-	return libevdev_get_property_name(prop);
 }
 
 const char*

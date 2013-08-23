@@ -1326,22 +1326,8 @@ int libevdev_get_repeat(struct libevdev *dev, int *delay, int *period);
 #define LIBEVDEV_DEPRECATED
 #endif
 
-/* replacement: libevdev_get_abs_minimum */
-int libevdev_get_abs_min(const struct libevdev *dev, unsigned int code) LIBEVDEV_DEPRECATED;
-/* replacement: libevdev_get_abs_maximum */
-int libevdev_get_abs_max(const struct libevdev *dev, unsigned int code) LIBEVDEV_DEPRECATED;
-
-/* replacement: libevdev_get_property_name */
-const char* libevdev_get_input_prop_name(unsigned int prop) LIBEVDEV_DEPRECATED;
-
-int libevdev_get_product_id(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
-int libevdev_get_vendor_id(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
-int libevdev_get_bustype(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
-int libevdev_get_version(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
-
 /* replacement: libevdev_kernel_set_abs_info */
 int libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs) LIBEVDEV_DEPRECATED;
-
 
 /**************************************/
 #endif /* LIBEVDEV_H */
