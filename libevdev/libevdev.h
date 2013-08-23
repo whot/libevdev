@@ -1211,6 +1211,9 @@ int libevdev_kernel_set_led_values(struct libevdev *dev, ...);
  * with the exception that some sanity checks are performed to ensure type
  * is valid.
  *
+ * @note The ranges for types are compiled into libevdev. If the kernel
+ * changes the max value, libevdev will not automatically pick these up.
+ *
  * @param ev The input event to check
  * @param type Input event type to compare the event against (EV_REL, EV_ABS,
  * etc.)
@@ -1230,6 +1233,9 @@ int libevdev_is_event_type(const struct input_event *ev, unsigned int type);
  *
  * with the exception that some sanity checks are performed to ensure type and
  * code are valid.
+ *
+ * @note The ranges for types and codes are compiled into libevdev. If the kernel
+ * changes the max value, libevdev will not automatically pick these up.
  *
  * @param ev The input event to check
  * @param type Input event type to compare the event against (EV_REL, EV_ABS,
