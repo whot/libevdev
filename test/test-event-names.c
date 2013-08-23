@@ -266,6 +266,11 @@ START_TEST(test_event_code)
 	}
 	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_MAX + 1, ev.code), 0);
 	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_REL, REL_MAX + 1), 0);
+
+	ev.type = EV_SYN;
+	ev.code = SYN_REPORT;
+	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_SYN, SYN_REPORT), 1);
+	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_SYN, SYN_DROPPED), 0);
 }
 END_TEST
 
