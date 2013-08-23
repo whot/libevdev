@@ -23,6 +23,10 @@
 #ifndef LIBEVDEV_H
 #define LIBEVDEV_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <linux/input.h>
 #include <stdarg.h>
 
@@ -1330,4 +1334,9 @@ int libevdev_get_repeat(struct libevdev *dev, int *delay, int *period);
 int libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs) LIBEVDEV_DEPRECATED;
 
 /**************************************/
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* LIBEVDEV_H */
