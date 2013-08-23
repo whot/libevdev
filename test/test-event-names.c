@@ -157,7 +157,9 @@ START_TEST(test_code_msc_name)
 	/* pick out a few only */
 	ck_assert_str_eq(libevdev_get_event_code_name(EV_MSC, MSC_SERIAL), "MSC_SERIAL");
 	ck_assert_str_eq(libevdev_get_event_code_name(EV_MSC, MSC_RAW), "MSC_RAW");
+#ifdef MSC_TIMESTAMP
 	ck_assert_str_eq(libevdev_get_event_code_name(EV_MSC, MSC_TIMESTAMP), "MSC_TIMESTAMP");
+#endif
 	ck_assert_str_eq(libevdev_get_event_code_name(EV_MSC, MSC_MAX), "MSC_MAX");
 
 	ck_assert(libevdev_get_event_code_name(EV_MSC, MSC_MAX - 1) == NULL);
