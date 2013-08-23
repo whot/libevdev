@@ -853,7 +853,7 @@ libevdev_has_event_code(const struct libevdev *dev, unsigned int type, unsigned 
 
 	max = type_to_mask_const(dev, type, &mask);
 
-	if (max == -1 || code > max)
+	if (max == -1 || code > (unsigned int)max)
 		return 0;
 
 	return bit_is_set(mask, code);
@@ -922,7 +922,7 @@ libevdev_get_slot_value(const struct libevdev *dev, unsigned int slot, unsigned 
 	if (!libevdev_has_event_type(dev, EV_ABS) || !libevdev_has_event_code(dev, EV_ABS, code))
 		return 0;
 
-	if (slot >= dev->num_slots || slot >= MAX_SLOTS)
+	if (dev->num_slots < 0 || slot >= (unsigned int)dev->num_slots || slot >= MAX_SLOTS)
 		return 0;
 
 	if (code > ABS_MT_MAX || code < ABS_MT_MIN)
@@ -960,7 +960,8 @@ libevdev_fetch_slot_value(const struct libevdev *dev, unsigned int slot, unsigne
 {
 	if (libevdev_has_event_type(dev, EV_ABS) &&
 	    libevdev_has_event_code(dev, EV_ABS, code) &&
-	    slot < dev->num_slots && slot < MAX_SLOTS) {
+	    dev->num_slots >= 0 &&
+	    slot < (unsigned int)dev->num_slots && slot < MAX_SLOTS) {
 		*value = libevdev_get_slot_value(dev, slot, code);
 		return 1;
 	} else
