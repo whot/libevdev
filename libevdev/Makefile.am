@@ -1,6 +1,6 @@
 lib_LTLIBRARIES=libevdev.la
 
-AM_CPPFLAGS = $(GCOV_CFLAGS)
+AM_CPPFLAGS = $(GCC_CFLAGS) $(GCOV_CFLAGS)
 
 libevdev_la_SOURCES = \
                    libevdev.h \
