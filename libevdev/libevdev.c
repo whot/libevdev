@@ -1190,10 +1190,9 @@ libevdev_get_event_type_name(unsigned int type)
 const char*
 libevdev_get_event_code_name(unsigned int type, unsigned int code)
 {
-	if (type > EV_MAX)
-		return NULL;
+	int max = libevdev_get_event_type_max(type);
 
-	if (code > ev_max[type])
+	if (max == -1 || code > (unsigned int)max)
 		return NULL;
 
 	return event_type_map[type][code];
