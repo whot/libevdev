@@ -1172,10 +1172,13 @@ libevdev_is_event_type(const struct input_event *ev, unsigned int type)
 int
 libevdev_is_event_code(const struct input_event *ev, unsigned int type, unsigned int code)
 {
-	return type < EV_MAX &&
-		ev->type == type &&
-		(type == EV_SYN || code <= libevdev_get_event_type_max(type)) &&
-		ev->code == code;
+	int max;
+
+	if (!libevdev_is_event_type(ev, type))
+		return 0;
+
+	max = libevdev_get_event_type_max(type);
+	return (max > -1 && code <= (unsigned int)max && ev->code == code);
 }
 
 const char*
