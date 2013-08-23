@@ -92,7 +92,7 @@ struct libevdev {
 	unsigned long led_values[NLONGS(LED_CNT)];
 	unsigned long sw_values[NLONGS(SW_CNT)];
 	struct input_absinfo abs_info[ABS_CNT];
-	unsigned int mt_slot_vals[MAX_SLOTS][ABS_MT_CNT];
+	int mt_slot_vals[MAX_SLOTS][ABS_MT_CNT];
 	int num_slots; /**< valid slots in mt_slot_vals */
 	int current_slot;
 	int rep_values[REP_CNT];
