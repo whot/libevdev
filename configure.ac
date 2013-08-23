@@ -47,11 +47,8 @@ AC_SUBST(GCC_CFLAGS)
 AC_PATH_PROG(DOXYGEN, [doxygen])
 if test "x$DOXYGEN" = "x"; then
 	AC_MSG_WARN([doxygen not found - required for documentation])
-	have_doxygen=no
-else
-	have_doxygen=yes
 fi
-AM_CONDITIONAL([HAVE_DOXYGEN], [test "$have_doxygen" = yes])
+AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
 
 AC_MSG_CHECKING([whether to build with gcov])
 AC_ARG_ENABLE([gcov],
