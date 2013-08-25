@@ -490,7 +490,7 @@ sync_state(struct libevdev *dev)
 	 */
 
 	for (i = queue_num_elements(dev) - 1; i >= 0; i--) {
-		struct input_event e;
+		struct input_event e = {{0,0}, 0, 0, 0};
 		queue_peek(dev, i, &e);
 		if (e.type == EV_SYN)
 			break;
@@ -1055,7 +1055,7 @@ libevdev_enable_event_code(struct libevdev *dev, unsigned int type,
 			   unsigned int code, const void *data)
 {
 	unsigned int max;
-	unsigned long *mask;
+	unsigned long *mask = NULL;
 
 	if (libevdev_enable_event_type(dev, type))
 		return -1;
@@ -1096,7 +1096,7 @@ int
 libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned int code)
 {
 	unsigned int max;
-	unsigned long *mask;
+	unsigned long *mask = NULL;
 
 	if (type > EV_MAX)
 		return -1;
