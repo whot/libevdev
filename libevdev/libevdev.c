@@ -232,6 +232,14 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	if (rc < 0)
 		goto out;
 
+	rc = ioctl(fd, EVIOCGKEY(sizeof(dev->key_values)), dev->key_values);
+	if (rc < 0)
+		goto out;
+
+	rc = ioctl(fd, EVIOCGLED(sizeof(dev->led_values)), dev->led_values);
+	if (rc < 0)
+		goto out;
+
 	/* rep is a special case, always set it to 1 for both values if EV_REP is set */
 	if (bit_is_set(dev->bits, EV_REP)) {
 		for (i = 0; i < REP_CNT; i++)
@@ -317,6 +325,32 @@ out:
 	return rc ? -errno : 0;
 }
 
+static int
+sync_led_state(struct libevdev *dev)
+{
+	int rc;
+	int i;
+	unsigned long ledstate[NLONGS(LED_MAX)];
+
+	rc = ioctl(dev->fd, EVIOCGLED(sizeof(ledstate)), ledstate);
+	if (rc < 0)
+		goto out;
+
+	for (i = 0; i < LED_MAX; i++) {
+		int old, new;
+		old = bit_is_set(dev->led_values, i);
+		new = bit_is_set(ledstate, i);
+		if (old ^ new) {
+			struct input_event *ev = queue_push(dev);
+			init_event(dev, ev, EV_LED, i, new ? 1 : 0);
+		}
+		set_bit_state(dev->led_values, i, new);
+	}
+
+	rc = 0;
+out:
+	return rc ? -errno : 0;
+}
 static int
 sync_abs_state(struct libevdev *dev)
 {
@@ -437,6 +471,8 @@ sync_state(struct libevdev *dev)
 
 	if (libevdev_has_event_type(dev, EV_KEY))
 		rc = sync_key_state(dev);
+	if (libevdev_has_event_type(dev, EV_LED))
+		rc = sync_led_state(dev);
 	if (rc == 0 && libevdev_has_event_type(dev, EV_ABS))
 		rc = sync_abs_state(dev);
 	if (rc == 0 && libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT))
@@ -471,7 +507,14 @@ static int
 update_mt_state(struct libevdev *dev, const struct input_event *e)
 {
 	if (e->code == ABS_MT_SLOT) {
+		int i;
 		dev->current_slot = e->value;
+		/* sync abs_info with the current slot values */
+		for (i = ABS_MT_SLOT + 1; i <= ABS_MT_MAX; i++) {
+			if (libevdev_has_event_code(dev, EV_ABS, i))
+				dev->abs_info[i].value = dev->mt_slot_vals[dev->current_slot][i - ABS_MT_MIN];
+		}
+
 		return 0;
 	} else if (dev->current_slot == -1)
 		return 1;
@@ -491,9 +534,23 @@ update_abs_state(struct libevdev *dev, const struct input_event *e)
 		return 1;
 
 	if (e->code >= ABS_MT_MIN && e->code <= ABS_MT_MAX)
-		return update_mt_state(dev, e);
+		update_mt_state(dev, e);
 
 	dev->abs_info[e->code].value = e->value;
+
+	return 0;
+}
+
+static int
+update_led_state(struct libevdev *dev, const struct input_event *e)
+{
+	if (!libevdev_has_event_type(dev, EV_LED))
+		return 1;
+
+	if (e->code > LED_MAX)
+		return 1;
+
+	set_bit_state(dev->led_values, e->code, e->value != 0);
 
 	return 0;
 }
@@ -512,6 +569,9 @@ update_state(struct libevdev *dev, const struct input_event *e)
 			break;
 		case EV_ABS:
 			rc = update_abs_state(dev, e);
+			break;
+		case EV_LED:
+			rc = update_led_state(dev, e);
 			break;
 	}
 
@@ -761,12 +821,37 @@ libevdev_get_event_value(const struct libevdev *dev, unsigned int type, unsigned
 	switch (type) {
 		case EV_ABS: value = dev->abs_info[code].value; break;
 		case EV_KEY: value = bit_is_set(dev->key_values, code); break;
+		case EV_LED: value = bit_is_set(dev->led_values, code); break;
 		default:
 			value = 0;
 			break;
 	}
 
 	return value;
+}
+
+int libevdev_set_event_value(struct libevdev *dev, unsigned int type, unsigned int code, int value)
+{
+	int rc = 0;
+	struct input_event e;
+
+	if (!libevdev_has_event_type(dev, type) || !libevdev_has_event_code(dev, type, code))
+		return -1;
+
+	e.type = type;
+	e.code = code;
+	e.value = value;
+
+	switch(type) {
+		case EV_ABS: rc = update_abs_state(dev, &e); break;
+		case EV_KEY: rc = update_key_state(dev, &e); break;
+		case EV_LED: rc = update_led_state(dev, &e); break;
+		default:
+			     rc = -1;
+			     break;
+	}
+
+	return rc;
 }
 
 int
@@ -793,6 +878,30 @@ libevdev_get_slot_value(const struct libevdev *dev, unsigned int slot, unsigned 
 		return 0;
 
 	return dev->mt_slot_vals[slot][code - ABS_MT_MIN];
+}
+
+int
+libevdev_set_slot_value(struct libevdev *dev, unsigned int slot, unsigned int code, int value)
+{
+	if (!libevdev_has_event_type(dev, EV_ABS) || !libevdev_has_event_code(dev, EV_ABS, code))
+		return -1;
+
+	if (slot >= dev->num_slots || slot >= MAX_SLOTS)
+		return -1;
+
+	if (code > ABS_MT_MAX || code < ABS_MT_MIN)
+		return -1;
+
+	if (code == ABS_MT_SLOT) {
+		if (value < 0 || value >= libevdev_get_num_slots(dev))
+			return -1;
+		dev->current_slot = value;
+	}
+
+	dev->mt_slot_vals[slot][code - ABS_MT_MIN] = value;
+
+
+	return 0;
 }
 
 int
@@ -957,8 +1066,15 @@ libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned in
 	return 0;
 }
 
+/* DEPRECATED */
 int
 libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs)
+{
+	return libevdev_kernel_set_abs_info(dev, code, abs);
+}
+
+int
+libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs)
 {
 	int rc;
 
@@ -975,7 +1091,7 @@ libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const str
 }
 
 int
-libevdev_grab(struct libevdev *dev, int grab)
+libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab)
 {
 	int rc = 0;
 
@@ -1069,4 +1185,67 @@ libevdev_get_repeat(struct libevdev *dev, int *delay, int *period)
 		*period = dev->rep_values[REP_PERIOD];
 
 	return 0;
+}
+
+int
+libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum libevdev_led_value value)
+{
+	return libevdev_kernel_set_led_values(dev, code, value, -1);
+}
+
+int
+libevdev_kernel_set_led_values(struct libevdev *dev, ...)
+{
+	struct input_event ev[LED_MAX + 1];
+	enum libevdev_led_value val;
+	va_list args;
+	int code;
+	int rc = 0;
+	size_t nleds = 0;
+
+	memset(ev, 0, sizeof(ev));
+
+	va_start(args, dev);
+	code = va_arg(args, unsigned int);
+	while (code != -1) {
+		if (code > LED_MAX) {
+			rc = -EINVAL;
+			break;
+		}
+		val = va_arg(args, enum libevdev_led_value);
+		if (val != LIBEVDEV_LED_ON && val != LIBEVDEV_LED_OFF) {
+			rc = -EINVAL;
+			break;
+		}
+
+		if (libevdev_has_event_code(dev, EV_LED, code)) {
+			struct input_event *e = ev;
+
+			while (e->type > 0 && e->code != code)
+				e++;
+
+			if (e->type == 0)
+				nleds++;
+			e->type = EV_LED;
+			e->code = code;
+			e->value = (val == LIBEVDEV_LED_ON);
+		}
+		code = va_arg(args, unsigned int);
+	}
+	va_end(args);
+
+	if (rc == 0 && nleds > 0) {
+		ev[nleds].type = EV_SYN;
+		ev[nleds++].code = SYN_REPORT;
+
+		rc = write(libevdev_get_fd(dev), ev, nleds * sizeof(ev[0]));
+		if (rc > 0) {
+			nleds--; /* last is EV_SYN */
+			while (nleds--)
+				update_led_state(dev, &ev[nleds]);
+		}
+		rc = (rc != -1) ? 0 : -errno;
+	}
+
+	return rc;
 }

@@ -284,7 +284,7 @@
  */
 struct libevdev;
 
-enum EvdevReadFlags {
+enum libevdev_read_flag {
 	LIBEVDEV_READ_SYNC		= 1, /**< Process data in sync mode */
 	LIBEVDEV_READ_NORMAL		= 2, /**< Process data in normal mode */
 	LIBEVDEV_FORCE_SYNC		= 4, /**< Pretend the next event is a SYN_DROPPED. There is
@@ -369,7 +369,7 @@ typedef void (*libevdev_log_func_t)(const char *format, va_list args);
 void libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc);
 
 
-enum EvdevGrabModes {
+enum libevdev_grab_mode {
 	LIBEVDEV_GRAB = 3,
 	LIBEVDEV_UNGRAB = 4,
 };
@@ -390,7 +390,7 @@ enum EvdevGrabModes {
  * @return 0 if the device was successfull grabbed or ungrabbed, or a
  * negative errno in case of failure.
  */
-int libevdev_grab(struct libevdev *dev, int grab);
+int libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab);
 
 /**
  * @ingroup init
@@ -799,6 +799,10 @@ const struct input_absinfo* libevdev_get_abs_info(const struct libevdev *dev, un
  * Behaviour of this function is undefined if the device does not provide
  * the event.
  *
+ * If the device supports ABS_MT_SLOT, the value returned for any ABS_MT_*
+ * event code is the value of the currently active slot. You should use
+ * libevdev_get_slot_value() instead.
+ *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type for the code to query (EV_SYN, EV_REL, etc.)
  * @param code The event code to query for, one of ABS_X, REL_X, etc.
@@ -812,6 +816,34 @@ const struct input_absinfo* libevdev_get_abs_info(const struct libevdev *dev, un
  * @see libevdev_get_slot_value
  */
 int libevdev_get_event_value(const struct libevdev *dev, unsigned int type, unsigned int code);
+
+/**
+ * @ingroup kernel
+ *
+ * Set the value for a given event type and code. This only makes sense for
+ * some event types, e.g. setting the value for EV_REL is pointless.
+ *
+ * This is a local modification only affecting only this representation of
+ * this device. A future call to libevdev_get_event_value() will return this
+ * value, unless the value was overwritten by an event.
+ *
+ * If the device supports ABS_MT_SLOT, the value set for any ABS_MT_*
+ * event code is the value of the currently active slot. You should use
+ * libevdev_set_slot_value() instead.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param type The event type for the code to query (EV_SYN, EV_REL, etc.)
+ * @param code The event code to set the value for, one of ABS_X, LED_NUML, etc.
+ * @param value The new value to set
+ *
+ * @return 0 on success, or -1 on failure.
+ * @retval -1 the device does not have the event type or code enabled, or the code is outside the
+ * allowed limits for the given type, or the type cannot be set.
+ *
+ * @see libevdev_set_slot_value
+ * @see libevdev_get_event_value
+ */
+int libevdev_set_event_value(struct libevdev *dev, unsigned int type, unsigned int code, int value);
 
 /**
  * @ingroup bits
@@ -861,6 +893,34 @@ int libevdev_fetch_event_value(const struct libevdev *dev, unsigned int type, un
  * @see libevdev_get_value
  */
 int libevdev_get_slot_value(const struct libevdev *dev, unsigned int slot, unsigned int code);
+
+/**
+ * @ingroup kernel
+ *
+ * Set the value for a given code for the given slot.
+ *
+ * This is a local modification only affecting only this representation of
+ * this device. A future call to libevdev_get_slot_value() will return this
+ * value, unless the value was overwritten by an event.
+ *
+ * This function does not set event values for axes outside the ABS_MT range,
+ * use libevdev_set_event_value() instead.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param slot The numerical slot number, must be smaller than the total number
+ * of slots on this device
+ * @param code The event code to set the value for, one of ABS_MT_POSITION_X, etc.
+ * @param value The new value to set
+ *
+ * @return 0 on success, or -1 on failure.
+ * @retval -1 the device does not have the event code enabled, or the code is
+ * outside the allowed limits for multitouch events, or the slot number is outside
+ * the limits for this device, or the device does not support multitouch events.
+ *
+ * @see libevdev_set_event_value
+ * @see libevdev_get_slot_value
+ */
+int libevdev_set_slot_value(struct libevdev *dev, unsigned int slot, unsigned int code, int value);
 
 /**
  * @ingroup mt
@@ -1092,7 +1152,53 @@ int libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigne
  *
  * @see libevdev_enable_event_code
  */
-int libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs);
+int libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs);
+
+
+enum libevdev_led_value {
+	LIBEVDEV_LED_ON = 3,
+	LIBEVDEV_LED_OFF = 4,
+};
+
+/**
+ * @ingroup kernel
+ *
+ * Turn an LED on or off. Convenience function, if you need to modify multiple
+ * LEDs simultaneously, use libevdev_kernel_set_led_values() instead.
+ *
+ * @note enabling an LED requires write permissions on the device's file descriptor.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code The EV_LED event code to modify, one of LED_NUML, LED_CAPSL, ...
+ * @param value Specifies whether to turn the LED on or off
+ * @return zero on success, or a negative errno on failure
+ */
+int libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum libevdev_led_value value);
+
+/**
+ * @ingroup kernel
+ *
+ * Turn multiple LEDs on or off simultaneously. This function expects a pair
+ * of LED codes and values to set them to, terminated by a -1. For example, to
+ * switch the NumLock LED on but the CapsLock LED off, use:
+ *
+ * @code
+ *     libevdev_kernel_set_led_values(dev, LED_NUML, LIBEVDEV_LED_ON,
+ *                                         LED_CAPSL, LIBEVDEV_LED_OFF,
+ *                                         -1);
+ * @endcode
+ *
+ * If any LED code or value is invalid, this function returns -EINVAL and no
+ * LEDs are modified.
+ *
+ * @note enabling an LED requires write permissions on the device's file descriptor.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param ... A pair of LED_* event codes and libevdev_led_value_t, followed by
+ * -1 to terminate the list.
+ * @return zero on success, or a negative errno on failure
+ */
+int libevdev_kernel_set_led_values(struct libevdev *dev, ...);
 
 /**
  * @ingroup misc
@@ -1226,6 +1332,10 @@ int libevdev_get_product_id(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
 int libevdev_get_vendor_id(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
 int libevdev_get_bustype(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
 int libevdev_get_version(const struct libevdev *dev) LIBEVDEV_DEPRECATED;
+
+/* replacement: libevdev_kernel_set_abs_info */
+int libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs) LIBEVDEV_DEPRECATED;
+
 
 /**************************************/
 #endif /* LIBEVDEV_H */
