@@ -4,6 +4,7 @@
 # mapping table
 #
 
+from __future__ import print_function
 import re
 import sys
 import argparse
@@ -43,66 +44,66 @@ blacklist = [
 def print_bits(bits, prefix):
 	if  not hasattr(bits, prefix):
 		return
-	print "static const char * const %s_map[%s_MAX + 1] = {" % (prefix, prefix.upper())
-	print "	[0 ... %s_MAX] = NULL," % prefix.upper()
-	for val, name in getattr(bits, prefix).items():
-		print "	[%s] = \"%s\"," % (name, name)
-	print "};"
-	print ""
+	print("static const char * const %s_map[%s_MAX + 1] = {" % (prefix, prefix.upper()))
+	print("	[0 ... %s_MAX] = NULL," % prefix.upper())
+	for val, name in list(getattr(bits, prefix).items()):
+		print("	[%s] = \"%s\"," % (name, name))
+	print("};")
+	print("")
 
 def print_python_bits(bits, prefix):
 	if  not hasattr(bits, prefix):
 		return
 
-	print "%s_map = {" % (prefix)
-	for val, name in getattr(bits, prefix).items():
-		print "	%d : \"%s\"," % (val, name)
-	print "}"
-	print "for k, v in %s_map.items():" % (prefix)
-	print "	%s_map[v] = k" % (prefix)
-	print ""
+	print("%s_map = {" % (prefix))
+	for val, name in list(getattr(bits, prefix).items()):
+		print("	%d : \"%s\"," % (val, name))
+	print("}")
+	print("for k, v in %s_map.items():" % (prefix))
+	print("	%s_map[v] = k" % (prefix))
+	print("")
 
 def print_map(bits):
-	print "static const char * const * const event_type_map[EV_MAX + 1] = {"
-	print "	[0 ... EV_MAX] = NULL,"
+	print("static const char * const * const event_type_map[EV_MAX + 1] = {")
+	print("	[0 ... EV_MAX] = NULL,")
 
 	for prefix in prefixes:
 		if prefix == "BTN_" or prefix == "EV_" or prefix == "INPUT_PROP_":
 			continue
-		print "	[EV_%s] = %s_map," % (prefix[:-1], prefix[:-1].lower())
+		print("	[EV_%s] = %s_map," % (prefix[:-1], prefix[:-1].lower()))
 
-	print "};"
-	print ""
+	print("};")
+	print("")
 
-	print "static const int ev_max[EV_MAX + 1] = {"
-	print "	[0 ... EV_MAX] = -1,"
+	print("static const int ev_max[EV_MAX + 1] = {")
+	print("	[0 ... EV_MAX] = -1,")
 	for prefix in prefixes:
 		if prefix == "BTN_" or prefix == "EV_" or prefix == "INPUT_PROP_":
 			continue
-		print "	[EV_%s] = %s_MAX," % (prefix[:-1], prefix[:-1])
-	print "};"
-	print ""
+		print("	[EV_%s] = %s_MAX," % (prefix[:-1], prefix[:-1]))
+	print("};")
+	print("")
 
 def print_python_map(bits):
-	print "map = {"
+	print("map = {")
 
-	for val, name in getattr(bits, "ev").items():
+	for val, name in list(getattr(bits, "ev").items()):
 		name = name[3:]
 		if name == "REP" or name == "PWR"  or name == "FF_STATUS"  or name == "MAX":
 			continue
-		print "	%d : %s_map," % (val, name.lower())
+		print("	%d : %s_map," % (val, name.lower()))
 
-	print "}"
-	print ""
+	print("}")
+	print("")
 
 def print_mapping_table(bits):
-	print "/* THIS FILE IS GENERATED, DO NOT EDIT */"
-	print ""
-	print "#ifndef EVENT_NAMES_H"
-	print "#define EVENT_NAMES_H"
-	print ""
-	print "#define SYN_MAX 3 /* linux/input.h doesn't define that */"
-	print ""
+	print("/* THIS FILE IS GENERATED, DO NOT EDIT */")
+	print("")
+	print("#ifndef EVENT_NAMES_H")
+	print("#define EVENT_NAMES_H")
+	print("")
+	print("#define SYN_MAX 3 /* linux/input.h doesn't define that */")
+	print("")
 
 	for prefix in prefixes:
 		if prefix == "BTN_":
@@ -111,11 +112,11 @@ def print_mapping_table(bits):
 
 	print_map(bits)
 
-	print "#endif /* EVENT_NAMES_H */"
+	print("#endif /* EVENT_NAMES_H */")
 
 def print_python_mapping_table(bits):
-	print "# THIS FILE IS GENERATED, DO NOT EDIT"
-	print ""
+	print("# THIS FILE IS GENERATED, DO NOT EDIT")
+	print("")
 
 	for prefix in prefixes:
 		if prefix == "BTN_":
@@ -124,15 +125,15 @@ def print_python_mapping_table(bits):
 
 	print_python_map(bits)
 
-	print "def event_get_type_name(type):"
-	print "	return ev_map[type]"
-	print ""
-	print ""
-	print "def event_get_code_name(type, code):"
-	print "	if map.has_key(type) and map[type].has_key(code):"
-	print "		return map[type][code]"
-	print "	return 'UNKNOWN'"
-	print ""
+	print("def event_get_type_name(type):")
+	print("	return ev_map[type]")
+	print("")
+	print("")
+	print("def event_get_code_name(type, code):")
+	print("	if map.has_key(type) and map[type].has_key(code):")
+	print("		return map[type][code]")
+	print("	return 'UNKNOWN'")
+	print("")
 
 def parse_define(bits, line):
 	m = re.match(r"^#define\s+(\w+)\s+(\w+)", line)
