@@ -302,7 +302,7 @@ sync_key_state(struct libevdev *dev)
 {
 	int rc;
 	int i;
-	unsigned long keystate[NLONGS(KEY_MAX)];
+	unsigned long keystate[NLONGS(KEY_CNT)];
 
 	rc = ioctl(dev->fd, EVIOCGKEY(sizeof(keystate)), keystate);
 	if (rc < 0)
@@ -329,7 +329,7 @@ sync_led_state(struct libevdev *dev)
 {
 	int rc;
 	int i;
-	unsigned long ledstate[NLONGS(LED_MAX)];
+	unsigned long ledstate[NLONGS(LED_CNT)];
 
 	rc = ioctl(dev->fd, EVIOCGLED(sizeof(ledstate)), ledstate);
 	if (rc < 0)
