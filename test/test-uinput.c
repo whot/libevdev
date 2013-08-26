@@ -20,7 +20,6 @@
  * OF THIS SOFTWARE.
  */
 
-#define _GNU_SOURCE
 #include <config.h>
 #include <linux/input.h>
 #include <errno.h>
