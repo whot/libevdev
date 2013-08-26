@@ -49,18 +49,33 @@ init_event_queue(struct libevdev *dev)
 }
 
 static void
-_libevdev_log(struct libevdev *dev, const char *format, ...)
+libevdev_noop_log_func(enum libevdev_log_priority priority,
+		       void *data,
+		       const char *file, int line, const char *func,
+		       const char *format, va_list args)
+{
+}
+
+/*
+ * Global logging settings.
+ */
+struct logdata log_data = {
+	LIBEVDEV_LOG_INFO,
+	libevdev_noop_log_func,
+	NULL,
+};
+
+void
+log_msg(enum libevdev_log_priority priority,
+	void *data,
+	const char *file, int line, const char *func,
+	const char *format, ...)
 {
 	va_list args;
 
 	va_start(args, format);
-	dev->log(format, args);
+	log_data.handler(priority, data, file, line, func, format, args);
 	va_end(args);
-}
-
-static void
-libevdev_noop_log_func(const char *format, va_list args)
-{
 }
 
 LIBEVDEV_EXPORT struct libevdev*
@@ -74,7 +89,6 @@ libevdev_new(void)
 	dev->fd = -1;
 	dev->num_slots = -1;
 	dev->current_slot = -1;
-	dev->log = libevdev_noop_log_func;
 	dev->grabbed = LIBEVDEV_UNGRAB;
 	dev->sync_state = SYNC_NONE;
 
@@ -112,13 +126,33 @@ libevdev_free(struct libevdev *dev)
 	free(dev);
 }
 
+/* DEPRECATED */
 LIBEVDEV_EXPORT void
 libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc)
 {
-	if (dev == NULL)
-		return;
+	/* Can't be backwards compatible to this yet, so don't even try */
+	fprintf(stderr, "libevdev: ABI change. Log function will not be honored.\n");
+}
 
-	dev->log = logfunc ? logfunc : libevdev_noop_log_func;
+LIBEVDEV_EXPORT void
+libevdev_set_log_function(libevdev_log_func_t logfunc, void *data)
+{
+	log_data.handler = logfunc ? logfunc : libevdev_noop_log_func;
+	log_data.userdata = data;
+}
+
+LIBEVDEV_EXPORT void
+libevdev_set_log_priority(enum libevdev_log_priority priority)
+{
+	if (priority > LIBEVDEV_LOG_DEBUG)
+		priority = LIBEVDEV_LOG_DEBUG;
+	log_data.priority = priority;
+}
+
+LIBEVDEV_EXPORT enum libevdev_log_priority
+libevdev_get_log_priority(void)
+{
+	return log_data.priority;
 }
 
 LIBEVDEV_EXPORT int

@@ -38,6 +38,7 @@
 #define ABS_MT_MAX ABS_MT_TOOL_Y
 #define ABS_MT_CNT (ABS_MT_MAX - ABS_MT_MIN + 1)
 #define LIBEVDEV_EXPORT __attribute__((visibility("default")))
+#define LIBEVDEV_PRINTF(_format, _args) __attribute__ ((format (printf, _format, _args)))
 
 #undef min
 #undef max
@@ -71,8 +72,6 @@ enum SyncState {
 
 struct libevdev {
 	int fd;
-	libevdev_log_func_t log;
-
 	char *name;
 	char *phys;
 	char *uniq;
@@ -108,6 +107,30 @@ struct libevdev {
 
 	struct timeval last_event_time;
 };
+
+struct logdata {
+	enum libevdev_log_priority priority;	/** minimum logging priority */
+	libevdev_log_func_t handler;		/** handler function */
+	void *userdata;				/** user-defined data pointer */
+};
+extern struct logdata log_data;
+
+#define log_msg_cond(priority, ...) \
+	do { \
+		if (libevdev_get_log_priority() >= priority) \
+			log_msg(priority, log_data.userdata, __FILE__, __LINE__, __func__, __VA_ARGS__); \
+	} while(0)
+
+#define log_error(...) log_msg_cond(LIBEVDEV_LOG_ERROR, __VA_ARGS__)
+#define log_info(...) log_msg_cond(LIBEVDEV_LOG_INFO, __VA_ARGS__)
+#define log_dbg(...) log_msg_cond(LIBEVDEV_LOG_DEBUG, __VA_ARGS__)
+#define log_bug(...) log_msg_cond(LIBEVDEV_LOG_ERROR, "BUG: "__VA_ARGS__)
+
+extern void
+log_msg(enum libevdev_log_priority priority,
+	void *data,
+	const char *file, int line, const char *func,
+	const char *format, ...) LIBEVDEV_PRINTF(6, 7);
 
 /**
  * @return a pointer to the next element in the queue, or NULL if the queue

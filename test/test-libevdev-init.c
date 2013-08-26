@@ -93,24 +93,27 @@ START_TEST(test_init_and_change_fd)
 }
 END_TEST
 
-static void logfunc(const char *f, va_list args) {}
+static void logfunc(enum libevdev_log_priority priority,
+		    void *data,
+		    const char *file, int line, const char *func,
+		    const char *f, va_list args) {}
 
 START_TEST(test_log_init)
 {
 	struct libevdev *dev = NULL;
 
-	libevdev_set_log_handler(NULL, logfunc);
-	libevdev_set_log_handler(NULL, NULL);
+	libevdev_set_log_function(logfunc, NULL);
+	libevdev_set_log_function(NULL, NULL);
 
 	dev = libevdev_new();
 	ck_assert(dev != NULL);
-	libevdev_set_log_handler(dev, logfunc);
+	libevdev_set_log_function(logfunc, NULL);
 	libevdev_free(dev);
 
 	dev = libevdev_new();
 	ck_assert(dev != NULL);
-	libevdev_set_log_handler(dev, NULL);
-	libevdev_set_log_handler(dev, logfunc);
+	libevdev_set_log_function(NULL, NULL);
+	libevdev_set_log_function(logfunc, NULL);
 	libevdev_free(dev);
 	/* well, we didn't crash. can't test this otherwise */
 
