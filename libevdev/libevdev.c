@@ -27,7 +27,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdarg.h>
-#include <linux/uinput.h>
 
 #include "libevdev.h"
 #include "libevdev-int.h"
