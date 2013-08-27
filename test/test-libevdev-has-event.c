@@ -56,7 +56,7 @@ START_TEST(test_has_ev_bit)
 					*evbit, 0,
 					-1);
 		ck_assert_msg(rc == 0, "%s: Failed to create device with: %s",
-				libevdev_get_event_type_name(*evbit),
+				libevdev_event_type_get_name(*evbit),
 				strerror(-rc));
 
 		ck_assert_msg(libevdev_has_event_type(dev, EV_SYN), "for event type %d\n", *evbit);
@@ -123,7 +123,7 @@ START_TEST(test_event_codes)
 			continue;
 		}
 
-		max = libevdev_get_event_type_max(*evbit);
+		max = libevdev_event_type_get_max(*evbit);
 
 		for (code = 1; code < max; code += 10) {
 			if (*evbit == EV_ABS) {
@@ -167,7 +167,7 @@ START_TEST(test_event_code_limits)
 			continue;
 		}
 
-		max = libevdev_get_event_type_max(*evbit);
+		max = libevdev_event_type_get_max(*evbit);
 		ck_assert(max != -1);
 
 		if (*evbit == EV_ABS) {

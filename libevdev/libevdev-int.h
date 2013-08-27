@@ -39,6 +39,7 @@
 #define ABS_MT_CNT (ABS_MT_MAX - ABS_MT_MIN + 1)
 #define LIBEVDEV_EXPORT __attribute__((visibility("default")))
 #define LIBEVDEV_PRINTF(_format, _args) __attribute__ ((format (printf, _format, _args)))
+#define ALIAS(_to) __attribute__((alias(#_to)))
 
 #undef min
 #undef max

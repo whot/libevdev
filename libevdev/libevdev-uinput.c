@@ -359,7 +359,7 @@ libevdev_uinput_write_event(const struct libevdev_uinput *uinput_dev,
 	if (type > EV_MAX)
 		return -EINVAL;
 
-	max = libevdev_get_event_type_max(type);
+	max = libevdev_event_type_get_max(type);
 	if (max == -1 || code > (unsigned int)max)
 		return -EINVAL;
 

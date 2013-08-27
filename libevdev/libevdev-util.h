@@ -56,7 +56,7 @@ set_bit_state(unsigned long *array, int bit, int state)
 #define max_mask(uc, lc) \
 	case EV_##uc: \
 			*mask = dev->lc##_bits; \
-			max = libevdev_get_event_type_max(type); \
+			max = libevdev_event_type_get_max(type); \
 		break;
 
 

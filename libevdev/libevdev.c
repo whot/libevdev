@@ -1244,26 +1244,41 @@ libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab)
 	return rc < 0 ? -errno : 0;
 }
 
+/* DEPRECATED */
 LIBEVDEV_EXPORT int
 libevdev_is_event_type(const struct input_event *ev, unsigned int type)
+ALIAS(libevdev_event_is_type);
+
+LIBEVDEV_EXPORT int
+libevdev_event_is_type(const struct input_event *ev, unsigned int type)
 {
 	return type < EV_CNT && ev->type == type;
 }
 
+/* DEPRECATED */
 LIBEVDEV_EXPORT int
 libevdev_is_event_code(const struct input_event *ev, unsigned int type, unsigned int code)
+ALIAS(libevdev_event_is_code);
+
+LIBEVDEV_EXPORT int
+libevdev_event_is_code(const struct input_event *ev, unsigned int type, unsigned int code)
 {
 	int max;
 
-	if (!libevdev_is_event_type(ev, type))
+	if (!libevdev_event_is_type(ev, type))
 		return 0;
 
-	max = libevdev_get_event_type_max(type);
+	max = libevdev_event_type_get_max(type);
 	return (max > -1 && code <= (unsigned int)max && ev->code == code);
 }
 
+/* DEPRECATED */
 LIBEVDEV_EXPORT const char*
 libevdev_get_event_type_name(unsigned int type)
+ALIAS(libevdev_event_type_get_name);
+
+LIBEVDEV_EXPORT const char*
+libevdev_event_type_get_name(unsigned int type)
 {
 	if (type > EV_MAX)
 		return NULL;
@@ -1271,10 +1286,15 @@ libevdev_get_event_type_name(unsigned int type)
 	return ev_map[type];
 }
 
+/* DEPRECATED */
 LIBEVDEV_EXPORT const char*
 libevdev_get_event_code_name(unsigned int type, unsigned int code)
+ALIAS(libevdev_event_code_get_name);
+
+LIBEVDEV_EXPORT const char*
+libevdev_event_code_get_name(unsigned int type, unsigned int code)
 {
-	int max = libevdev_get_event_type_max(type);
+	int max = libevdev_event_type_get_max(type);
 
 	if (max == -1 || code > (unsigned int)max)
 		return NULL;
@@ -1282,8 +1302,18 @@ libevdev_get_event_code_name(unsigned int type, unsigned int code)
 	return event_type_map[type][code];
 }
 
+/* DEPRECATED */
+LIBEVDEV_EXPORT const char*
+libevdev_get_input_prop_name(unsigned int prop)
+ALIAS(libevdev_property_get_name);
+
+/* DEPRECATED */
 LIBEVDEV_EXPORT const char*
 libevdev_get_property_name(unsigned int prop)
+ALIAS(libevdev_property_get_name);
+
+LIBEVDEV_EXPORT const char*
+libevdev_property_get_name(unsigned int prop)
 {
 	if (prop > INPUT_PROP_MAX)
 		return NULL;
@@ -1291,8 +1321,13 @@ libevdev_get_property_name(unsigned int prop)
 	return input_prop_map[prop];
 }
 
+/* DEPRECATED */
 LIBEVDEV_EXPORT int
 libevdev_get_event_type_max(unsigned int type)
+ALIAS(libevdev_event_type_get_max);
+
+LIBEVDEV_EXPORT int
+libevdev_event_type_get_max(unsigned int type)
 {
 	if (type > EV_MAX)
 		return -1;
