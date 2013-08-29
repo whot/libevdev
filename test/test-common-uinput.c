@@ -156,7 +156,7 @@ uinput_device_create(struct uinput_device* d)
 	/* write abs resolution now */
 	if (libevdev_has_event_type(d->d, EV_ABS)) {
 		int  code;
-		for (code = 0; code < ABS_MAX; code++) {
+		for (code = 0; code < ABS_CNT; code++) {
 			const struct input_absinfo *abs;
 
 			/* can't change slots */

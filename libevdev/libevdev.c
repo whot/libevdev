@@ -312,7 +312,7 @@ sync_key_state(struct libevdev *dev)
 	if (rc < 0)
 		goto out;
 
-	for (i = 0; i < KEY_MAX; i++) {
+	for (i = 0; i < KEY_CNT; i++) {
 		int old, new;
 		old = bit_is_set(dev->key_values, i);
 		new = bit_is_set(keystate, i);
@@ -366,7 +366,7 @@ sync_led_state(struct libevdev *dev)
 	if (rc < 0)
 		goto out;
 
-	for (i = 0; i < LED_MAX; i++) {
+	for (i = 0; i < LED_CNT; i++) {
 		int old, new;
 		old = bit_is_set(dev->led_values, i);
 		new = bit_is_set(ledstate, i);
@@ -387,7 +387,7 @@ sync_abs_state(struct libevdev *dev)
 	int rc;
 	int i;
 
-	for (i = ABS_X; i <= ABS_MAX; i++) {
+	for (i = ABS_X; i < ABS_CNT; i++) {
 		struct input_absinfo abs_info;
 
 		if (i >= ABS_MT_MIN && i <= ABS_MT_MAX)
@@ -423,7 +423,7 @@ sync_mt_state(struct libevdev *dev, int create_events)
 		int val[MAX_SLOTS];
 	} mt_state[ABS_MT_CNT];
 
-	for (i = ABS_MT_MIN; i < ABS_MT_MAX; i++) {
+	for (i = ABS_MT_MIN; i <= ABS_MT_MAX; i++) {
 		int idx;
 		if (i == ABS_MT_SLOT)
 			continue;
@@ -447,7 +447,7 @@ sync_mt_state(struct libevdev *dev, int create_events)
 			init_event(dev, ev, EV_ABS, ABS_MT_SLOT, i);
 		}
 
-		for (j = ABS_MT_MIN; j < ABS_MT_MAX; j++) {
+		for (j = ABS_MT_MIN; j <= ABS_MT_MAX; j++) {
 			int jdx = j - ABS_MT_MIN;
 
 			if (j == ABS_MT_SLOT)

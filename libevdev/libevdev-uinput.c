@@ -60,7 +60,7 @@ set_evbits(const struct libevdev *dev, int fd, struct uinput_user_dev *uidev)
 	int rc = 0;
 	unsigned int type;
 
-	for (type = 0; type < EV_MAX; type++) {
+	for (type = 0; type < EV_CNT; type++) {
 		unsigned int code;
 		int max;
 		int uinput_bit;
@@ -96,7 +96,7 @@ set_evbits(const struct libevdev *dev, int fd, struct uinput_user_dev *uidev)
 				    goto out;
 		}
 
-		for (code = 0; code < (unsigned int)max; code++) {
+		for (code = 0; code <= (unsigned int)max; code++) {
 			if (!libevdev_has_event_code(dev, type, code))
 				continue;
 
@@ -127,7 +127,7 @@ set_props(const struct libevdev *dev, int fd, struct uinput_user_dev *uidev)
 	unsigned int prop;
 	int rc = 0;
 
-	for (prop = 0; prop < INPUT_PROP_MAX; prop++) {
+	for (prop = 0; prop <= INPUT_PROP_MAX; prop++) {
 		if (!libevdev_has_property(dev, prop))
 			continue;
 

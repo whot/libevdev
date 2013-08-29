@@ -63,7 +63,7 @@ START_TEST(test_uinput_create_device)
 	rc = libevdev_new_from_fd(fd, &dev2);
 	ck_assert_int_eq(rc, 0);
 
-	for (type = 0; type < EV_MAX; type++) {
+	for (type = 0; type < EV_CNT; type++) {
 		int max = libevdev_get_event_type_max(type);
 		if (max == -1)
 			continue;
@@ -142,7 +142,7 @@ START_TEST(test_uinput_create_device_from_fd)
 	rc = libevdev_new_from_fd(fd2, &dev2);
 	ck_assert_int_eq(rc, 0);
 
-	for (type = 0; type < EV_MAX; type++) {
+	for (type = 0; type < EV_CNT; type++) {
 		int max = libevdev_get_event_type_max(type);
 		if (max == -1)
 			continue;

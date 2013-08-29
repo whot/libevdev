@@ -237,7 +237,7 @@ START_TEST(test_event_type)
 	ev.type = EV_REL;
 
 	ck_assert_int_eq(libevdev_is_event_type(&ev, EV_REL), 1);
-	for (i = 0; i < EV_MAX; i++) {
+	for (i = 0; i < EV_CNT; i++) {
 		if (i == ev.type)
 			continue;
 		ck_assert_int_eq(libevdev_is_event_type(&ev, i), 0);
@@ -255,7 +255,7 @@ START_TEST(test_event_code)
 	ev.code = REL_Y;
 
 	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_REL, REL_Y), 1);
-	for (i = 0; i < EV_MAX; i++) {
+	for (i = 0; i < EV_CNT; i++) {
 		int j;
 		if (i == ev.type || i == EV_SYN)
 			continue;

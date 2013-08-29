@@ -274,7 +274,7 @@ START_TEST(test_input_props)
 	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
 
 
-	for (i = 0; i < INPUT_PROP_MAX; i++) {
+	for (i = 0; i < INPUT_PROP_CNT; i++) {
 		if (i == INPUT_PROP_DIRECT || i == INPUT_PROP_BUTTONPAD)
 			ck_assert_int_eq(libevdev_has_property(dev, i), 1);
 		else
