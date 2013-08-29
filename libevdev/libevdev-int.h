@@ -99,7 +99,7 @@ struct libevdev {
 	int rep_values[REP_CNT];
 
 	enum SyncState sync_state;
-	int grabbed;
+	enum libevdev_grab_mode grabbed;
 
 	struct input_event *queue;
 	size_t queue_size; /**< size of queue in elements */

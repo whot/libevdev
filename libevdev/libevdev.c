@@ -936,7 +936,7 @@ libevdev_set_slot_value(struct libevdev *dev, unsigned int slot, unsigned int co
 	if (!libevdev_has_event_type(dev, EV_ABS) || !libevdev_has_event_code(dev, EV_ABS, code))
 		return -1;
 
-	if (slot >= dev->num_slots || slot >= MAX_SLOTS)
+	if (dev->num_slots == -1 || slot >= (unsigned int)dev->num_slots || slot >= MAX_SLOTS)
 		return -1;
 
 	if (code > ABS_MT_MAX || code < ABS_MT_MIN)
