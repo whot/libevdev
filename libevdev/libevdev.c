@@ -1166,7 +1166,7 @@ libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab)
 int
 libevdev_is_event_type(const struct input_event *ev, unsigned int type)
 {
-	return type < EV_MAX && ev->type == type;
+	return type < EV_CNT && ev->type == type;
 }
 
 int
