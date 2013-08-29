@@ -306,7 +306,7 @@ sync_key_state(struct libevdev *dev)
 {
 	int rc;
 	int i;
-	unsigned long keystate[NLONGS(KEY_CNT)];
+	unsigned long keystate[NLONGS(KEY_CNT)] = {0};
 
 	rc = ioctl(dev->fd, EVIOCGKEY(sizeof(keystate)), keystate);
 	if (rc < 0)
@@ -320,8 +320,9 @@ sync_key_state(struct libevdev *dev)
 			struct input_event *ev = queue_push(dev);
 			init_event(dev, ev, EV_KEY, i, new ? 1 : 0);
 		}
-		set_bit_state(dev->key_values, i, new);
 	}
+
+	memcpy(dev->key_values, keystate, rc);
 
 	rc = 0;
 out:
@@ -333,7 +334,7 @@ sync_sw_state(struct libevdev *dev)
 {
 	int rc;
 	int i;
-	unsigned long swstate[NLONGS(SW_CNT)];
+	unsigned long swstate[NLONGS(SW_CNT)] = {0};
 
 	rc = ioctl(dev->fd, EVIOCGSW(sizeof(swstate)), swstate);
 	if (rc < 0)
@@ -347,8 +348,9 @@ sync_sw_state(struct libevdev *dev)
 			struct input_event *ev = queue_push(dev);
 			init_event(dev, ev, EV_SW, i, new ? 1 : 0);
 		}
-		set_bit_state(dev->sw_values, i, new);
 	}
+
+	memcpy(dev->sw_values, swstate, rc);
 
 	rc = 0;
 out:
@@ -360,7 +362,7 @@ sync_led_state(struct libevdev *dev)
 {
 	int rc;
 	int i;
-	unsigned long ledstate[NLONGS(LED_CNT)];
+	unsigned long ledstate[NLONGS(LED_CNT)] = {0};
 
 	rc = ioctl(dev->fd, EVIOCGLED(sizeof(ledstate)), ledstate);
 	if (rc < 0)
@@ -374,8 +376,9 @@ sync_led_state(struct libevdev *dev)
 			struct input_event *ev = queue_push(dev);
 			init_event(dev, ev, EV_LED, i, new ? 1 : 0);
 		}
-		set_bit_state(dev->led_values, i, new);
 	}
+
+	memcpy(dev->led_values, ledstate, rc);
 
 	rc = 0;
 out:
