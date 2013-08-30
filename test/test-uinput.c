@@ -323,6 +323,48 @@ START_TEST(test_uinput_events)
 }
 END_TEST
 
+START_TEST(test_uinput_properties)
+{
+	struct libevdev *dev, *dev2;
+	struct libevdev_uinput *uidev;
+	int fd;
+	int rc;
+	const char *devnode;
+
+	dev = libevdev_new();
+	ck_assert(dev != NULL);
+	libevdev_set_name(dev, TEST_DEVICE_NAME);
+	libevdev_enable_event_type(dev, EV_SYN);
+	libevdev_enable_event_type(dev, EV_REL);
+	libevdev_enable_event_type(dev, EV_KEY);
+	libevdev_enable_event_code(dev, EV_REL, REL_X, NULL);
+	libevdev_enable_event_code(dev, EV_REL, REL_Y, NULL);
+	libevdev_enable_event_code(dev, EV_KEY, BTN_LEFT, NULL);
+	libevdev_enable_property(dev, INPUT_PROP_BUTTONPAD);
+	libevdev_enable_property(dev, INPUT_PROP_MAX);
+
+	rc = libevdev_uinput_create_from_device(dev, LIBEVDEV_UINPUT_OPEN_MANAGED, &uidev);
+	ck_assert_int_eq(rc, 0);
+	ck_assert(uidev != NULL);
+
+	devnode = libevdev_uinput_get_devnode(uidev);
+	ck_assert(devnode != NULL);
+
+	fd = open(devnode, O_RDONLY);
+	ck_assert_int_gt(fd, -1);
+	rc = libevdev_new_from_fd(fd, &dev2);
+	ck_assert_int_eq(rc, 0);
+
+	ck_assert(libevdev_has_property(dev2, INPUT_PROP_BUTTONPAD));
+	ck_assert(libevdev_has_property(dev2, INPUT_PROP_MAX));
+
+	libevdev_free(dev);
+	libevdev_free(dev2);
+	libevdev_uinput_destroy(uidev);
+	close(fd);
+}
+END_TEST
+
 Suite *
 uinput_suite(void)
 {
@@ -338,6 +380,10 @@ uinput_suite(void)
 
 	tc = tcase_create("device events");
 	tcase_add_test(tc, test_uinput_events);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("device properties");
+	tcase_add_test(tc, test_uinput_properties);
 	suite_add_tcase(s, tc);
 
 	return s;
