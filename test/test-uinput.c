@@ -47,6 +47,7 @@ START_TEST(test_uinput_create_device)
 	libevdev_enable_event_type(dev, EV_REL);
 	libevdev_enable_event_code(dev, EV_REL, REL_X, NULL);
 	libevdev_enable_event_code(dev, EV_REL, REL_Y, NULL);
+	libevdev_enable_event_code(dev, EV_REL, REL_MAX, NULL);
 
 	rc = libevdev_uinput_create_from_device(dev, LIBEVDEV_UINPUT_OPEN_MANAGED, &uidev);
 	ck_assert_int_eq(rc, 0);
