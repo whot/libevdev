@@ -194,11 +194,11 @@ static inline int
 queue_alloc(struct libevdev *dev, size_t size)
 {
 	if (size == 0)
-		return -ENOSPC;
+		return -ENOMEM;
 
 	dev->queue = calloc(size, sizeof(struct input_event));
 	if (!dev->queue)
-		return -ENOSPC;
+		return -ENOMEM;
 
 	dev->queue_size = size;
 	dev->queue_next = 0;

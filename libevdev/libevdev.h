@@ -202,7 +202,7 @@ extern "C" {
  *
  * dev = libevdev_new();
  * if (!dev)
- *         return ENOSPC;
+ *         return ENOMEM;
  *
  * err = libevdev_set_fd(dev, fd);
  * if (err < 0) {

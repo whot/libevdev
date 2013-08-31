@@ -89,7 +89,7 @@ libevdev_new_from_fd(int fd, struct libevdev **dev)
 
 	d = libevdev_new();
 	if (!d)
-		return -ENOSPC;
+		return -ENOMEM;
 
 	rc = libevdev_set_fd(d, fd);
 	if (rc < 0)
@@ -152,7 +152,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	free(dev->name);
 	dev->name = strdup(buf);
 	if (!dev->name) {
-		errno = ENOSPC;
+		errno = ENOMEM;
 		goto out;
 	}
 
@@ -167,7 +167,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	} else {
 		dev->phys = strdup(buf);
 		if (!dev->phys) {
-			errno = ENOSPC;
+			errno = ENOMEM;
 			goto out;
 		}
 	}
@@ -182,7 +182,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	} else  {
 		dev->uniq = strdup(buf);
 		if (!dev->uniq) {
-			errno = ENOSPC;
+			errno = ENOMEM;
 			goto out;
 		}
 	}
