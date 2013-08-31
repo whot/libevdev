@@ -1130,6 +1130,9 @@ libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const stru
 {
 	int rc;
 
+	if (dev->fd < 0)
+		return -EBADF;
+
 	if (code > ABS_MAX)
 		return -EINVAL;
 
@@ -1146,6 +1149,9 @@ LIBEVDEV_EXPORT int
 libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab)
 {
 	int rc = 0;
+
+	if (dev->fd < 0)
+		return -EBADF;
 
 	if (grab != LIBEVDEV_GRAB && grab != LIBEVDEV_UNGRAB)
 		return -EINVAL;
@@ -1249,6 +1255,9 @@ libevdev_kernel_set_led_values(struct libevdev *dev, ...)
 	int code;
 	int rc = 0;
 	size_t nleds = 0;
+
+	if (dev->fd < 0)
+		return -EBADF;
 
 	memset(ev, 0, sizeof(ev));
 
