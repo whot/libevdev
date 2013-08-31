@@ -158,8 +158,10 @@ libevdev_get_log_priority(void)
 LIBEVDEV_EXPORT int
 libevdev_change_fd(struct libevdev *dev, int fd)
 {
-	if (dev->fd == -1)
+	if (dev->fd == -1) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -1;
+	}
 	dev->fd = fd;
 	return 0;
 }
@@ -171,8 +173,10 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	int i;
 	char buf[256];
 
-	if (dev->fd != -1)
+	if (dev->fd != -1) {
+		log_bug("device already initialized.\n");
 		return -EBADF;
+	}
 
 	rc = ioctl(fd, EVIOCGBIT(0, sizeof(dev->bits)), dev->bits);
 	if (rc < 0)
@@ -696,11 +700,15 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 {
 	int rc = 0;
 
-	if (dev->fd < 0)
+	if (dev->fd < 0) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
+	}
 
-	if (!(flags & (LIBEVDEV_READ_NORMAL|LIBEVDEV_READ_SYNC|LIBEVDEV_FORCE_SYNC)))
+	if (!(flags & (LIBEVDEV_READ_NORMAL|LIBEVDEV_READ_SYNC|LIBEVDEV_FORCE_SYNC))) {
+		log_bug("invalid flags %#x\n.\n", flags);
 		return -EINVAL;
+	}
 
 	if (flags & LIBEVDEV_READ_SYNC) {
 		if (dev->sync_state == SYNC_NEEDED) {
@@ -782,8 +790,10 @@ libevdev_has_event_pending(struct libevdev *dev)
 	struct pollfd fds = { dev->fd, POLLIN, 0 };
 	int rc;
 
-	if (dev->fd < 0)
+	if (dev->fd < 0) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
+	}
 
 	if (queue_num_elements(dev) != 0)
 		return 1;
@@ -1164,8 +1174,10 @@ libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const stru
 {
 	int rc;
 
-	if (dev->fd < 0)
+	if (dev->fd < 0) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
+	}
 
 	if (code > ABS_MAX)
 		return -EINVAL;
@@ -1184,11 +1196,15 @@ libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab)
 {
 	int rc = 0;
 
-	if (dev->fd < 0)
+	if (dev->fd < 0) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
+	}
 
-	if (grab != LIBEVDEV_GRAB && grab != LIBEVDEV_UNGRAB)
+	if (grab != LIBEVDEV_GRAB && grab != LIBEVDEV_UNGRAB) {
+		log_bug("invalid grab parameter %#x\n", grab);
 		return -EINVAL;
+	}
 
 	if (grab == dev->grabbed)
 		return 0;
@@ -1290,8 +1306,10 @@ libevdev_kernel_set_led_values(struct libevdev *dev, ...)
 	int rc = 0;
 	size_t nleds = 0;
 
-	if (dev->fd < 0)
+	if (dev->fd < 0) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
+	}
 
 	memset(ev, 0, sizeof(ev));
 

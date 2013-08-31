@@ -260,8 +260,10 @@ libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct li
 			return fd;
 
 		new_device->fd_is_managed = 1;
-	} else if (fd < 0)
+	} else if (fd < 0) {
+		log_bug("Invalid fd %d\n", fd);
 		return -EBADF;
+	}
 
 	memset(&uidev, 0, sizeof(uidev));
 
@@ -301,6 +303,7 @@ libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct li
 	new_device->fd = fd;
 
 	if (fetch_syspath_and_devnode(new_device) == -1) {
+		log_error("unable to fetch syspath or device node.\n");
 		errno = ENODEV;
 		goto error;
 	}
