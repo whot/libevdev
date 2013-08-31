@@ -226,11 +226,16 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 
 		buf[len - 1] = '\0'; /* file contains \n */
 		if (strcmp(buf, uinput_dev->name) == 0) {
-			strcpy(buf, SYS_INPUT_DIR);
-			strcat(buf, namelist[i]->d_name);
-			uinput_dev->syspath = strdup(buf);
-			uinput_dev->devnode = fetch_device_node(buf);
-			break;
+			if (uinput_dev->syspath) {
+				/* FIXME: could descend into bit comparison here */
+				log_info("multiple identical devices found. syspath is unreliable\n");
+				break;
+			} else {
+				strcpy(buf, SYS_INPUT_DIR);
+				strcat(buf, namelist[i]->d_name);
+				uinput_dev->syspath = strdup(buf);
+				uinput_dev->devnode = fetch_device_node(buf);
+			}
 		}
 	}
 
