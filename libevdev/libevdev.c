@@ -663,7 +663,7 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 	int rc = 0;
 
 	if (dev->fd < 0)
-		return -ENODEV;
+		return -EBADF;
 
 	if (!(flags & (LIBEVDEV_READ_NORMAL|LIBEVDEV_READ_SYNC|LIBEVDEV_FORCE_SYNC)))
 		return -EINVAL;
