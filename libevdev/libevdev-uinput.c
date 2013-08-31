@@ -230,6 +230,7 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 			strcat(buf, namelist[i]->d_name);
 			uinput_dev->syspath = strdup(buf);
 			uinput_dev->devnode = fetch_device_node(buf);
+			break;
 		}
 	}
 
