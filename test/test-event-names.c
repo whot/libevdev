@@ -39,15 +39,6 @@ START_TEST(test_limits)
 }
 END_TEST
 
-START_TEST(test_syn_max)
-{
-	ck_assert_msg(libevdev_get_event_code_name(EV_SYN, 4) == NULL,
-			"If this test fails, update SYN_MAX and implement new functionality");
-}
-END_TEST
-
-
-
 START_TEST(test_type_name)
 {
 	ck_assert_str_eq(libevdev_get_event_type_name(EV_SYN), "EV_SYN");
@@ -281,7 +272,6 @@ event_name_suite(void)
 
 	TCase *tc = tcase_create("type limits");
 	tcase_add_test(tc, test_limits);
-	tcase_add_test(tc, test_syn_max);
 	tcase_add_test(tc, test_event_type_max);
 	suite_add_tcase(s, tc);
 
