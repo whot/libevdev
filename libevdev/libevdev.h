@@ -351,7 +351,7 @@ void libevdev_free(struct libevdev *dev);
 
 /**
  * Logging function called by library-internal logging.
- * This function is expected to treat it's input like printf would.
+ * This function is expected to treat its input like printf would.
  *
  * @param format printf-style format string
  * @param args List of arguments
