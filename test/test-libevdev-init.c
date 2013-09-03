@@ -93,10 +93,16 @@ START_TEST(test_init_and_change_fd)
 }
 END_TEST
 
+
+static int log_fn_called = 0;
+static char *logdata = "test";
 static void logfunc(enum libevdev_log_priority priority,
 		    void *data,
 		    const char *file, int line, const char *func,
-		    const char *f, va_list args) {}
+		    const char *f, va_list args) {
+	ck_assert_int_eq(strcmp(logdata, data), 0);
+	log_fn_called++;
+}
 
 START_TEST(test_log_init)
 {
@@ -107,16 +113,23 @@ START_TEST(test_log_init)
 
 	dev = libevdev_new();
 	ck_assert(dev != NULL);
-	libevdev_set_log_function(logfunc, NULL);
-	libevdev_free(dev);
 
-	dev = libevdev_new();
-	ck_assert(dev != NULL);
+	libevdev_set_log_function(logfunc, logdata);
+	libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, NULL);
+
 	libevdev_set_log_function(NULL, NULL);
-	libevdev_set_log_function(logfunc, NULL);
-	libevdev_free(dev);
-	/* well, we didn't crash. can't test this otherwise */
+	libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, NULL);
 
+	libevdev_set_log_function(logfunc, logdata);
+	libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, NULL);
+
+	/* libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, NULL) should
+	   trigger a log message. We called it three times, but only twice
+	   with the logfunc set, thus, ensure we only called the logfunc
+	   twice */
+	ck_assert_int_eq(log_fn_called, 2);
+
+	libevdev_free(dev);
 }
 END_TEST
 
