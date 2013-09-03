@@ -377,10 +377,10 @@ typedef void (*libevdev_log_func_t)(enum libevdev_log_priority priority,
 
 /**
  * Set a printf-style logging handler for library-internal logging. The default
- * logging function is a noop.
+ * logging function is to stdout.
  *
  * @param logfunc The logging function for this device. If NULL, the current
- * logging function is unset.
+ * logging function is unset and no logging is performed.
  * @param data User-specific data passed to the log handler.
  *
  * @note This function may be called before libevdev_set_fd().

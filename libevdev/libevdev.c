@@ -49,11 +49,32 @@ init_event_queue(struct libevdev *dev)
 }
 
 static void
-libevdev_noop_log_func(enum libevdev_log_priority priority,
+libevdev_dflt_log_func(enum libevdev_log_priority priority,
 		       void *data,
 		       const char *file, int line, const char *func,
 		       const char *format, va_list args)
 {
+	const char *prefix;
+	switch(priority) {
+		case LIBEVDEV_LOG_ERROR: prefix = "libevdev error"; break;
+		case LIBEVDEV_LOG_INFO: prefix = "libevdev info"; break;
+		case LIBEVDEV_LOG_DEBUG:
+					prefix = "libevdev debug";
+					break;
+		default:
+					break;
+	}
+	/* default logging format:
+	   libevev error in libevdev_some_func: blah blah
+	   libevev info in libevdev_some_func: blah blah
+	   libevev debug in file.c:123:libevdev_some_func: blah blah
+	 */
+
+	fprintf(stderr, "%s in ", prefix);
+	if (priority == LIBEVDEV_LOG_DEBUG)
+		fprintf(stderr, "%s:%d:", file, line);
+	fprintf(stderr, "%s: ", func);
+	vfprintf(stderr, format, args);
 }
 
 /*
@@ -61,7 +82,7 @@ libevdev_noop_log_func(enum libevdev_log_priority priority,
  */
 struct logdata log_data = {
 	LIBEVDEV_LOG_INFO,
-	libevdev_noop_log_func,
+	libevdev_dflt_log_func,
 	NULL,
 };
 
@@ -72,6 +93,9 @@ log_msg(enum libevdev_log_priority priority,
 	const char *format, ...)
 {
 	va_list args;
+
+	if (!log_data.handler)
+		return;
 
 	va_start(args, format);
 	log_data.handler(priority, data, file, line, func, format, args);
@@ -137,7 +161,7 @@ libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc)
 LIBEVDEV_EXPORT void
 libevdev_set_log_function(libevdev_log_func_t logfunc, void *data)
 {
-	log_data.handler = logfunc ? logfunc : libevdev_noop_log_func;
+	log_data.handler = logfunc;
 	log_data.userdata = data;
 }
 
