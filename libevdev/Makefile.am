@@ -15,10 +15,7 @@ libevdev_la_LDFLAGS = \
 	-version-info $(LIBEVDEV_LT_VERSION) \
 	-export-symbols-regex '^libevdev_' \
 	$(GCOV_LDFLAGS) \
-	-Wl,--as-needed \
-	-Wl,--gc-sections \
-	-Wl,-z,relro \
-	-Wl,-z,now
+	$(GNU_LD_FLAGS)
 
 libevdevincludedir = $(includedir)/libevdev-1.0/libevdev
 libevdevinclude_HEADERS = libevdev.h libevdev-uinput.h

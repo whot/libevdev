@@ -32,6 +32,11 @@ AC_PROG_CC
 # Initialize libtool
 LT_PREREQ([2.2])
 LT_INIT
+LT_PATH_LD
+if test "x$lt_cv_prog_gnu_ld" = "xyes"; then
+	GNU_LD_FLAGS="-Wl,--as-needed -Wl,--gc-sections -Wl,-z,relro -Wl,-z,now"
+	AC_SUBST(GNU_LD_FLAGS)
+fi
 
 PKG_PROG_PKG_CONFIG()
 PKG_CHECK_MODULES(CHECK, [check], [HAVE_CHECK="yes"], [HAVE_CHECK="no"])
