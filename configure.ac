@@ -47,7 +47,7 @@ AM_CONDITIONAL(BUILD_TESTS, [test "x$HAVE_CHECK" = "xyes"])
 
 
 if test "x$GCC" = "xyes"; then
-	GCC_CFLAGS="-Wall -Wextra -Wno-unused-parameter -Wstrict-prototypes -Wmissing-prototypes -fvisibility=hidden -pipe -fno-common -fno-strict-aliasing -ffunction-sections -fdata-sections -fstack-protector -fno-strict-aliasing -fdiagnostics-show-option -fno-common"
+	GCC_CFLAGS="-Wall -Wextra -Wno-unused-parameter -Wstrict-prototypes -Wmissing-prototypes -fvisibility=hidden -pipe -fno-common -fno-strict-aliasing -ffunction-sections -fdata-sections -fno-strict-aliasing -fdiagnostics-show-option -fno-common"
 fi
 AC_SUBST(GCC_CFLAGS)
 
