@@ -49,18 +49,57 @@ init_event_queue(struct libevdev *dev)
 }
 
 static void
-_libevdev_log(struct libevdev *dev, const char *format, ...)
+libevdev_dflt_log_func(enum libevdev_log_priority priority,
+		       void *data,
+		       const char *file, int line, const char *func,
+		       const char *format, va_list args)
+{
+	const char *prefix;
+	switch(priority) {
+		case LIBEVDEV_LOG_ERROR: prefix = "libevdev error"; break;
+		case LIBEVDEV_LOG_INFO: prefix = "libevdev info"; break;
+		case LIBEVDEV_LOG_DEBUG:
+					prefix = "libevdev debug";
+					break;
+		default:
+					break;
+	}
+	/* default logging format:
+	   libevev error in libevdev_some_func: blah blah
+	   libevev info in libevdev_some_func: blah blah
+	   libevev debug in file.c:123:libevdev_some_func: blah blah
+	 */
+
+	fprintf(stderr, "%s in ", prefix);
+	if (priority == LIBEVDEV_LOG_DEBUG)
+		fprintf(stderr, "%s:%d:", file, line);
+	fprintf(stderr, "%s: ", func);
+	vfprintf(stderr, format, args);
+}
+
+/*
+ * Global logging settings.
+ */
+struct logdata log_data = {
+	LIBEVDEV_LOG_INFO,
+	libevdev_dflt_log_func,
+	NULL,
+};
+
+void
+log_msg(enum libevdev_log_priority priority,
+	void *data,
+	const char *file, int line, const char *func,
+	const char *format, ...)
 {
 	va_list args;
 
-	va_start(args, format);
-	dev->log(format, args);
-	va_end(args);
-}
+	if (!log_data.handler)
+		return;
 
-static void
-libevdev_noop_log_func(const char *format, va_list args)
-{
+	va_start(args, format);
+	log_data.handler(priority, data, file, line, func, format, args);
+	va_end(args);
 }
 
 LIBEVDEV_EXPORT struct libevdev*
@@ -74,7 +113,6 @@ libevdev_new(void)
 	dev->fd = -1;
 	dev->num_slots = -1;
 	dev->current_slot = -1;
-	dev->log = libevdev_noop_log_func;
 	dev->grabbed = LIBEVDEV_UNGRAB;
 	dev->sync_state = SYNC_NONE;
 
@@ -89,7 +127,7 @@ libevdev_new_from_fd(int fd, struct libevdev **dev)
 
 	d = libevdev_new();
 	if (!d)
-		return -ENOSPC;
+		return -ENOMEM;
 
 	rc = libevdev_set_fd(d, fd);
 	if (rc < 0)
@@ -112,20 +150,42 @@ libevdev_free(struct libevdev *dev)
 	free(dev);
 }
 
+/* DEPRECATED */
 LIBEVDEV_EXPORT void
 libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc)
 {
-	if (dev == NULL)
-		return;
+	/* Can't be backwards compatible to this yet, so don't even try */
+	fprintf(stderr, "libevdev: ABI change. Log function will not be honored.\n");
+}
 
-	dev->log = logfunc ? logfunc : libevdev_noop_log_func;
+LIBEVDEV_EXPORT void
+libevdev_set_log_function(libevdev_log_func_t logfunc, void *data)
+{
+	log_data.handler = logfunc;
+	log_data.userdata = data;
+}
+
+LIBEVDEV_EXPORT void
+libevdev_set_log_priority(enum libevdev_log_priority priority)
+{
+	if (priority > LIBEVDEV_LOG_DEBUG)
+		priority = LIBEVDEV_LOG_DEBUG;
+	log_data.priority = priority;
+}
+
+LIBEVDEV_EXPORT enum libevdev_log_priority
+libevdev_get_log_priority(void)
+{
+	return log_data.priority;
 }
 
 LIBEVDEV_EXPORT int
 libevdev_change_fd(struct libevdev *dev, int fd)
 {
-	if (dev->fd == -1)
+	if (dev->fd == -1) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -1;
+	}
 	dev->fd = fd;
 	return 0;
 }
@@ -137,8 +197,10 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	int i;
 	char buf[256];
 
-	if (dev->fd != -1)
+	if (dev->fd != -1) {
+		log_bug("device already initialized.\n");
 		return -EBADF;
+	}
 
 	rc = ioctl(fd, EVIOCGBIT(0, sizeof(dev->bits)), dev->bits);
 	if (rc < 0)
@@ -152,7 +214,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	free(dev->name);
 	dev->name = strdup(buf);
 	if (!dev->name) {
-		errno = ENOSPC;
+		errno = ENOMEM;
 		goto out;
 	}
 
@@ -167,7 +229,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	} else {
 		dev->phys = strdup(buf);
 		if (!dev->phys) {
-			errno = ENOSPC;
+			errno = ENOMEM;
 			goto out;
 		}
 	}
@@ -182,7 +244,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	} else  {
 		dev->uniq = strdup(buf);
 		if (!dev->uniq) {
-			errno = ENOSPC;
+			errno = ENOMEM;
 			goto out;
 		}
 	}
@@ -662,11 +724,15 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 {
 	int rc = 0;
 
-	if (dev->fd < 0)
-		return -ENODEV;
+	if (dev->fd < 0) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		return -EBADF;
+	}
 
-	if (!(flags & (LIBEVDEV_READ_NORMAL|LIBEVDEV_READ_SYNC|LIBEVDEV_FORCE_SYNC)))
+	if (!(flags & (LIBEVDEV_READ_NORMAL|LIBEVDEV_READ_SYNC|LIBEVDEV_FORCE_SYNC))) {
+		log_bug("invalid flags %#x\n.\n", flags);
 		return -EINVAL;
+	}
 
 	if (flags & LIBEVDEV_READ_SYNC) {
 		if (dev->sync_state == SYNC_NEEDED) {
@@ -748,8 +814,10 @@ libevdev_has_event_pending(struct libevdev *dev)
 	struct pollfd fds = { dev->fd, POLLIN, 0 };
 	int rc;
 
-	if (dev->fd < 0)
+	if (dev->fd < 0) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
+	}
 
 	if (queue_num_elements(dev) != 0)
 		return 1;
@@ -1130,6 +1198,11 @@ libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const stru
 {
 	int rc;
 
+	if (dev->fd < 0) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		return -EBADF;
+	}
+
 	if (code > ABS_MAX)
 		return -EINVAL;
 
@@ -1147,8 +1220,15 @@ libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab)
 {
 	int rc = 0;
 
-	if (grab != LIBEVDEV_GRAB && grab != LIBEVDEV_UNGRAB)
+	if (dev->fd < 0) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		return -EBADF;
+	}
+
+	if (grab != LIBEVDEV_GRAB && grab != LIBEVDEV_UNGRAB) {
+		log_bug("invalid grab parameter %#x\n", grab);
 		return -EINVAL;
+	}
 
 	if (grab == dev->grabbed)
 		return 0;
@@ -1249,6 +1329,11 @@ libevdev_kernel_set_led_values(struct libevdev *dev, ...)
 	int code;
 	int rc = 0;
 	size_t nleds = 0;
+
+	if (dev->fd < 0) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		return -EBADF;
+	}
 
 	memset(ev, 0, sizeof(ev));
 

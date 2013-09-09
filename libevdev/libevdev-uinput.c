@@ -226,10 +226,16 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 
 		buf[len - 1] = '\0'; /* file contains \n */
 		if (strcmp(buf, uinput_dev->name) == 0) {
-			strcpy(buf, SYS_INPUT_DIR);
-			strcat(buf, namelist[i]->d_name);
-			uinput_dev->syspath = strdup(buf);
-			uinput_dev->devnode = fetch_device_node(buf);
+			if (uinput_dev->syspath) {
+				/* FIXME: could descend into bit comparison here */
+				log_info("multiple identical devices found. syspath is unreliable\n");
+				break;
+			} else {
+				strcpy(buf, SYS_INPUT_DIR);
+				strcat(buf, namelist[i]->d_name);
+				uinput_dev->syspath = strdup(buf);
+				uinput_dev->devnode = fetch_device_node(buf);
+			}
 		}
 	}
 
@@ -259,8 +265,10 @@ libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct li
 			return fd;
 
 		new_device->fd_is_managed = 1;
-	} else if (fd < 0)
+	} else if (fd < 0) {
+		log_bug("Invalid fd %d\n", fd);
 		return -EBADF;
+	}
 
 	memset(&uidev, 0, sizeof(uidev));
 
@@ -300,6 +308,7 @@ libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct li
 	new_device->fd = fd;
 
 	if (fetch_syspath_and_devnode(new_device) == -1) {
+		log_error("unable to fetch syspath or device node.\n");
 		errno = ENODEV;
 		goto error;
 	}

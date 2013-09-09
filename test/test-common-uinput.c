@@ -75,7 +75,7 @@ uinput_device_new_with_events_v(struct uinput_device **d, const char *name, cons
 
 	dev = uinput_device_new(name);
 	if (!dev)
-		return -ENOSPC;
+		return -ENOMEM;
 	if (id != DEFAULT_IDS)
 		uinput_device_set_ids(dev, id);
 
