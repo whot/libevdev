@@ -39,7 +39,7 @@ if test "x$lt_cv_prog_gnu_ld" = "xyes"; then
 fi
 
 PKG_PROG_PKG_CONFIG()
-PKG_CHECK_MODULES(CHECK, [check], [HAVE_CHECK="yes"], [HAVE_CHECK="no"])
+PKG_CHECK_MODULES(CHECK, [check >= 0.9.9], [HAVE_CHECK="yes"], [HAVE_CHECK="no"])
 if test "x$HAVE_CHECK" != "xyes"; then
        AC_MSG_WARN([check not found - skipping building unit tests])
 fi
