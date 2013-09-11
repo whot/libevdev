@@ -288,6 +288,9 @@ extern "C" {
  */
 struct libevdev;
 
+/**
+ * @ingroup events
+ */
 enum libevdev_read_flag {
 	LIBEVDEV_READ_SYNC		= 1, /**< Process data in sync mode */
 	LIBEVDEV_READ_NORMAL		= 2, /**< Process data in normal mode */
@@ -349,13 +352,18 @@ int libevdev_new_from_fd(int fd, struct libevdev **dev);
  */
 void libevdev_free(struct libevdev *dev);
 
+/**
+ * @ingroup init
+ */
 enum libevdev_log_priority {
-	LIBEVDEV_LOG_ERROR = 10,	/** cricitical errors and application bugs */
-	LIBEVDEV_LOG_INFO  = 20,	/** informational messages */
-	LIBEVDEV_LOG_DEBUG = 30,	/** debug information */
+	LIBEVDEV_LOG_ERROR = 10,	/**< cricitical errors and application bugs */
+	LIBEVDEV_LOG_INFO  = 20,	/**< informational messages */
+	LIBEVDEV_LOG_DEBUG = 30,	/**< debug information */
 };
 
 /**
+ * @ingroup init
+ *
  * Logging function called by library-internal logging.
  * This function is expected to treat its input like printf would.
  *
@@ -376,6 +384,8 @@ typedef void (*libevdev_log_func_t)(enum libevdev_log_priority priority,
 				    const char *format, va_list args);
 
 /**
+ * @ingroup init
+ *
  * Set a printf-style logging handler for library-internal logging. The default
  * logging function is to stdout.
  *
@@ -388,6 +398,8 @@ typedef void (*libevdev_log_func_t)(enum libevdev_log_priority priority,
 void libevdev_set_log_function(libevdev_log_func_t logfunc, void *data);
 
 /**
+ * @ingroup init
+ *
  * Define the minimum level to be printed to the log handler.
  * Messages higher than this level are printed, others are discarded. This
  * is a global setting and applies to any future logging messages.
@@ -398,17 +410,23 @@ void libevdev_set_log_function(libevdev_log_func_t logfunc, void *data);
 void libevdev_set_log_priority(enum libevdev_log_priority priority);
 
 /**
+ * @ingroup init
+ *
  * @return the current log level
  */
 enum libevdev_log_priority libevdev_get_log_priority(void);
 
-
+/**
+ * @ingroup init
+ */
 enum libevdev_grab_mode {
-	LIBEVDEV_GRAB = 3,
-	LIBEVDEV_UNGRAB = 4,
+	LIBEVDEV_GRAB = 3,	/**< Grab the device if not currently grabbed */
+	LIBEVDEV_UNGRAB = 4,	/**< Ungrab the device if currently grabbed */
 };
 
 /**
+ * @ingroup init
+ *
  * Grab or ungrab the device through a kernel EVIOCGRAB. This prevents other
  * clients (including kernel-internal ones such as rfkill) from receiving
  * events from this device.
@@ -474,6 +492,8 @@ int libevdev_set_fd(struct libevdev* dev, int fd);
 int libevdev_change_fd(struct libevdev* dev, int fd);
 
 /**
+ * @ingroup init
+ *
  * @param dev The evdev device
  *
  * @return The previously set fd, or -1 if none had been set previously.
