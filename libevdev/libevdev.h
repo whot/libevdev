@@ -501,25 +501,48 @@ int libevdev_change_fd(struct libevdev* dev, int fd);
  */
 int libevdev_get_fd(const struct libevdev* dev);
 
+
+/**
+ * @ingroup events
+ */
+enum libevdev_read_status {
+	/**
+	 * libevdev_next_event() has finished without an error
+	 * and an event is available for processing.
+	 *
+	 * @see libevdev_next_event
+	 */
+	LIBEVDEV_READ_STATUS_SUCCESS = 0,
+	/**
+	 * Depending on the libevdev_next_event() read flag:
+	 * * libevdev received a SYN_DROPPED from the device, and the caller should
+	 * now resync the device, or,
+	 * * an event has been read in sync mode.
+	 *
+	 * @see libevdev_next_event
+	 */
+	LIBEVDEV_READ_STATUS_SYNC = 1,
+};
 /**
  * @ingroup events
  *
  * Get the next event from the device. This function operates in two different
  * modes: normal mode or sync mode.
  *
- * In normal mode, this function returns 0 and returns the event in the
- * parameter ev. If no events are available at this time, it returns -EAGAIN
- * and ev is undefined.
+ * In normal mode, this function returns LIBEVDEV_READ_STATUS_SUCCESS and
+ * returns the event in the parameter ev. If no events are available at this
+ * time, it returns -EAGAIN and ev is undefined.
  *
- * If a SYN_DROPPED is read from the device, this function returns 1. The
- * caller should now call this function with the LIBEVDEV_READ_SYNC flag set,
- * to get the set of events that make up the device state delta. This function
- * returns 1 for each event part of that delta, until it returns -EAGAIN once
- * all events have been synced.
+ * If a SYN_DROPPED is read from the device, this function returns
+ * LIBEVDEV_READ_STATUS_SYNC. The caller should now call this function with the
+ * LIBEVDEV_READ_SYNC flag set, to get the set of events that make up the
+ * device state delta. This function returns LIBEVDEV_READ_STATUS_SYNC for
+ * each event part of that delta, until it returns -EAGAIN once all events
+ * have been synced.
  *
  * If a device needs to be synced by the caller but the caller does not call
- * with the LIBEVDEV_READ_SYNC flag set, all events from the diff are dropped
- * and event processing continues as normal.
+ * with the LIBEVDEV_READ_STATUS_SYNC flag set, all events from the diff are
+ * dropped and event processing continues as normal.
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param flags Set of flags to determine behaviour. If LIBEVDEV_READ_NORMAL
@@ -527,10 +550,10 @@ int libevdev_get_fd(const struct libevdev* dev);
  * set, the next event is read in sync mode.
  * @param ev On success, set to the current event.
  * @return On failure, a negative errno is returned.
- * @retval 0 One or more events where read of the device
+ * @retval LIBEVDEV_READ_STATUS_SUCCESS One or more events where read of the device
  * @retval -EAGAIN No events are currently available on the device
- * @retval 1 A SYN_DROPPED event was received, or a synced event was
- * returned.
+ * @retval LIBEVDEV_READ_STATUS_SYNC A SYN_DROPPED event was received, or a
+ * synced event was returned.
  *
  * @note This function is signal-safe.
  */

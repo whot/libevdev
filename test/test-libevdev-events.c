@@ -48,7 +48,7 @@ START_TEST(test_next_event)
 	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 1);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
-	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
 	ck_assert_int_eq(ev.type, EV_KEY);
 	ck_assert_int_eq(ev.code, BTN_LEFT);
 	ck_assert_int_eq(ev.value, 1);
@@ -87,10 +87,9 @@ START_TEST(test_syn_event)
 	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 1);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
-	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
 	ck_assert_int_eq(ev.type, EV_KEY);
 	ck_assert_int_eq(ev.code, BTN_LEFT);
-
 	rc = pipe2(pipefd, O_NONBLOCK);
 	ck_assert_int_eq(rc, 0);
 
@@ -104,11 +103,11 @@ START_TEST(test_syn_event)
 
 	libevdev_change_fd(dev, uinput_device_get_fd(uidev));
 
-	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
 	ck_assert_int_eq(ev.type, EV_SYN);
 	ck_assert_int_eq(ev.code, SYN_REPORT);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 
 	/* only check for the rc, nothing actually changed on the device */
 
@@ -144,7 +143,7 @@ START_TEST(test_event_type_filtered)
 	uinput_device_event(uidev, EV_KEY, REL_Y, 1);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
-	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
 	ck_assert_int_eq(ev.type, EV_SYN);
 	ck_assert_int_eq(ev.code, SYN_REPORT);
 
@@ -179,13 +178,13 @@ START_TEST(test_event_code_filtered)
 	uinput_device_event(uidev, EV_REL, REL_Y, 1);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
-	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
 	ck_assert_int_eq(ev.type, EV_REL);
 	ck_assert_int_eq(ev.code, REL_Y);
 	ck_assert_int_eq(ev.value, 1);
 
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
-	ck_assert_int_eq(rc, 0);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
 	ck_assert_int_eq(ev.type, EV_SYN);
 	ck_assert_int_eq(ev.code, SYN_REPORT);
 
@@ -261,24 +260,25 @@ START_TEST(test_syn_delta_button)
 	uinput_device_event(uidev, EV_KEY, KEY_MAX, 1);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_KEY);
 	ck_assert_int_eq(ev.code, BTN_LEFT);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_KEY);
 	ck_assert_int_eq(ev.code, BTN_RIGHT);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_KEY);
 	ck_assert_int_eq(ev.code, KEY_MAX);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_SYN);
 	ck_assert_int_eq(ev.code, SYN_REPORT);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
@@ -327,25 +327,25 @@ START_TEST(test_syn_delta_abs)
 	uinput_device_event(uidev, EV_ABS, ABS_MAX, 700);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_X);
 	ck_assert_int_eq(ev.value, 100);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_Y);
 	ck_assert_int_eq(ev.value, 500);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_MAX);
 	ck_assert_int_eq(ev.value, 700);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_SYN);
 	ck_assert_int_eq(ev.code, SYN_REPORT);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
@@ -403,61 +403,61 @@ START_TEST(test_syn_delta_mt)
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
 
 	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_X);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_Y);
 	ck_assert_int_eq(ev.value, 5);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_MT_SLOT);
 	ck_assert_int_eq(ev.value, 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_MT_POSITION_X);
 	ck_assert_int_eq(ev.value, 100);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_MT_POSITION_Y);
 	ck_assert_int_eq(ev.value, 500);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_MT_TRACKING_ID);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_MT_SLOT);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_MT_POSITION_X);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_MT_POSITION_Y);
 	ck_assert_int_eq(ev.value, 5);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_MT_TRACKING_ID);
 	ck_assert_int_eq(ev.value, 2);
 
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_SYN);
 	ck_assert_int_eq(ev.code, SYN_REPORT);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
@@ -489,25 +489,25 @@ START_TEST(test_syn_delta_led)
 	uinput_device_event(uidev, EV_LED, LED_MAX, 1);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_LED);
 	ck_assert_int_eq(ev.code, LED_NUML);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_LED);
 	ck_assert_int_eq(ev.code, LED_CAPSL);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_LED);
 	ck_assert_int_eq(ev.code, LED_MAX);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_SYN);
 	ck_assert_int_eq(ev.code, SYN_REPORT);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
@@ -543,25 +543,25 @@ START_TEST(test_syn_delta_sw)
 	uinput_device_event(uidev, EV_SW, SW_MAX, 1);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_SW);
 	ck_assert_int_eq(ev.code, SW_LID);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_SW);
 	ck_assert_int_eq(ev.code, SW_MICROPHONE_INSERT);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_SW);
 	ck_assert_int_eq(ev.code, SW_MAX);
 	ck_assert_int_eq(ev.value, 1);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_SYN);
 	ck_assert_int_eq(ev.code, SYN_REPORT);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
@@ -606,7 +606,7 @@ START_TEST(test_skipped_sync)
 	uinput_device_event(uidev, EV_ABS, ABS_Y, 500);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
 	ck_assert_int_eq(rc, -EAGAIN);
@@ -650,10 +650,10 @@ START_TEST(test_incomplete_sync)
 	uinput_device_event(uidev, EV_ABS, ABS_Y, 500);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_KEY);
 	ck_assert_int_eq(ev.code, BTN_LEFT);
 	ck_assert_int_eq(ev.value, 1);
@@ -687,7 +687,7 @@ START_TEST(test_empty_sync)
 	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
 
 	rc = libevdev_next_event(dev, LIBEVDEV_FORCE_SYNC, &ev);
-	ck_assert_int_eq(rc, 1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
 	ck_assert_int_eq(rc, -EAGAIN);
@@ -863,7 +863,7 @@ START_TEST(test_mt_event_values)
 
 	do {
 		rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
-	} while (rc == 0);
+	} while (rc == LIBEVDEV_READ_STATUS_SUCCESS);
 	ck_assert_int_eq(rc, -EAGAIN);
 
 	ck_assert_int_eq(libevdev_get_current_slot(dev), 1);

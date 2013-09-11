@@ -171,18 +171,18 @@ main(int argc, char **argv)
 	do {
 		struct input_event ev;
 		rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL|LIBEVDEV_READ_BLOCKING, &ev);
-		if (rc == 1) {
+		if (rc == LIBEVDEV_READ_STATUS_SYNC) {
 			printf("::::::::::::::::::::: dropped ::::::::::::::::::::::\n");
-			while (rc == 1) {
+			while (rc == LIBEVDEV_READ_STATUS_SYNC) {
 				print_sync_event(&ev);
 				rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
 			}
 			printf("::::::::::::::::::::: re-synced ::::::::::::::::::::::\n");
-		} else if (rc == 0)
+		} else if (rc == LIBEVDEV_READ_STATUS_SUCCESS)
 			print_event(&ev);
-	} while (rc == 1 || rc == 0 || rc == -EAGAIN);
+	} while (rc == LIBEVDEV_READ_STATUS_SYNC || rc == LIBEVDEV_READ_STATUS_SUCCESS || rc == -EAGAIN);
 
-	if (rc != 0 && rc != -EAGAIN)
+	if (rc != LIBEVDEV_READ_STATUS_SUCCESS && rc != -EAGAIN)
 		fprintf(stderr, "Failed to handle events: %s\n", strerror(rc));
 
 	rc = 0;

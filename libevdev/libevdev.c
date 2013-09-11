@@ -722,7 +722,7 @@ read_more_events(struct libevdev *dev)
 LIBEVDEV_EXPORT int
 libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event *ev)
 {
-	int rc = 0;
+	int rc = LIBEVDEV_READ_STATUS_SUCCESS;
 
 	if (dev->fd < 0) {
 		log_bug("device not initialized. call libevdev_set_fd() first\n");
@@ -778,7 +778,7 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 
 		if (flags & LIBEVDEV_FORCE_SYNC) {
 			dev->sync_state = SYNC_NEEDED;
-			rc = 1;
+			rc = LIBEVDEV_READ_STATUS_SYNC;
 			goto out;
 		}
 
@@ -794,12 +794,12 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 	rc = 0;
 	if (ev->type == EV_SYN && ev->code == SYN_DROPPED) {
 		dev->sync_state = SYNC_NEEDED;
-		rc = 1;
+		rc = LIBEVDEV_READ_STATUS_SYNC;
 	}
 
 	if (flags & LIBEVDEV_READ_SYNC && dev->queue_nsync > 0) {
 		dev->queue_nsync--;
-		rc = 1;
+		rc = LIBEVDEV_READ_STATUS_SYNC;
 		if (dev->queue_nsync == 0)
 			dev->sync_state = SYNC_NONE;
 	}
