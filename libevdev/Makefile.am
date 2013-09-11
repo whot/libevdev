@@ -13,7 +13,7 @@ libevdev_la_SOURCES = \
 
 libevdev_la_LDFLAGS = \
 	-version-info $(LIBEVDEV_LT_VERSION) \
-	-export-symbols-regex '^libevdev_' \
+	-export-symbols-regex '^libevdev_|^LIBEVDEV_' \
 	$(GCOV_LDFLAGS) \
 	$(GNU_LD_FLAGS)
 

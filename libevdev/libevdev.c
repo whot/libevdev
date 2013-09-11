@@ -35,6 +35,12 @@
 
 #define MAXEVENTS 64
 
+/* DEPRECATED */
+LIBEVDEV_EXPORT const enum libevdev_read_flag LIBEVDEV_READ_SYNC = LIBEVDEV_READ_FLAG_SYNC;
+LIBEVDEV_EXPORT const enum libevdev_read_flag LIBEVDEV_READ_NORMAL = LIBEVDEV_READ_FLAG_NORMAL;
+LIBEVDEV_EXPORT const enum libevdev_read_flag LIBEVDEV_FORCE_SYNC = LIBEVDEV_READ_FLAG_FORCE_SYNC;
+LIBEVDEV_EXPORT const enum libevdev_read_flag LIBEVDEV_READ_BLOCKING = LIBEVDEV_READ_FLAG_BLOCKING;
+
 static int sync_mt_state(struct libevdev *dev, int create_events);
 
 static int
@@ -729,12 +735,12 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 		return -EBADF;
 	}
 
-	if (!(flags & (LIBEVDEV_READ_NORMAL|LIBEVDEV_READ_SYNC|LIBEVDEV_FORCE_SYNC))) {
+	if (!(flags & (LIBEVDEV_READ_FLAG_NORMAL|LIBEVDEV_READ_FLAG_SYNC|LIBEVDEV_READ_FLAG_FORCE_SYNC))) {
 		log_bug("invalid flags %#x\n.\n", flags);
 		return -EINVAL;
 	}
 
-	if (flags & LIBEVDEV_READ_SYNC) {
+	if (flags & LIBEVDEV_READ_FLAG_SYNC) {
 		if (dev->sync_state == SYNC_NEEDED) {
 			rc = sync_state(dev);
 			if (rc != 0)
@@ -769,14 +775,14 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 	   read in any more.
 	 */
 	do {
-		if (!(flags & LIBEVDEV_READ_BLOCKING) ||
+		if (!(flags & LIBEVDEV_READ_FLAG_BLOCKING) ||
 		    queue_num_elements(dev) == 0) {
 			rc = read_more_events(dev);
 			if (rc < 0 && rc != -EAGAIN)
 				goto out;
 		}
 
-		if (flags & LIBEVDEV_FORCE_SYNC) {
+		if (flags & LIBEVDEV_READ_FLAG_FORCE_SYNC) {
 			dev->sync_state = SYNC_NEEDED;
 			rc = LIBEVDEV_READ_STATUS_SYNC;
 			goto out;
@@ -797,7 +803,7 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 		rc = LIBEVDEV_READ_STATUS_SYNC;
 	}
 
-	if (flags & LIBEVDEV_READ_SYNC && dev->queue_nsync > 0) {
+	if (flags & LIBEVDEV_READ_FLAG_SYNC && dev->queue_nsync > 0) {
 		dev->queue_nsync--;
 		rc = LIBEVDEV_READ_STATUS_SYNC;
 		if (dev->queue_nsync == 0)

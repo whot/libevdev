@@ -59,9 +59,9 @@
  * default state: SYNC_NONE
  *
  * SYNC_NONE → SYN_DROPPED or forced sync → SYNC_NEEDED
- * SYNC_NEEDED → libevdev_next_event(LIBEVDEV_READ_SYNC) → SYNC_IN_PROGRESS
- * SYNC_NEEDED → libevdev_next_event(LIBEVDEV_READ_SYNC_NONE) → SYNC_NONE
- * SYNC_IN_PROGRESS → libevdev_next_event(LIBEVDEV_READ_SYNC_NONE) → SYNC_NONE
+ * SYNC_NEEDED → libevdev_next_event(LIBEVDEV_READ_FLAG_SYNC) → SYNC_IN_PROGRESS
+ * SYNC_NEEDED → libevdev_next_event(LIBEVDEV_READ_FLAG_SYNC_NONE) → SYNC_NONE
+ * SYNC_IN_PROGRESS → libevdev_next_event(LIBEVDEV_READ_FLAG_SYNC_NONE) → SYNC_NONE
  * SYNC_IN_PROGRESS → no sync events left → SYNC_NONE
  *
  */

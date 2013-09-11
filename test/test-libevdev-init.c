@@ -115,15 +115,15 @@ START_TEST(test_log_init)
 	ck_assert(dev != NULL);
 
 	libevdev_set_log_function(logfunc, logdata);
-	libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, NULL);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
 
 	libevdev_set_log_function(NULL, NULL);
-	libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, NULL);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
 
 	libevdev_set_log_function(logfunc, logdata);
-	libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, NULL);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
 
-	/* libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, NULL) should
+	/* libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL) should
 	   trigger a log message. We called it three times, but only twice
 	   with the logfunc set, thus, ensure we only called the logfunc
 	   twice */

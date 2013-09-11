@@ -123,7 +123,7 @@ extern "C" {
  *
  *      do {
  *              struct input_event ev;
- *              rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL, &ev);
+ *              rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
  *              if (rc == 0)
  *                      printf("Event: %s %s %d\n",
  *                             libevdev_get_event_type_name(ev.type),
@@ -292,12 +292,13 @@ struct libevdev;
  * @ingroup events
  */
 enum libevdev_read_flag {
-	LIBEVDEV_READ_SYNC		= 1, /**< Process data in sync mode */
-	LIBEVDEV_READ_NORMAL		= 2, /**< Process data in normal mode */
-	LIBEVDEV_FORCE_SYNC		= 4, /**< Pretend the next event is a SYN_DROPPED. There is
+	LIBEVDEV_READ_FLAG_SYNC		= 1, /**< Process data in sync mode */
+	LIBEVDEV_READ_FLAG_NORMAL	= 2, /**< Process data in normal mode */
+	LIBEVDEV_READ_FLAG_FORCE_SYNC	= 4, /**< Pretend the next event is a SYN_DROPPED. There is
 					          no reason to ever use this except for
 						  automated tests, so don't. */
-	LIBEVDEV_READ_BLOCKING		= 8, /**< The fd is not in O_NONBLOCK and a read may block */
+	LIBEVDEV_READ_FLAG_BLOCKING	= 8, /**< The fd is not in O_NONBLOCK and a read may block */
+
 };
 
 /**
@@ -535,7 +536,7 @@ enum libevdev_read_status {
  *
  * If a SYN_DROPPED is read from the device, this function returns
  * LIBEVDEV_READ_STATUS_SYNC. The caller should now call this function with the
- * LIBEVDEV_READ_SYNC flag set, to get the set of events that make up the
+ * LIBEVDEV_READ_FLAG_SYNC flag set, to get the set of events that make up the
  * device state delta. This function returns LIBEVDEV_READ_STATUS_SYNC for
  * each event part of that delta, until it returns -EAGAIN once all events
  * have been synced.
@@ -545,8 +546,8 @@ enum libevdev_read_status {
  * dropped and event processing continues as normal.
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
- * @param flags Set of flags to determine behaviour. If LIBEVDEV_READ_NORMAL
- * is set, the next event is read in normal mode. If LIBEVDEV_READ_SYNC is
+ * @param flags Set of flags to determine behaviour. If LIBEVDEV_READ_FLAG_NORMAL
+ * is set, the next event is read in normal mode. If LIBEVDEV_READ_FLAG_SYNC is
  * set, the next event is read in sync mode.
  * @param ev On success, set to the current event.
  * @return On failure, a negative errno is returned.
@@ -1402,6 +1403,11 @@ int libevdev_get_repeat(struct libevdev *dev, int *delay, int *period);
 #else
 #define LIBEVDEV_DEPRECATED
 #endif
+
+LIBEVDEV_DEPRECATED extern const enum libevdev_read_flag LIBEVDEV_READ_SYNC;
+LIBEVDEV_DEPRECATED extern const enum libevdev_read_flag LIBEVDEV_READ_NORMAL;
+LIBEVDEV_DEPRECATED extern const enum libevdev_read_flag LIBEVDEV_FORCE_SYNC;
+LIBEVDEV_DEPRECATED extern const enum libevdev_read_flag LIBEVDEV_READ_BLOCKING;
 
 /* replacement: libevdev_kernel_set_abs_info */
 int libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs) LIBEVDEV_DEPRECATED;

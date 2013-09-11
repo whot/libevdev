@@ -170,12 +170,12 @@ main(int argc, char **argv)
 
 	do {
 		struct input_event ev;
-		rc = libevdev_next_event(dev, LIBEVDEV_READ_NORMAL|LIBEVDEV_READ_BLOCKING, &ev);
+		rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL|LIBEVDEV_READ_FLAG_BLOCKING, &ev);
 		if (rc == LIBEVDEV_READ_STATUS_SYNC) {
 			printf("::::::::::::::::::::: dropped ::::::::::::::::::::::\n");
 			while (rc == LIBEVDEV_READ_STATUS_SYNC) {
 				print_sync_event(&ev);
-				rc = libevdev_next_event(dev, LIBEVDEV_READ_SYNC, &ev);
+				rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
 			}
 			printf("::::::::::::::::::::: re-synced ::::::::::::::::::::::\n");
 		} else if (rc == LIBEVDEV_READ_STATUS_SUCCESS)
