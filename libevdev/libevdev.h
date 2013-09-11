@@ -356,7 +356,7 @@ void libevdev_free(struct libevdev *dev);
  * @ingroup init
  */
 enum libevdev_log_priority {
-	LIBEVDEV_LOG_ERROR = 10,	/**< cricitical errors and application bugs */
+	LIBEVDEV_LOG_ERROR = 10,	/**< critical errors and application bugs */
 	LIBEVDEV_LOG_INFO  = 20,	/**< informational messages */
 	LIBEVDEV_LOG_DEBUG = 30,	/**< debug information */
 };
