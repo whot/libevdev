@@ -294,9 +294,8 @@ struct libevdev;
 enum libevdev_read_flag {
 	LIBEVDEV_READ_FLAG_SYNC		= 1, /**< Process data in sync mode */
 	LIBEVDEV_READ_FLAG_NORMAL	= 2, /**< Process data in normal mode */
-	LIBEVDEV_READ_FLAG_FORCE_SYNC	= 4, /**< Pretend the next event is a SYN_DROPPED. There is
-					          no reason to ever use this except for
-						  automated tests, so don't. */
+	LIBEVDEV_READ_FLAG_FORCE_SYNC	= 4, /**< Pretend the next event is a SYN_DROPPED and
+					          require the caller to sync */
 	LIBEVDEV_READ_FLAG_BLOCKING	= 8, /**< The fd is not in O_NONBLOCK and a read may block */
 
 };
