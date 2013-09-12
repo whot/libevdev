@@ -33,10 +33,16 @@ AC_PROG_CC
 LT_PREREQ([2.2])
 LT_INIT
 LT_PATH_LD
+
+with_ldflags=""
 if test "x$lt_cv_prog_gnu_ld" = "xyes"; then
-	GNU_LD_FLAGS="-Wl,--as-needed -Wl,--gc-sections -Wl,-z,relro -Wl,-z,now"
-	AC_SUBST(GNU_LD_FLAGS)
+	CC_CHECK_FLAGS_APPEND([with_ldflags], [LDFLAGS], [\
+				-Wl,--as-needed \
+				-Wl,--gc-sections \
+				-Wl,-z,relro \
+				-Wl,-z,now])
 fi
+AC_SUBST([GNU_LD_FLAGS], $with_ldflags)
 
 PKG_PROG_PKG_CONFIG()
 PKG_CHECK_MODULES(CHECK, [check >= 0.9.9], [HAVE_CHECK="yes"], [HAVE_CHECK="no"])
@@ -45,11 +51,25 @@ if test "x$HAVE_CHECK" != "xyes"; then
 fi
 AM_CONDITIONAL(BUILD_TESTS, [test "x$HAVE_CHECK" = "xyes"])
 
-
+with_cflags=""
 if test "x$GCC" = "xyes"; then
-	GCC_CFLAGS="-Wall -Wextra -Wno-unused-parameter -Wstrict-prototypes -Wmissing-prototypes -fvisibility=hidden -pipe -fno-common -fno-strict-aliasing -ffunction-sections -fdata-sections -fno-strict-aliasing -fdiagnostics-show-option -fno-common"
+	CC_CHECK_FLAGS_APPEND([with_cflags], [CFLAGS], [\
+				-Wall \
+				-Wextra \
+				-Wno-unused-parameter \
+				-Wstrict-prototypes \
+				-Wmissing-prototypes \
+				-fvisibility=hidden \
+				-pipe \
+				-fno-common \
+				-fno-strict-aliasing \
+				-ffunction-sections \
+				-fdata-sections \
+				-fno-strict-aliasing \
+				-fdiagnostics-show-option \
+				-fno-common])
 fi
-AC_SUBST(GCC_CFLAGS)
+AC_SUBST([GCC_CFLAGS], $with_cflags)
 
 AC_PATH_PROG(DOXYGEN, [doxygen])
 if test "x$DOXYGEN" = "x"; then
