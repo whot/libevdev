@@ -23,7 +23,12 @@
 #include <config.h>
 #include <errno.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
+#include <libevdev/libevdev-uinput.h>
 #include "test-common.h"
 
 START_TEST(test_new_device)
@@ -260,6 +265,104 @@ START_TEST(test_device_grab)
 }
 END_TEST
 
+START_TEST(test_set_clock_id)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+
+	rc = test_create_device(&uidev, &dev,
+				EV_SYN, SYN_REPORT,
+				EV_REL, REL_X,
+				EV_REL, REL_Y,
+				EV_REL, REL_WHEEL,
+				EV_KEY, BTN_LEFT,
+				EV_KEY, BTN_MIDDLE,
+				EV_KEY, BTN_RIGHT,
+				-1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	rc = libevdev_set_clock_id(dev, CLOCK_REALTIME);
+	ck_assert_int_eq(rc, 0);
+
+	rc = libevdev_set_clock_id(dev, CLOCK_MONOTONIC);
+	ck_assert_int_eq(rc, 0);
+
+	rc = libevdev_set_clock_id(dev, CLOCK_MONOTONIC_RAW);
+	ck_assert_int_eq(rc, -EINVAL);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
+START_TEST(test_clock_id_events)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev, *dev2;
+	int rc, fd;
+	struct input_event ev1, ev2;
+	struct timespec t1_real, t2_real;
+	struct timespec t1_mono, t2_mono;
+
+	rc = test_create_device(&uidev, &dev,
+				EV_SYN, SYN_REPORT,
+				EV_REL, REL_X,
+				EV_REL, REL_Y,
+				EV_REL, REL_WHEEL,
+				EV_KEY, BTN_LEFT,
+				EV_KEY, BTN_MIDDLE,
+				EV_KEY, BTN_RIGHT,
+				-1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	fd = open(uinput_device_get_devnode(uidev), O_RDONLY);
+	ck_assert_int_gt(fd, -1);
+
+	rc = libevdev_new_from_fd(fd, &dev2);
+	ck_assert_msg(rc == 0, "Failed to create second device: %s", strerror(-rc));
+
+	rc = libevdev_set_clock_id(dev2, CLOCK_MONOTONIC);
+	ck_assert_int_eq(rc, 0);
+
+	clock_gettime(CLOCK_REALTIME, &t1_real);
+	clock_gettime(CLOCK_MONOTONIC, &t1_mono);
+	uinput_device_event(uidev, EV_REL, REL_X, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	clock_gettime(CLOCK_REALTIME, &t2_real);
+	clock_gettime(CLOCK_MONOTONIC, &t2_mono);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev1);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+
+	rc = libevdev_next_event(dev2, LIBEVDEV_READ_FLAG_NORMAL, &ev2);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+
+	ck_assert_int_eq(ev1.type, ev2.type);
+	ck_assert_int_eq(ev1.code, ev2.code);
+	ck_assert_int_eq(ev1.value, ev2.value);
+
+	ck_assert_int_ne(ev1.time.tv_sec, ev2.time.tv_sec);
+	ck_assert_int_ne(ev1.time.tv_usec, ev2.time.tv_usec);
+
+	ck_assert_int_ge(ev1.time.tv_sec, t1_real.tv_sec);
+	ck_assert_int_ge(ev1.time.tv_usec, t1_real.tv_nsec/1000);
+	ck_assert_int_le(ev1.time.tv_sec, t2_real.tv_sec);
+	ck_assert_int_le(ev1.time.tv_usec, t2_real.tv_nsec/1000);
+
+	ck_assert_int_ge(ev2.time.tv_sec, t1_mono.tv_sec);
+	ck_assert_int_ge(ev2.time.tv_usec, t1_mono.tv_nsec/1000);
+	ck_assert_int_le(ev2.time.tv_sec, t2_mono.tv_sec);
+	ck_assert_int_le(ev2.time.tv_usec, t2_mono.tv_nsec/1000);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+	libevdev_free(dev2);
+	close(fd);
+}
+END_TEST
+
+
 Suite *
 libevdev_init_test(void)
 {
@@ -284,6 +387,11 @@ libevdev_init_test(void)
 
 	tc = tcase_create("device grab");
 	tcase_add_test(tc, test_device_grab);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("clock id");
+	tcase_add_test(tc, test_set_clock_id);
+	tcase_add_test(tc, test_clock_id_events);
 	suite_add_tcase(s, tc);
 
 	return s;

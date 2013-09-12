@@ -1278,6 +1278,22 @@ int libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum 
 int libevdev_kernel_set_led_values(struct libevdev *dev, ...);
 
 /**
+ * @ingroup kernel
+ *
+ * Set the clock ID to be used for timestamps. Further events from this device
+ * will report an event time based on the given clock.
+ *
+ * This is a modification only affecting this representation of
+ * this device.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param clockid The clock to use for future events. Permitted values
+ * are CLOCK_MONOTONIC and CLOCK_REALTIME (the default).
+ * @return zero on success, or a negative errno on failure
+ */
+int libevdev_set_clock_id(struct libevdev *dev, int clockid);
+
+/**
  * @ingroup misc
  *
  * Helper function to check if an event is of a specific type. This is
