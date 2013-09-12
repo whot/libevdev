@@ -67,6 +67,7 @@ if test "x$GCC" = "xyes"; then
 				-fdata-sections \
 				-fno-strict-aliasing \
 				-fdiagnostics-show-option \
+				-fstack-protector \
 				-fno-common])
 fi
 AC_SUBST([GCC_CFLAGS], $with_cflags)
