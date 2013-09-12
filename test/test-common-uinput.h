@@ -44,5 +44,6 @@ int uinput_device_event(const struct uinput_device* dev, unsigned int type, unsi
 int uinput_device_event_multiple(const struct uinput_device* dev, ...);
 int uinput_device_event_multiple_v(const struct uinput_device* dev, va_list args);
 int uinput_device_get_fd(const struct uinput_device *dev);
+const char* uinput_device_get_devnode(const struct uinput_device *dev);
 
 char *uinput_devnode_from_syspath(const char *syspath);
