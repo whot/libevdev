@@ -133,6 +133,43 @@ START_TEST(test_log_init)
 }
 END_TEST
 
+static char *logdata_1 = "foo";
+static char *logdata_2 = "bar";
+static int log_data_fn_called = 0;
+static void logfunc_data(enum libevdev_log_priority priority,
+			 void *data,
+			 const char *file, int line, const char *func,
+			 const char *f, va_list args) {
+	switch(log_data_fn_called) {
+		case 0: ck_assert(data == logdata_1); break;
+		case 1: ck_assert(data == logdata_2); break;
+		case 2: ck_assert(data == NULL); break;
+		default:
+			ck_abort();
+	}
+	log_data_fn_called++;
+}
+
+START_TEST(test_log_data)
+{
+	struct libevdev *dev = NULL;
+
+	dev = libevdev_new();
+	ck_assert(dev != NULL);
+
+	libevdev_set_log_function(logfunc_data, logdata_1);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
+
+	libevdev_set_log_function(logfunc_data, logdata_2);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
+
+	libevdev_set_log_function(logfunc_data, NULL);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
+
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_device_init)
 {
 	struct uinput_device* uidev;
@@ -237,6 +274,7 @@ libevdev_init_test(void)
 
 	tc = tcase_create("log init");
 	tcase_add_test(tc, test_log_init);
+	tcase_add_test(tc, test_log_data);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("device fd init");
