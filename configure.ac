@@ -61,7 +61,6 @@ if test "x$GCC" = "xyes"; then
 				-Wmissing-prototypes \
 				-fvisibility=hidden \
 				-pipe \
-				-fno-common \
 				-fno-strict-aliasing \
 				-ffunction-sections \
 				-fdata-sections \
