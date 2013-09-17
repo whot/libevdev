@@ -54,10 +54,10 @@ struct libevdev_uinput;
  *     return err;
  *
  * // post a REL_X event
- * err = libevdev_uinput_write(event(uidev, EV_REL, REL_X, -1);
+ * err = libevdev_uinput_write_event(uidev, EV_REL, REL_X, -1);
  * if (err != 0)
  *     return err;
- * libevdev_uinput_write(event(uidev, EV_SYN, SYN_REPORT, 0);
+ * libevdev_uinput_write_event(uidev, EV_SYN, SYN_REPORT, 0);
  * if (err != 0)
  *     return err;
  *
