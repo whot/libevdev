@@ -107,7 +107,8 @@ print_props(struct libevdev *dev)
 	}
 }
 
-int print_event(struct input_event *ev)
+static int
+print_event(struct input_event *ev)
 {
 	if (ev->type == EV_SYN)
 		printf("Event: time %ld.%06ld, ++++++++++++++++++++ %s +++++++++++++++\n",
@@ -126,7 +127,8 @@ int print_event(struct input_event *ev)
 	return 0;
 }
 
-int print_sync_event(struct input_event *ev)
+static int
+print_sync_event(struct input_event *ev)
 {
 	printf("SYNC: ");
 	print_event(ev);
