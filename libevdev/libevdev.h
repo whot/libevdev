@@ -1232,6 +1232,9 @@ int libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigne
 int libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs);
 
 
+/**
+ * @ingroup kernel
+ */
 enum libevdev_led_value {
 	LIBEVDEV_LED_ON = 3,
 	LIBEVDEV_LED_OFF = 4,
