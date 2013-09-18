@@ -1422,3 +1422,14 @@ libevdev_kernel_set_led_values(struct libevdev *dev, ...)
 
 	return rc;
 }
+
+LIBEVDEV_EXPORT int
+libevdev_set_clock_id(struct libevdev *dev, int clockid)
+{
+	if (dev->fd < 0) {
+		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		return -EBADF;
+	}
+
+	return ioctl(dev->fd, EVIOCSCLOCKID, &clockid) ? -errno : 0;
+}

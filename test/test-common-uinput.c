@@ -128,6 +128,12 @@ uinput_device_get_fd(const struct uinput_device *dev)
 	return dev->dev_fd;
 }
 
+const char*
+uinput_device_get_devnode(const struct uinput_device *dev)
+{
+	return libevdev_uinput_get_devnode(dev->uidev);
+}
+
 int
 uinput_device_create(struct uinput_device* d)
 {
