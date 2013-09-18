@@ -23,6 +23,10 @@
 #ifndef LIBEVDEV_UINPUT_H
 #define LIBEVDEV_UINPUT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <libevdev/libevdev.h>
 
 struct libevdev_uinput;
@@ -226,5 +230,8 @@ int libevdev_uinput_write_event(const struct libevdev_uinput *uinput_dev,
 				unsigned int type,
 				unsigned int code,
 				int value);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LIBEVDEV_UINPUT_H */
