@@ -20,8 +20,8 @@
  * OF THIS SOFTWARE.
  */
 
-#ifndef libevdev_uinput_H
-#define libevdev_uinput_H
+#ifndef LIBEVDEV_UINPUT_H
+#define LIBEVDEV_UINPUT_H
 
 #include <libevdev/libevdev.h>
 
@@ -227,4 +227,4 @@ int libevdev_uinput_write_event(const struct libevdev_uinput *uinput_dev,
 				unsigned int code,
 				int value);
 
-#endif /* libevdev_uinput_H */
+#endif /* LIBEVDEV_UINPUT_H */
