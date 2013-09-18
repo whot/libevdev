@@ -68,6 +68,7 @@ libevdev_dflt_log_func(enum libevdev_log_priority priority,
 					prefix = "libevdev debug";
 					break;
 		default:
+					prefix = "libevdev INVALID LOG PRIORITY";
 					break;
 	}
 	/* default logging format:
