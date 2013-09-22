@@ -9,7 +9,7 @@ clean-local:
 
 .PHONY: doxygen
 
-doc_src= $(shell find html -name "*" -printf "html/%P\n")
+doc_src= $(shell find html -type f -printf "html/%P\n")
 EXTRA_DIST = $(doc_src) libevdev.doxygen libevdev.css
 endif
 
