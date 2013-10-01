@@ -79,9 +79,9 @@ AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
 AC_MSG_CHECKING([whether to build with gcov])
 AC_ARG_ENABLE([gcov],
 	      [AS_HELP_STRING([--enable-gcov],
-			      [Whether to enable coverage testing (default:enabled)])],
+			      [Whether to enable coverage testing (default:disabled)])],
 	      [],
-	      [enable_gcov=yes],
+	      [enable_gcov=no],
 	      )
 AS_IF([test "x$enable_gcov" != "xno"],
       [
