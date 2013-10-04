@@ -197,14 +197,14 @@ END_TEST
 
 START_TEST(test_prop_name)
 {
-	ck_assert_str_eq(libevdev_get_property_name(INPUT_PROP_POINTER), "INPUT_PROP_POINTER");
-	ck_assert_str_eq(libevdev_get_property_name(INPUT_PROP_DIRECT), "INPUT_PROP_DIRECT");
-	ck_assert_str_eq(libevdev_get_property_name(INPUT_PROP_BUTTONPAD), "INPUT_PROP_BUTTONPAD");
-	ck_assert_str_eq(libevdev_get_property_name(INPUT_PROP_SEMI_MT), "INPUT_PROP_SEMI_MT");
-	ck_assert_str_eq(libevdev_get_property_name(INPUT_PROP_MAX), "INPUT_PROP_MAX");
+	ck_assert_str_eq(libevdev_property_get_name(INPUT_PROP_POINTER), "INPUT_PROP_POINTER");
+	ck_assert_str_eq(libevdev_property_get_name(INPUT_PROP_DIRECT), "INPUT_PROP_DIRECT");
+	ck_assert_str_eq(libevdev_property_get_name(INPUT_PROP_BUTTONPAD), "INPUT_PROP_BUTTONPAD");
+	ck_assert_str_eq(libevdev_property_get_name(INPUT_PROP_SEMI_MT), "INPUT_PROP_SEMI_MT");
+	ck_assert_str_eq(libevdev_property_get_name(INPUT_PROP_MAX), "INPUT_PROP_MAX");
 
-	ck_assert(libevdev_get_property_name(INPUT_PROP_MAX - 1) == NULL);
-	ck_assert(libevdev_get_property_name(INPUT_PROP_MAX + 1) == NULL);
+	ck_assert(libevdev_property_get_name(INPUT_PROP_MAX - 1) == NULL);
+	ck_assert(libevdev_property_get_name(INPUT_PROP_MAX + 1) == NULL);
 }
 END_TEST
 
@@ -227,13 +227,13 @@ START_TEST(test_event_type)
 
 	ev.type = EV_REL;
 
-	ck_assert_int_eq(libevdev_is_event_type(&ev, EV_REL), 1);
+	ck_assert_int_eq(libevdev_event_is_type(&ev, EV_REL), 1);
 	for (i = 0; i < EV_CNT; i++) {
 		if (i == ev.type)
 			continue;
-		ck_assert_int_eq(libevdev_is_event_type(&ev, i), 0);
+		ck_assert_int_eq(libevdev_event_is_type(&ev, i), 0);
 	}
-	ck_assert_int_eq(libevdev_is_event_type(&ev, EV_MAX + 1), 0);
+	ck_assert_int_eq(libevdev_event_is_type(&ev, EV_MAX + 1), 0);
 }
 END_TEST
 
@@ -245,23 +245,23 @@ START_TEST(test_event_code)
 	ev.type = EV_REL;
 	ev.code = REL_Y;
 
-	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_REL, REL_Y), 1);
+	ck_assert_int_eq(libevdev_event_is_code(&ev, EV_REL, REL_Y), 1);
 	for (i = 0; i < EV_CNT; i++) {
 		int j;
 		if (i == ev.type || i == EV_SYN)
 			continue;
 
 		for (j = 0; j < libevdev_event_type_get_max(i); i++) {
-			ck_assert_int_eq(libevdev_is_event_code(&ev, i, j), 0);
+			ck_assert_int_eq(libevdev_event_is_code(&ev, i, j), 0);
 		}
 	}
-	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_MAX + 1, ev.code), 0);
-	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_REL, REL_MAX + 1), 0);
+	ck_assert_int_eq(libevdev_event_is_code(&ev, EV_MAX + 1, ev.code), 0);
+	ck_assert_int_eq(libevdev_event_is_code(&ev, EV_REL, REL_MAX + 1), 0);
 
 	ev.type = EV_SYN;
 	ev.code = SYN_REPORT;
-	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_SYN, SYN_REPORT), 1);
-	ck_assert_int_eq(libevdev_is_event_code(&ev, EV_SYN, SYN_DROPPED), 0);
+	ck_assert_int_eq(libevdev_event_is_code(&ev, EV_SYN, SYN_REPORT), 1);
+	ck_assert_int_eq(libevdev_event_is_code(&ev, EV_SYN, SYN_DROPPED), 0);
 }
 END_TEST
 

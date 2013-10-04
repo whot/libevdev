@@ -1438,7 +1438,7 @@ void libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc)
 int libevdev_get_event_type_max(unsigned int type) LIBEVDEV_DEPRECATED;
 
 /** replacement: libevdev_property_get_name */
-const char* libevdev_get_property_name(unsigned int prop);
+const char* libevdev_get_property_name(unsigned int prop) LIBEVDEV_DEPRECATED;
 
 /** replacement: libevdev_event_type_get_name */
 const char * libevdev_get_event_type_name(unsigned int type) LIBEVDEV_DEPRECATED;
@@ -1446,10 +1446,10 @@ const char * libevdev_get_event_type_name(unsigned int type) LIBEVDEV_DEPRECATED
 const char * libevdev_get_event_code_name(unsigned int type, unsigned int code) LIBEVDEV_DEPRECATED;
 
 /** replacement: libevdev_event_is_type */
-int libevdev_is_event_type(const struct input_event *ev, unsigned int type);
+int libevdev_is_event_type(const struct input_event *ev, unsigned int type) LIBEVDEV_DEPRECATED;
 
 /** replacement: libevdev_event_is_code */
-int libevdev_is_event_code(const struct input_event *ev, unsigned int type, unsigned int code);
+int libevdev_is_event_code(const struct input_event *ev, unsigned int type, unsigned int code) LIBEVDEV_DEPRECATED;
 /**************************************/
 
 #ifdef __cplusplus
