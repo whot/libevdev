@@ -478,6 +478,10 @@ int libevdev_set_fd(struct libevdev* dev, int fd);
  * No check is made that new fd points to the same device. If the device has
  * changed, libevdev's behavior is undefined.
  *
+ * libevdev does not sync itself after changing the fd and keeps the current
+ * device state. Use libevdev_next_event with the LIBEVDEV_FORCE_SYNC flag to
+ * force a re-sync.
+ *
  * The fd may be open in O_RDONLY or O_RDWR.
  *
  * It is an error to call this function before calling libevdev_set_fd().
