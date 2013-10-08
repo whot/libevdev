@@ -494,10 +494,13 @@ sync_mt_state(struct libevdev *dev, int create_events)
 {
 	int rc;
 	int i;
+	int ioctl_success = 0;
 	struct mt_state {
 		int code;
 		int val[MAX_SLOTS];
 	} mt_state[ABS_MT_CNT];
+
+	memset(&mt_state, 0, sizeof(mt_state));
 
 	for (i = ABS_MT_MIN; i <= ABS_MT_MAX; i++) {
 		int idx;
@@ -510,8 +513,15 @@ sync_mt_state(struct libevdev *dev, int create_events)
 		idx = i - ABS_MT_MIN;
 		mt_state[idx].code = i;
 		rc = ioctl(dev->fd, EVIOCGMTSLOTS(sizeof(struct mt_state)), &mt_state[idx]);
-		if (rc < 0)
-			goto out;
+		if (rc < 0) {
+			/* if the first ioctl fails with -EINVAL, chances are the kernel
+			   doesn't support the ioctl. Simply continue */
+			if (errno == -EINVAL && !ioctl_success) {
+				rc = 0;
+			} else /* if the second, ... ioctl fails, really fail */
+				goto out;
+		} else if (ioctl_success == 0)
+			ioctl_success = 1;
 	}
 
 	for (i = 0; i < dev->num_slots; i++) {
