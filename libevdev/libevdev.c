@@ -264,8 +264,12 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	if (rc < 0)
 		goto out;
 
+	/* Built on a kernel with props, running against a kernel without property
+	   support. This should not be a fatal case, we'll be missing properties but other
+	   than that everything is as expected.
+	 */
 	rc = ioctl(fd, EVIOCGPROP(sizeof(dev->props)), dev->props);
-	if (rc < 0)
+	if (rc < 0 && errno != EINVAL)
 		goto out;
 
 	rc = ioctl(fd, EVIOCGBIT(EV_REL, sizeof(dev->rel_bits)), dev->rel_bits);
