@@ -27,6 +27,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #include "libevdev.h"
 #include "libevdev-int.h"
@@ -118,6 +119,7 @@ libevdev_new(void)
 	if (!dev)
 		return NULL;
 	dev->fd = -1;
+	dev->initialized = false;
 	dev->num_slots = -1;
 	dev->current_slot = -1;
 	dev->grabbed = LIBEVDEV_UNGRAB;
@@ -189,7 +191,7 @@ libevdev_get_log_priority(void)
 LIBEVDEV_EXPORT int
 libevdev_change_fd(struct libevdev *dev, int fd)
 {
-	if (dev->fd == -1) {
+	if (!dev->initialized) {
 		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -1;
 	}
@@ -204,7 +206,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	int i;
 	char buf[256];
 
-	if (dev->fd != -1) {
+	if (dev->initialized) {
 		log_bug("device already initialized.\n");
 		return -EBADF;
 	}
@@ -351,6 +353,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	 * Same with the valuators, really, but they may not change.
 	 */
 
+	dev->initialized = true;
 out:
 	return rc ? -errno : 0;
 }
@@ -731,10 +734,11 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 {
 	int rc = LIBEVDEV_READ_STATUS_SUCCESS;
 
-	if (dev->fd < 0) {
+	if (!dev->initialized) {
 		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
-	}
+	} else if (dev->fd < 0)
+		return -EBADF;
 
 	if (!(flags & (LIBEVDEV_READ_FLAG_NORMAL|LIBEVDEV_READ_FLAG_SYNC|LIBEVDEV_READ_FLAG_FORCE_SYNC))) {
 		log_bug("invalid flags %#x\n.\n", flags);
@@ -821,10 +825,11 @@ libevdev_has_event_pending(struct libevdev *dev)
 	struct pollfd fds = { dev->fd, POLLIN, 0 };
 	int rc;
 
-	if (dev->fd < 0) {
+	if (!dev->initialized) {
 		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
-	}
+	} else if (dev->fd < 0)
+		return -EBADF;
 
 	if (queue_num_elements(dev) != 0)
 		return 1;
@@ -1205,10 +1210,11 @@ libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const stru
 {
 	int rc;
 
-	if (dev->fd < 0) {
+	if (!dev->initialized) {
 		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
-	}
+	} else if (dev->fd < 0)
+		return -EBADF;
 
 	if (code > ABS_MAX)
 		return -EINVAL;
@@ -1227,10 +1233,11 @@ libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab)
 {
 	int rc = 0;
 
-	if (dev->fd < 0) {
+	if (!dev->initialized) {
 		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
-	}
+	} else if (dev->fd < 0)
+		return -EBADF;
 
 	if (grab != LIBEVDEV_GRAB && grab != LIBEVDEV_UNGRAB) {
 		log_bug("invalid grab parameter %#x\n", grab);
@@ -1372,10 +1379,11 @@ libevdev_kernel_set_led_values(struct libevdev *dev, ...)
 	int rc = 0;
 	size_t nleds = 0;
 
-	if (dev->fd < 0) {
+	if (!dev->initialized) {
 		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
-	}
+	} else if (dev->fd < 0)
+		return -EBADF;
 
 	memset(ev, 0, sizeof(ev));
 
@@ -1427,10 +1435,11 @@ libevdev_kernel_set_led_values(struct libevdev *dev, ...)
 LIBEVDEV_EXPORT int
 libevdev_set_clock_id(struct libevdev *dev, int clockid)
 {
-	if (dev->fd < 0) {
+	if (!dev->initialized) {
 		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
-	}
+	} else if (dev->fd < 0)
+		return -EBADF;
 
 	return ioctl(dev->fd, EVIOCSCLOCKID, &clockid) ? -errno : 0;
 }

@@ -26,6 +26,7 @@
 #include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <errno.h>
 #include "libevdev.h"
 
@@ -73,6 +74,7 @@ enum SyncState {
 
 struct libevdev {
 	int fd;
+	bool initialized;
 	char *name;
 	char *phys;
 	char *uniq;
