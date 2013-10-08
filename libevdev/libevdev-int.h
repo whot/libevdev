@@ -20,8 +20,8 @@
  * OF THIS SOFTWARE.
  */
 
-#ifndef libevdev_INT_H
-#define libevdev_INT_H
+#ifndef LIBEVDEV_INT_H
+#define LIBEVDEV_INT_H
 
 #include <config.h>
 #include <stdio.h>
