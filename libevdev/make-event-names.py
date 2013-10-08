@@ -42,11 +42,10 @@ blacklist = [
 ]
 
 def print_bits(bits, prefix):
-	if  not hasattr(bits, prefix):
-		return
 	print("static const char * const %s_map[%s_MAX + 1] = {" % (prefix, prefix.upper()))
-	for val, name in list(getattr(bits, prefix).items()):
-		print("	[%s] = \"%s\"," % (name, name))
+	if hasattr(bits, prefix):
+		for val, name in list(getattr(bits, prefix).items()):
+			print("	[%s] = \"%s\"," % (name, name))
 	print("};")
 	print("")
 
@@ -105,6 +104,9 @@ def print_mapping_table(bits):
 	print("")
 	print("#ifndef SYN_MAX /* added in 3.12  */")
 	print("#define SYN_MAX 0xf")
+	print("#endif")
+	print("#ifndef INPUT_PROP_MAX")
+	print("#define INPUT_PROP_MAX 0x1f")
 	print("#endif")
 	print("")
 
