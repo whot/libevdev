@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include "libevdev.h"
+#include "libevdev-defines.h"
 
 #define LONG_BITS (sizeof(long) * 8)
 #define NLONGS(x) (((x) + LONG_BITS - 1) / LONG_BITS)

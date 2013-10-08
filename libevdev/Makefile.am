@@ -4,6 +4,7 @@ AM_CPPFLAGS = $(GCC_CFLAGS) $(GCOV_CFLAGS) -I$(top_srcdir)
 
 libevdev_la_SOURCES = \
                    libevdev.h \
+                   libevdev-defines.h \
                    libevdev-int.h \
                    libevdev-util.h \
                    libevdev-uinput.c \
