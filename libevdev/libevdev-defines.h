@@ -60,5 +60,13 @@
 #define REP_CNT                 (REP_MAX+1)
 #endif
 
+#ifndef UINPUT_IOCTL_BASE
+#define UINPUT_IOCTL_BASE       'U'
+#endif
+
+#ifndef UI_SET_PROPBIT
+#define UI_SET_PROPBIT _IOW(UINPUT_IOCTL_BASE, 110, int)
+#endif
+
 #endif /* LIBEVDEV_DEFINES_H */
 

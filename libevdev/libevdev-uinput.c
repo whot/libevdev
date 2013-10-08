@@ -37,6 +37,7 @@
 #include "libevdev-uinput.h"
 #include "libevdev-uinput-int.h"
 #include "libevdev-util.h"
+#include "libevdev-defines.h"
 
 #define SYS_INPUT_DIR "/sys/devices/virtual/input/"
 
@@ -132,8 +133,17 @@ set_props(const struct libevdev *dev, int fd, struct uinput_user_dev *uidev)
 			continue;
 
 		rc = ioctl(fd, UI_SET_PROPBIT, prop);
-		if (rc == -1)
+		if (rc == -1) {
+			/* If UI_SET_PROPBIT is not supported, treat -EINVAL
+			 * as success. The kernel only sends -EINVAL for an
+			 * invalid ioctl, invalid INPUT_PROP_MAX or if the
+			 * ioctl is called on an already created device. The
+			 * last two can't happen here.
+			 */
+			if (errno == -EINVAL)
+				rc = 0;
 			break;
+		}
 	}
 	return rc;
 }
