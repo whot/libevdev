@@ -209,7 +209,8 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	if (dev->initialized) {
 		log_bug("device already initialized.\n");
 		return -EBADF;
-	}
+	} else if (fd < 0)
+		return -EBADF;
 
 	rc = ioctl(fd, EVIOCGBIT(0, sizeof(dev->bits)), dev->bits);
 	if (rc < 0)
