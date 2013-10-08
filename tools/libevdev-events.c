@@ -97,6 +97,7 @@ print_bits(struct libevdev *dev)
 static void
 print_props(struct libevdev *dev)
 {
+#ifdef INPUT_PROP_MAX
 	unsigned int i;
 	printf("Properties:\n");
 
@@ -105,6 +106,7 @@ print_props(struct libevdev *dev)
 			printf("  Property type %d (%s)\n", i,
 					libevdev_property_get_name(i));
 	}
+#endif
 }
 
 static int
