@@ -135,6 +135,12 @@ extern "C" {
  * A more complete example is available with the libevdev-events tool here:
  * http://cgit.freedesktop.org/libevdev/tree/tools/libevdev-events.c
  *
+ * Backwards compatibility with older kernel
+ * =========================================
+ * libevdev attempts to build and run correctly on a number of kernel versions.
+ * If features requiredare not available, libevdev attempts to work around them
+ * in the most reasonable way. For more details see \ref backwardscompatibility.
+ *
  * libevdev internal test suite
  * ============================
  *
@@ -187,6 +193,56 @@ extern "C" {
  * ==============
  * Please report bugs in the freedesktop.org bugzilla under the libevdev product:
  * https://bugs.freedesktop.org/enter_bug.cgi?product=libevdev
+ */
+
+/**
+ * @page backwardscompatibility Compatibility and Behavior across kernel versions
+ *
+ * This page describes libevdev's behavior when the build-time kernel and the
+ * run-time kernel differ in their feature set.
+ *
+ * With the exception of event names, libevdev defines features that may be
+ * missing on older kernels and building on such kernels will not disable
+ * features. Running libevdev on a kernel that is missing some feature will
+ * change libevdev's behavior. In most cases, the new behavior should be
+ * obvious, but it is spelled out below in detail.
+ *
+ * Minimum requirements
+ * ====================
+ * libevdev requires a 2.6.36 kernel as minimum. Specifically, it requires
+ * ABS_MT_SLOT and the matching behavior.
+ *
+ * Event and input property names
+ * ==============================
+ * Event names and input property names are defined at build-time by the
+ * linux/input.h shipped with libevedv.
+ * The list of event names is compiled at build-time and thus any events not defined
+ * at build time will not resolve. Specifically,
+ * libevdev_event_code_get_name(type, code) for an undefined type or code will
+ * always return NULL. Likewise, libevdev_property_get_name() will return NULL
+ * for properties undefined on the build system.
+ *
+ * Input properties
+ * ================
+ * If the kernel does not support input properties, specifically the
+ * EVIOCGPROPS ioclt, libevdev does not expose input properties to the caller.
+ * Specifically, libevdev_has_property() will always return 0 unless the
+ * property has been manually set with libevdev_enable_property().
+ *
+ * This also applies to the libevdev-uinput code. If uinput does not honor
+ * UI_SET_PROPBIT, libevdev will continue without setting the properties on
+ * the device.
+ *
+ * MT slot behavior
+ * =================
+ * If the kernel does not support the EVIOCGMTSLOTS ioctl, libevdev continues
+ * as normal and assumes all values in all slots to be 0.
+ *
+ * SYN_DROPPED behavior
+ * ====================
+ * A kernel without SYN_DROPPED, won't send the event. libevdev_next_event()
+ * will never require the switch to sync mode.
+ *
  */
 
 /**
