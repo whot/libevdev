@@ -189,7 +189,9 @@ START_TEST(test_code_syn_name)
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_SYN, SYN_REPORT), "SYN_REPORT");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_SYN, SYN_CONFIG), "SYN_CONFIG");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_SYN, SYN_MT_REPORT), "SYN_MT_REPORT");
+#ifdef SYN_DROPPED
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_SYN, SYN_DROPPED), "SYN_DROPPED");
+#endif
 
 	/* there is no SYN_MAX */
 }
@@ -266,7 +268,9 @@ START_TEST(test_event_code)
 	ev.type = EV_SYN;
 	ev.code = SYN_REPORT;
 	ck_assert_int_eq(libevdev_event_is_code(&ev, EV_SYN, SYN_REPORT), 1);
+#ifdef SYN_DROPPED
 	ck_assert_int_eq(libevdev_event_is_code(&ev, EV_SYN, SYN_DROPPED), 0);
+#endif
 }
 END_TEST
 

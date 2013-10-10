@@ -61,6 +61,7 @@ END_TEST
 
 START_TEST(test_syn_event)
 {
+#ifdef SYN_DROPPED
 	struct uinput_device* uidev;
 	struct libevdev *dev;
 	int rc;
@@ -116,7 +117,7 @@ START_TEST(test_syn_event)
 
 	close(pipefd[0]);
 	close(pipefd[1]);
-
+#endif
 }
 END_TEST
 
@@ -236,6 +237,8 @@ START_TEST(test_has_event_pending)
 
 }
 END_TEST
+
+#ifdef SYN_DROPPED
 START_TEST(test_syn_delta_button)
 {
 	struct uinput_device* uidev;
@@ -696,6 +699,7 @@ START_TEST(test_empty_sync)
 	libevdev_free(dev);
 }
 END_TEST
+#endif /* ifdef SYN_DROPPED */
 
 START_TEST(test_event_values)
 {
@@ -1184,6 +1188,7 @@ libevdev_events(void)
 	tcase_add_test(tc, test_has_event_pending);
 	suite_add_tcase(s, tc);
 
+#ifdef SYN_DROPPED
 	tc = tcase_create("SYN_DROPPED deltas");
 	tcase_add_test(tc, test_syn_delta_button);
 	tcase_add_test(tc, test_syn_delta_abs);
@@ -1197,6 +1202,7 @@ libevdev_events(void)
 	tcase_add_test(tc, test_incomplete_sync);
 	tcase_add_test(tc, test_empty_sync);
 	suite_add_tcase(s, tc);
+#endif
 
 	tc = tcase_create("event values");
 	tcase_add_test(tc, test_event_values);
