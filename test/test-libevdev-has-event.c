@@ -257,6 +257,7 @@ END_TEST
 
 START_TEST(test_input_props)
 {
+#ifdef INPUT_PROP_MAX
 	struct uinput_device* uidev;
 	struct libevdev *dev;
 	int rc, i;
@@ -286,11 +287,13 @@ START_TEST(test_input_props)
 
 	uinput_device_free(uidev);
 	libevdev_free(dev);
+#endif
 }
 END_TEST
 
 START_TEST(test_set_input_props)
 {
+#ifdef INPUT_PROP_MAX
 	struct uinput_device* uidev;
 	struct libevdev *dev;
 	int rc, fd;
@@ -319,6 +322,7 @@ START_TEST(test_set_input_props)
 
 	uinput_device_free(uidev);
 	libevdev_free(dev);
+#endif
 }
 END_TEST
 

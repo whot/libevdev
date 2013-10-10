@@ -326,6 +326,7 @@ END_TEST
 
 START_TEST(test_uinput_properties)
 {
+#ifdef INPUT_PROP_MAX
 	struct libevdev *dev, *dev2;
 	struct libevdev_uinput *uidev;
 	int fd;
@@ -363,6 +364,7 @@ START_TEST(test_uinput_properties)
 	libevdev_free(dev2);
 	libevdev_uinput_destroy(uidev);
 	close(fd);
+#endif
 }
 END_TEST
 

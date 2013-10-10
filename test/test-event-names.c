@@ -197,6 +197,7 @@ END_TEST
 
 START_TEST(test_prop_name)
 {
+#ifdef INPUT_PROP_MAX
 	ck_assert_str_eq(libevdev_property_get_name(INPUT_PROP_POINTER), "INPUT_PROP_POINTER");
 	ck_assert_str_eq(libevdev_property_get_name(INPUT_PROP_DIRECT), "INPUT_PROP_DIRECT");
 	ck_assert_str_eq(libevdev_property_get_name(INPUT_PROP_BUTTONPAD), "INPUT_PROP_BUTTONPAD");
@@ -205,6 +206,10 @@ START_TEST(test_prop_name)
 
 	ck_assert(libevdev_property_get_name(INPUT_PROP_MAX - 1) == NULL);
 	ck_assert(libevdev_property_get_name(INPUT_PROP_MAX + 1) == NULL);
+#else
+	ck_assert(libevdev_property_get_name(0) == NULL);
+	ck_assert(libevdev_property_get_name(1) == NULL);
+#endif
 }
 END_TEST
 
