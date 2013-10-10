@@ -114,7 +114,9 @@ START_TEST(test_code_key_name)
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_GAMEPAD), "BTN_A");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_DIGI), "BTN_TOOL_PEN");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_WHEEL), "BTN_GEAR_DOWN");
+#ifdef BTN_TRIGGER_HAPPY
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_TRIGGER_HAPPY), "BTN_TRIGGER_HAPPY1");
+#endif
 
 }
 END_TEST
