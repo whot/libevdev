@@ -265,6 +265,7 @@ START_TEST(test_device_grab)
 }
 END_TEST
 
+#ifdef EVIOCSCLOCKID
 START_TEST(test_set_clock_id)
 {
 	struct uinput_device* uidev;
@@ -361,7 +362,7 @@ START_TEST(test_clock_id_events)
 	close(fd);
 }
 END_TEST
-
+#endif
 
 Suite *
 libevdev_init_test(void)
@@ -389,10 +390,12 @@ libevdev_init_test(void)
 	tcase_add_test(tc, test_device_grab);
 	suite_add_tcase(s, tc);
 
+#ifdef EVIOCSCLOCKID
 	tc = tcase_create("clock id");
 	tcase_add_test(tc, test_set_clock_id);
 	tcase_add_test(tc, test_clock_id_events);
 	suite_add_tcase(s, tc);
+#endif
 
 	return s;
 }
