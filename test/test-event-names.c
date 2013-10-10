@@ -99,8 +99,8 @@ START_TEST(test_code_key_name)
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_A), "BTN_A");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_TOOL_PEN), "BTN_TOOL_PEN");
 
-	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, KEY_TOUCHPAD_TOGGLE), "KEY_TOUCHPAD_TOGGLE");
-	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_TRIGGER_HAPPY), "BTN_TRIGGER_HAPPY1");
+	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, KEY_A), "KEY_A");
+	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_LEFT), "BTN_LEFT");
 
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, KEY_MAX), "KEY_MAX");
 	ck_assert(libevdev_event_code_get_name(EV_KEY, KEY_MAX - 1) == NULL);
