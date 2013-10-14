@@ -9,8 +9,6 @@ import re
 import sys
 import argparse
 
-SOURCE_FILE = "/usr/include/linux/input.h"
-
 class Bits(object):
 	pass
 
@@ -166,9 +164,7 @@ def parse_define(bits, line):
 		b = getattr(bits, attrname)
 		b[value] = name
 
-def parse(path):
-	fp = open(path)
-
+def parse(fp):
 	bits = Bits()
 
 	lines = fp.readlines()
@@ -180,11 +176,14 @@ def parse(path):
 	return bits
 
 if __name__ == "__main__":
-	bits = parse(SOURCE_FILE)
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--output", default="c")
+	parser.add_argument('source', metavar="/path/to/linux/input.h",
+			    type=argparse.FileType('r'),
+			    help='source file to parse')
 
 	args = parser.parse_args(sys.argv[1:])
+	bits = parse(args.source)
 	if args.output == "python":
 		print_python_mapping_table(bits)
 	else:
