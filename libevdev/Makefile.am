@@ -1,6 +1,6 @@
 lib_LTLIBRARIES=libevdev.la
 
-AM_CPPFLAGS = $(GCC_CFLAGS) $(GCOV_CFLAGS) -I$(top_srcdir)
+AM_CPPFLAGS = $(GCC_CFLAGS) $(GCOV_CFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)
 
 libevdev_la_SOURCES = \
                    libevdev.h \
@@ -9,7 +9,8 @@ libevdev_la_SOURCES = \
                    libevdev-uinput.c \
                    libevdev-uinput.h \
                    libevdev-uinput-int.h \
-                   libevdev.c
+                   libevdev.c \
+		   ../include/linux/input.h
 
 libevdev_la_LDFLAGS = \
 	-version-info $(LIBEVDEV_LT_VERSION) \

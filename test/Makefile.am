@@ -17,7 +17,7 @@ common_sources = $(libevdev_sources) \
 		 test-common.h
 
 # include builddir for event-names.h
-AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)/libevdev $(CHECK_CFLAGS) $(GCOV_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/include -I$(top_builddir)/libevdev $(CHECK_CFLAGS) $(GCOV_CFLAGS)
 
 test_libevdev_SOURCES = \
 			test-main.c \

@@ -96,7 +96,7 @@ START_TEST(test_code_key_name)
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_0), "BTN_0");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_LEFT), "BTN_LEFT");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_TRIGGER), "BTN_TRIGGER");
-	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_A), "BTN_A");
+	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_A), "BTN_SOUTH");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_TOOL_PEN), "BTN_TOOL_PEN");
 
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, KEY_TOUCHPAD_TOGGLE), "KEY_TOUCHPAD_TOGGLE");
@@ -111,7 +111,7 @@ START_TEST(test_code_key_name)
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_MISC), "BTN_0");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_MOUSE), "BTN_LEFT");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_JOYSTICK), "BTN_TRIGGER");
-	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_GAMEPAD), "BTN_A");
+	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_GAMEPAD), "BTN_SOUTH");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_DIGI), "BTN_TOOL_PEN");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_WHEEL), "BTN_GEAR_DOWN");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_KEY, BTN_TRIGGER_HAPPY), "BTN_TRIGGER_HAPPY1");
