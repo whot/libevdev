@@ -21,7 +21,7 @@ libevdevincludedir = $(includedir)/libevdev-1.0/libevdev
 libevdevinclude_HEADERS = libevdev.h libevdev-uinput.h
 
 event-names.h: Makefile make-event-names.py
-	        $(srcdir)/make-event-names.py --output=c > $@
+	$(PYTHON) $(srcdir)/make-event-names.py --output=c > $@
 
 EXTRA_DIST = make-event-names.py
 CLEANFILES = event-names.h
