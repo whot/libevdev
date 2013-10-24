@@ -775,6 +775,9 @@ START_TEST(test_device_enable_bit_invalid)
 	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_ABS, ABS_MAX + 1, &abs), -1);
 	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_MAX + 1, ABS_MAX + 1, &abs), -1);
 	ck_assert_int_eq(libevdev_enable_event_type(dev, EV_MAX + 1), -1);
+	/* there's a gap between EV_SW and EV_LED */
+	ck_assert_int_eq(libevdev_enable_event_type(dev, EV_LED - 1), -1);
+	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_LED - 1, 0, NULL), -1);
 
 	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_ABS, ABS_Y, NULL), -1);
 	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_REP, REP_DELAY, NULL), -1);
@@ -843,6 +846,9 @@ START_TEST(test_device_disable_bit_invalid)
 	rc = test_create_abs_device(&uidev, &dev, 1, &abs, -1);
 	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
 
+	/* there's a gap between EV_SW and EV_LED */
+	ck_assert_int_eq(libevdev_disable_event_type(dev, EV_LED - 1), -1);
+	ck_assert_int_eq(libevdev_disable_event_code(dev, EV_LED - 1, 0), -1);
 	ck_assert_int_eq(libevdev_disable_event_code(dev, EV_ABS, ABS_MAX + 1), -1);
 	ck_assert_int_eq(libevdev_disable_event_code(dev, EV_MAX + 1, ABS_MAX + 1), -1);
 	ck_assert_int_eq(libevdev_disable_event_type(dev, EV_MAX + 1), -1);

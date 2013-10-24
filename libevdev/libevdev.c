@@ -1139,11 +1139,17 @@ libevdev_set_abs_info(struct libevdev *dev, unsigned int code, const struct inpu
 LIBEVDEV_EXPORT int
 libevdev_enable_event_type(struct libevdev *dev, unsigned int type)
 {
+	int max;
+
 	if (type > EV_MAX)
 		return -1;
 
 	if (libevdev_has_event_type(dev, type))
 		return 0;
+
+	max = libevdev_event_type_get_max(type);
+	if (max == -1)
+		return -1;
 
 	set_bit(dev->bits, type);
 
@@ -1158,7 +1164,13 @@ libevdev_enable_event_type(struct libevdev *dev, unsigned int type)
 LIBEVDEV_EXPORT int
 libevdev_disable_event_type(struct libevdev *dev, unsigned int type)
 {
+	int max;
+
 	if (type > EV_MAX || type == EV_SYN)
+		return -1;
+
+	max = libevdev_event_type_get_max(type);
+	if (max == -1)
 		return -1;
 
 	clear_bit(dev->bits, type);
@@ -1192,7 +1204,7 @@ libevdev_enable_event_code(struct libevdev *dev, unsigned int type,
 
 	max = type_to_mask(dev, type, &mask);
 
-	if (code > max)
+	if (code > max || (int)max == -1)
 		return -1;
 
 	set_bit(mask, code);
@@ -1219,7 +1231,7 @@ libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned in
 
 	max = type_to_mask(dev, type, &mask);
 
-	if (code > max)
+	if (code > max || (int)max == -1)
 		return -1;
 
 	clear_bit(mask, code);
