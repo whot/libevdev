@@ -1213,7 +1213,7 @@ libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned in
 	unsigned int max;
 	unsigned long *mask = NULL;
 
-	if (type > EV_MAX)
+	if (type > EV_MAX || type == EV_SYN)
 		return -1;
 
 	max = type_to_mask(dev, type, &mask);
