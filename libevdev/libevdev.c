@@ -120,6 +120,7 @@ libevdev_reset(struct libevdev *dev)
 	dev->current_slot = -1;
 	dev->grabbed = LIBEVDEV_UNGRAB;
 	dev->sync_state = SYNC_NONE;
+	libevdev_enable_event_type(dev, EV_SYN);
 }
 
 LIBEVDEV_EXPORT struct libevdev*
@@ -944,7 +945,7 @@ libevdev_enable_property(struct libevdev *dev, unsigned int prop)
 LIBEVDEV_EXPORT int
 libevdev_has_event_type(const struct libevdev *dev, unsigned int type)
 {
-	return (type <= EV_MAX) && bit_is_set(dev->bits, type);
+	return type == EV_SYN ||(type <= EV_MAX && bit_is_set(dev->bits, type));
 }
 
 LIBEVDEV_EXPORT int
