@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Parses linux/input.h scanning for #define KEY_FOO 134
-# Prints a C header file or a Python file that can be used as
-# mapping table
+# Prints C header files or Python files that can be used as
+# mapping and lookup tables.
 #
 
 from __future__ import print_function
@@ -39,12 +39,36 @@ blacklist = [
 		"BTN_TRIGGER_HAPPY"
 ]
 
+btn_additional = [
+		[0, "BTN_A"],
+		[0, "BTN_B"],
+		[0, "BTN_X"],
+		[0, "BTN_Y"],
+]
+
+names = [
+		"REL_",
+		"ABS_",
+		"KEY_",
+		"BTN_",
+		"LED_",
+		"SND_",
+		"MSC_",
+		"SW_",
+		"FF_",
+		"SYN_",
+		"REP_",
+]
+
 def print_bits(bits, prefix):
 	if  not hasattr(bits, prefix):
 		return
 	print("static const char * const %s_map[%s_MAX + 1] = {" % (prefix, prefix.upper()))
 	for val, name in list(getattr(bits, prefix).items()):
 		print("	[%s] = \"%s\"," % (name, name))
+	if prefix == "key":
+		for val, name in list(getattr(bits, "btn").items()):
+			print("	[%s] = \"%s\"," % (name, name))
 	print("};")
 	print("")
 
@@ -55,6 +79,9 @@ def print_python_bits(bits, prefix):
 	print("%s_map = {" % (prefix))
 	for val, name in list(getattr(bits, prefix).items()):
 		print("	%d : \"%s\"," % (val, name))
+	if prefix == "key":
+		for val, name in list(getattr(bits, "btn").items()):
+			print("	%d : \"%s\"," % (val, name))
 	print("}")
 	print("for k, v in %s_map.items():" % (prefix))
 	print("	%s_map[v] = k" % (prefix))
@@ -95,6 +122,35 @@ def print_python_map(bits):
 	print("}")
 	print("")
 
+def print_lookup(bits, prefix):
+	if not hasattr(bits, prefix):
+		return
+
+	names = list(getattr(bits, prefix).items())
+	if prefix == "btn":
+		names = names + btn_additional;
+
+	for val, name in sorted(names, key=lambda e: e[1]):
+		print("	{ .name = \"%s\", .value = %s }," % (name, name))
+
+def print_lookup_table(bits):
+	print("struct name_entry {")
+	print("	const char *name;")
+	print("	unsigned int value;")
+	print("};")
+	print("")
+	print("static const struct name_entry ev_names[] = {")
+	print_lookup(bits, "ev")
+	print("};")
+	print("")
+
+	print("static const struct name_entry code_names[] = {")
+	for prefix in sorted(names, key=lambda e: e):
+		print_lookup(bits, prefix[:-1].lower())
+	print("};")
+	print("")
+
+
 def print_mapping_table(bits):
 	print("/* THIS FILE IS GENERATED, DO NOT EDIT */")
 	print("")
@@ -112,6 +168,7 @@ def print_mapping_table(bits):
 		print_bits(bits, prefix[:-1].lower())
 
 	print_map(bits)
+	print_lookup_table(bits)
 
 	print("#endif /* EVENT_NAMES_H */")
 
@@ -156,8 +213,6 @@ def parse_define(bits, line):
 			continue
 
 		attrname = prefix[:-1].lower()
-		if attrname == "btn":
-			attrname = "key"
 
 		if not hasattr(bits, attrname):
 			setattr(bits, attrname, {})
