@@ -22,6 +22,7 @@
 
 #include <config.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <unistd.h>
 #include <time.h>
 #include <sys/types.h>
@@ -304,6 +305,7 @@ START_TEST(test_clock_id_events)
 	struct input_event ev1, ev2;
 	struct timespec t1_real, t2_real;
 	struct timespec t1_mono, t2_mono;
+	int64_t t1, t2;
 
 	rc = test_create_device(&uidev, &dev,
 				EV_SYN, SYN_REPORT,
@@ -342,8 +344,9 @@ START_TEST(test_clock_id_events)
 	ck_assert_int_eq(ev1.code, ev2.code);
 	ck_assert_int_eq(ev1.value, ev2.value);
 
-	ck_assert_int_ne(ev1.time.tv_sec, ev2.time.tv_sec);
-	ck_assert_int_ne(ev1.time.tv_usec, ev2.time.tv_usec);
+	t1 = ev1.time.tv_sec * 1000000LL + ev1.time.tv_usec;
+	t2 = ev2.time.tv_sec * 1000000LL + ev2.time.tv_usec;
+	ck_assert_int_ne(t1, t2);
 
 	ck_assert_int_ge(ev1.time.tv_sec, t1_real.tv_sec);
 	ck_assert_int_ge(ev1.time.tv_usec, t1_real.tv_nsec/1000);
