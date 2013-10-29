@@ -1,4 +1,4 @@
-AC_PREREQ([2.64])
+AC_PREREQ([2.62])
 
 AC_INIT([libevdev],
         [0.4],
