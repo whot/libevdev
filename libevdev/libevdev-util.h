@@ -24,7 +24,15 @@
 #define _UTIL_H_
 
 #include <config.h>
+#include <stdbool.h>
+#include <string.h>
 #include "libevdev-int.h"
+
+static inline bool
+startswith(const char *str, size_t len, const char *prefix, size_t plen)
+{
+	return len >= plen && !strncmp(str, prefix, plen);
+}
 
 static inline int
 bit_is_set(const unsigned long *array, int bit)
