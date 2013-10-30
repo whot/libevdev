@@ -23,6 +23,7 @@ AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/include -I$(top_builddir)/libevdev
 test_libevdev_SOURCES = \
 			test-main.c \
 			test-event-names.c \
+			test-event-codes.c \
 			test-libevdev-init.c \
 			test-libevdev-has-event.c \
 			test-int-queue.c \
