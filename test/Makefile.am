@@ -5,6 +5,7 @@ TESTS = $(noinst_PROGRAMS)
 
 libevdev_sources = $(top_srcdir)/libevdev/libevdev.c \
 		   $(top_srcdir)/libevdev/libevdev.h \
+		   $(top_srcdir)/libevdev/libevdev-names.c \
 		   $(top_srcdir)/libevdev/libevdev-uinput.h \
 		   $(top_srcdir)/libevdev/libevdev-uinput.c \
 		   $(top_srcdir)/libevdev/libevdev-uinput-int.h \

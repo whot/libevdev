@@ -1460,6 +1460,48 @@ const char* libevdev_property_get_name(unsigned int prop);
 int libevdev_event_type_get_max(unsigned int type);
 
 /**
+ * @ingroup misc
+ *
+ * Look up an event-type by its name. Event-types start with "EV_" followed by
+ * the name (eg., "EV_ABS"). The "EV_" prefix must be included in the name. It
+ * returns the constant assigned to the event-type or -1 if not found.
+ *
+ * @param name A non-NULL string describing an input-event type ("EV_KEY",
+ * "EV_ABS", ...).
+ * @param len The length of the passed string excluding any terminating 0
+ * character. If less than zero the string is assumed to be zero-terminated.
+ *
+ * @return The given type constant for the passed name or -1 if not found.
+ *
+ * @note EV_MAX is also recognized.
+ */
+int libevdev_event_type_from_name(const char *name, ssize_t len);
+
+/**
+ * @ingroup misc
+ *
+ * Look up an event-code by its type and name. Event-codes start with a fixed
+ * prefix followed by their name (eg., "ABS_X"). The prefix must be included in
+ * the name. It returns the constant assigned to the event-code or -1 if not
+ * found.
+ *
+ * You have to pass the event-type where to look for the name. For instance, to
+ * resolve "ABS_X" you need to pass EV_ABS as type and "ABS_X" as string.
+ * Supported event-codes are codes starting with SYN_, KEY_, BTN_, REL_, ABS_,
+ * MSC_, SND_, SW_, LED_, REP_, FF_.
+ *
+ * @param type The event type (EV_* constant) where to look for the name.
+ * @param name A non-NULL string describing an input-event code ("KEY_A",
+ * "ABS_X", "BTN_Y", ...).
+ * @param len The length of the passed string excluding any terminating 0
+ * character. If less than zero the string is assumed to be zero-terminated.
+ *
+ * @return The given code constant for the passed name or -1 if not found.
+ */
+int libevdev_event_code_from_name(unsigned int type, const char *name,
+				  ssize_t len);
+
+/**
  * @ingroup bits
  *
  * Get the repeat delay and repeat period values for this device.

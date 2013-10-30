@@ -10,6 +10,7 @@ libevdev_la_SOURCES = \
                    libevdev-uinput.h \
                    libevdev-uinput-int.h \
                    libevdev.c \
+                   libevdev-names.c \
 		   ../include/linux/input.h
 
 libevdev_la_LDFLAGS = \
