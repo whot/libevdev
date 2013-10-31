@@ -67,13 +67,19 @@ lookup_name(const struct name_entry *array, size_t asize,
 }
 
 LIBEVDEV_EXPORT int
-libevdev_event_type_from_name(const char *name, ssize_t len)
+libevdev_event_type_from_name(const char *name)
+{
+	return libevdev_event_type_from_name_n(name, strlen(name));
+}
+
+LIBEVDEV_EXPORT int
+libevdev_event_type_from_name_n(const char *name, size_t len)
 {
 	struct name_lookup lookup;
 	const struct name_entry *entry;
 
 	lookup.name = name;
-	lookup.len = (len < 0) ? strlen(name) : (size_t)len;
+	lookup.len = len;
 
 	entry = lookup_name(ev_names, ARRAY_LENGTH(ev_names), &lookup);
 
@@ -85,9 +91,6 @@ static int type_from_prefix(const char *name, ssize_t len)
 	const char *e;
 	size_t i;
 	ssize_t l;
-
-	if (len < 0)
-		len = strlen(name);
 
 	/* MAX_ is not allowed, even though EV_MAX exists */
 	if (startswith(name, len, "MAX_", 4))
@@ -113,7 +116,13 @@ static int type_from_prefix(const char *name, ssize_t len)
 }
 
 LIBEVDEV_EXPORT int
-libevdev_event_code_from_name(unsigned int type, const char *name, ssize_t len)
+libevdev_event_code_from_name(unsigned int type, const char *name)
+{
+	return libevdev_event_code_from_name_n(type, name, strlen(name));
+}
+
+LIBEVDEV_EXPORT int
+libevdev_event_code_from_name_n(unsigned int type, const char *name, size_t len)
 {
 	struct name_lookup lookup;
 	const struct name_entry *entry;
@@ -126,7 +135,7 @@ libevdev_event_code_from_name(unsigned int type, const char *name, ssize_t len)
 
 	/* now look up the name @name and return the constant */
 	lookup.name = name;
-	lookup.len = (len < 0) ? strlen(name) : (size_t)len;
+	lookup.len = len;
 
 	entry = lookup_name(code_names, ARRAY_LENGTH(code_names), &lookup);
 
