@@ -29,6 +29,7 @@ AC_INIT([libevdev],
 AC_CONFIG_SRCDIR([libevdev/libevdev.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([build-aux])
 AC_USE_SYSTEM_EXTENSIONS
 
 AM_INIT_AUTOMAKE([1.11 foreign no-dist-gzip dist-xz])
