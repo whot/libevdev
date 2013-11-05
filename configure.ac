@@ -6,6 +6,7 @@ AC_INIT([libevdev],
         [libevdev],
         [])
 
+AC_CONFIG_SRCDIR([libevdev/libevdev.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_USE_SYSTEM_EXTENSIONS
