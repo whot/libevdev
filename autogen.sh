@@ -6,7 +6,6 @@ test -n "$srcdir" || srcdir=.
 olddir=`pwd`
 
 cd "$srcdir"
-test -d m4 || mkdir m4
 autoreconf -fvi || exit $?
 
 cd "$olddir"
