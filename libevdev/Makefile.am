@@ -1,6 +1,6 @@
 lib_LTLIBRARIES=libevdev.la
 
-AM_CPPFLAGS = $(GCC_CFLAGS) $(GCOV_CFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)
+AM_CPPFLAGS = $(GCC_CFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)
 
 libevdev_la_SOURCES = \
                    libevdev.h \
@@ -16,7 +16,6 @@ libevdev_la_SOURCES = \
 libevdev_la_LDFLAGS = \
 	-version-info $(LIBEVDEV_LT_VERSION) \
 	-export-symbols-regex '^libevdev_|^LIBEVDEV_' \
-	$(GCOV_LDFLAGS) \
 	$(GNU_LD_FLAGS)
 
 libevdevincludedir = $(includedir)/libevdev-1.0/libevdev
@@ -29,6 +28,3 @@ EXTRA_DIST = make-event-names.py
 CLEANFILES = event-names.h
 BUILT_SOURCES = event-names.h
 
-# gcov leaves it's mess in this directory too
-clean-local:
-	@rm -f *.gcno
