@@ -10,4 +10,4 @@ test -d m4 || mkdir m4
 autoreconf -fvi || exit $?
 
 cd "$olddir"
-test -n "$NOCONFIGURE" || ./configure "$@"
+test -n "$NOCONFIGURE" || $srcdir/configure "$@"
