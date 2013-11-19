@@ -116,7 +116,6 @@ AS_IF([test "x$enable_gcov" != "xno"],
 )
 
 AM_PATH_PYTHON()
-AC_SUBST(PYTHON)
 AS_IF([$($PYTHON -c "import argparse")], [:],
        AC_MSG_ERROR([python argparse module is missing]))
 
