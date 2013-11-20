@@ -333,7 +333,12 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 				goto out;
 
 			dev->abs_info[i] = abs_info;
-			if (i == ABS_MT_SLOT) {
+
+			/* devices with ABS_MT_SLOT - 1 aren't MT devices,
+			   see the documentation for multitouch-related
+			   functions for more details */
+			if (i == ABS_MT_SLOT &&
+			    !libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT - 1)) {
 				dev->num_slots = abs_info.maximum + 1;
 				dev->current_slot = abs_info.value;
 			}
@@ -627,7 +632,7 @@ update_key_state(struct libevdev *dev, const struct input_event *e)
 static int
 update_mt_state(struct libevdev *dev, const struct input_event *e)
 {
-	if (e->code == ABS_MT_SLOT) {
+	if (e->code == ABS_MT_SLOT && dev->num_slots > -1) {
 		int i;
 		dev->current_slot = e->value;
 		/* sync abs_info with the current slot values */

@@ -361,6 +361,15 @@ extern "C" {
  *
  * As with @ref bits, the logical state of the device as seen by the library
  * depends on the caller using libevdev_next_event().
+ *
+ * The Linux kernel requires all axes on a device to have a semantic
+ * meaning, matching the axis names in linux/input.h. Some devices merely
+ * export a number of axes beyond the available axis list. For those
+ * devices, the multitouch information is invalid. Specfically, if a device
+ * provides the ABS_MT_SLOT axis AND also the (ABS_MT_SLOT - 1) axis, the
+ * device is not treated as multitouch device. No slot information is
+ * available and the ABS_MT axis range for these devices is treated as all
+ * other EV_ABS axes.
  */
 
 /**

@@ -425,6 +425,38 @@ START_TEST(test_slot_number)
 }
 END_TEST
 
+START_TEST(test_invalid_mt_device)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	const int nslots = 4;
+	int value;
+	struct input_absinfo abs[] = {  { ABS_X, 0, 2 },
+		{ ABS_Y, 0, 2 },
+		{ ABS_MT_POSITION_X, 0, 2 },
+		{ ABS_MT_POSITION_Y, 0, 2 },
+		{ ABS_MT_SLOT - 1, 0, 2 },
+		{ ABS_MT_SLOT, 0, nslots - 1 }};
+
+	rc = test_create_abs_device(&uidev, &dev, 6, abs,
+			-1);
+	ck_assert_msg(rc == 0, "Failed to uinput device: %s", strerror(-rc));
+
+	ck_assert_int_eq(libevdev_get_num_slots(dev), -1);
+	ck_assert_int_eq(libevdev_get_current_slot(dev), -1);
+	ck_assert_int_eq(libevdev_set_slot_value(dev, 0, ABS_MT_POSITION_X, 0), -1);
+	ck_assert_int_eq(libevdev_fetch_slot_value(dev, 0, ABS_MT_POSITION_X, &value), 0);
+
+	ck_assert(libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT - 1));
+	ck_assert(libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT));
+
+	ck_assert_int_eq(libevdev_set_event_value(dev, EV_ABS, ABS_MT_SLOT, 1), 0);
+	ck_assert(libevdev_get_event_value(dev, EV_ABS, ABS_MT_SLOT) == 1);
+
+	uinput_device_free(uidev);
+} END_TEST
+
 
 START_TEST(test_device_name)
 {
@@ -1129,6 +1161,7 @@ libevdev_has_event_test(void)
 	tcase_add_test(tc, test_no_slots);
 	tcase_add_test(tc, test_slot_number);
 	tcase_add_test(tc, test_slot_init_value);
+	tcase_add_test(tc, test_invalid_mt_device);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("device info");
