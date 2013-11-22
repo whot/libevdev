@@ -885,9 +885,9 @@ LIBEVDEV_EXPORT void libevdev_set_##field(struct libevdev *dev, const char *fiel
 	dev->field = strdup(field); \
 }
 
-STRING_SETTER(name);
-STRING_SETTER(phys);
-STRING_SETTER(uniq);
+STRING_SETTER(name)
+STRING_SETTER(phys)
+STRING_SETTER(uniq)
 
 
 #define PRODUCT_GETTER(name) \
@@ -896,10 +896,10 @@ LIBEVDEV_EXPORT int libevdev_get_id_##name(const struct libevdev *dev) \
 	return dev->ids.name; \
 }
 
-PRODUCT_GETTER(product);
-PRODUCT_GETTER(vendor);
-PRODUCT_GETTER(bustype);
-PRODUCT_GETTER(version);
+PRODUCT_GETTER(product)
+PRODUCT_GETTER(vendor)
+PRODUCT_GETTER(bustype)
+PRODUCT_GETTER(version)
 
 #define PRODUCT_SETTER(field) \
 LIBEVDEV_EXPORT void libevdev_set_id_##field(struct libevdev *dev, int field) \
@@ -907,10 +907,10 @@ LIBEVDEV_EXPORT void libevdev_set_id_##field(struct libevdev *dev, int field) \
 	dev->ids.field = field;\
 }
 
-PRODUCT_SETTER(product);
-PRODUCT_SETTER(vendor);
-PRODUCT_SETTER(bustype);
-PRODUCT_SETTER(version);
+PRODUCT_SETTER(product)
+PRODUCT_SETTER(vendor)
+PRODUCT_SETTER(bustype)
+PRODUCT_SETTER(version)
 
 LIBEVDEV_EXPORT int
 libevdev_get_driver_version(const struct libevdev *dev)
@@ -1099,11 +1099,11 @@ LIBEVDEV_EXPORT int libevdev_get_abs_##name(const struct libevdev *dev, unsigned
 	return absinfo ? absinfo->name : 0; \
 }
 
-ABS_GETTER(maximum);
-ABS_GETTER(minimum);
-ABS_GETTER(fuzz);
-ABS_GETTER(flat);
-ABS_GETTER(resolution);
+ABS_GETTER(maximum)
+ABS_GETTER(minimum)
+ABS_GETTER(fuzz)
+ABS_GETTER(flat)
+ABS_GETTER(resolution)
 
 #define ABS_SETTER(field) \
 LIBEVDEV_EXPORT void libevdev_set_abs_##field(struct libevdev *dev, unsigned int code, int val) \
