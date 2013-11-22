@@ -352,8 +352,7 @@ enum libevdev_read_flag {
 	LIBEVDEV_READ_FLAG_NORMAL	= 2, /**< Process data in normal mode */
 	LIBEVDEV_READ_FLAG_FORCE_SYNC	= 4, /**< Pretend the next event is a SYN_DROPPED and
 					          require the caller to sync */
-	LIBEVDEV_READ_FLAG_BLOCKING	= 8, /**< The fd is not in O_NONBLOCK and a read may block */
-
+	LIBEVDEV_READ_FLAG_BLOCKING	= 8  /**< The fd is not in O_NONBLOCK and a read may block */
 };
 
 /**
@@ -414,7 +413,7 @@ void libevdev_free(struct libevdev *dev);
 enum libevdev_log_priority {
 	LIBEVDEV_LOG_ERROR = 10,	/**< critical errors and application bugs */
 	LIBEVDEV_LOG_INFO  = 20,	/**< informational messages */
-	LIBEVDEV_LOG_DEBUG = 30,	/**< debug information */
+	LIBEVDEV_LOG_DEBUG = 30		/**< debug information */
 };
 
 /**
@@ -477,7 +476,7 @@ enum libevdev_log_priority libevdev_get_log_priority(void);
  */
 enum libevdev_grab_mode {
 	LIBEVDEV_GRAB = 3,	/**< Grab the device if not currently grabbed */
-	LIBEVDEV_UNGRAB = 4,	/**< Ungrab the device if currently grabbed */
+	LIBEVDEV_UNGRAB = 4	/**< Ungrab the device if currently grabbed */
 };
 
 /**
@@ -581,7 +580,7 @@ enum libevdev_read_status {
 	 *
 	 * @see libevdev_next_event
 	 */
-	LIBEVDEV_READ_STATUS_SYNC = 1,
+	LIBEVDEV_READ_STATUS_SYNC = 1
 };
 /**
  * @ingroup events
@@ -1297,7 +1296,7 @@ int libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const 
  */
 enum libevdev_led_value {
 	LIBEVDEV_LED_ON = 3,
-	LIBEVDEV_LED_OFF = 4,
+	LIBEVDEV_LED_OFF = 4
 };
 
 /**

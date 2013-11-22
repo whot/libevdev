@@ -104,7 +104,7 @@ enum libevdev_uinput_open_mode {
 	/* intentionally -2 to avoid to avoid code like the below from accidentally working:
 		fd = open("/dev/uinput", O_RDWR); // fails, fd is -1
 		libevdev_uinput_create_from_device(dev, fd, &uidev); // may hide the error */
-	LIBEVDEV_UINPUT_OPEN_MANAGED = -2, /**< let libevdev open and close @c /dev/uinput */
+	LIBEVDEV_UINPUT_OPEN_MANAGED = -2  /**< let libevdev open and close @c /dev/uinput */
 };
 
 /**
