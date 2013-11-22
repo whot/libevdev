@@ -1561,36 +1561,6 @@ int libevdev_get_repeat(struct libevdev *dev, int *delay, int *period);
 #define LIBEVDEV_DEPRECATED
 #endif
 
-LIBEVDEV_DEPRECATED extern const enum libevdev_read_flag LIBEVDEV_READ_SYNC;
-LIBEVDEV_DEPRECATED extern const enum libevdev_read_flag LIBEVDEV_READ_NORMAL;
-LIBEVDEV_DEPRECATED extern const enum libevdev_read_flag LIBEVDEV_FORCE_SYNC;
-LIBEVDEV_DEPRECATED extern const enum libevdev_read_flag LIBEVDEV_READ_BLOCKING;
-
-/* replacement: libevdev_kernel_set_abs_info */
-int libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs) LIBEVDEV_DEPRECATED;
-
-
-/* replacement: libevdev_set_log_function */
-void libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc) LIBEVDEV_DEPRECATED;
-
-/** replacement: libevdev_event_type_get_max */
-int libevdev_get_event_type_max(unsigned int type) LIBEVDEV_DEPRECATED;
-
-/** replacement: libevdev_property_get_name */
-const char* libevdev_get_property_name(unsigned int prop) LIBEVDEV_DEPRECATED;
-
-/** replacement: libevdev_event_type_get_name */
-const char * libevdev_get_event_type_name(unsigned int type) LIBEVDEV_DEPRECATED;
-/** replacement: libevdev_event_code_get_name */
-const char * libevdev_get_event_code_name(unsigned int type, unsigned int code) LIBEVDEV_DEPRECATED;
-
-/** replacement: libevdev_event_is_type */
-int libevdev_is_event_type(const struct input_event *ev, unsigned int type) LIBEVDEV_DEPRECATED;
-
-/** replacement: libevdev_event_is_code */
-int libevdev_is_event_code(const struct input_event *ev, unsigned int type, unsigned int code) LIBEVDEV_DEPRECATED;
-/**************************************/
-
 #ifdef __cplusplus
 }
 #endif

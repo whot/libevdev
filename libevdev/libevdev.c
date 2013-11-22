@@ -168,14 +168,6 @@ libevdev_free(struct libevdev *dev)
 	free(dev);
 }
 
-/* DEPRECATED */
-LIBEVDEV_EXPORT void
-libevdev_set_log_handler(struct libevdev *dev, libevdev_log_func_t logfunc)
-{
-	/* Can't be backwards compatible to this yet, so don't even try */
-	fprintf(stderr, "libevdev: ABI change. Log function will not be honored.\n");
-}
-
 LIBEVDEV_EXPORT void
 libevdev_set_log_function(libevdev_log_func_t logfunc, void *data)
 {
@@ -1240,12 +1232,6 @@ libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned in
 }
 
 LIBEVDEV_EXPORT int
-libevdev_kernel_set_abs_value(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs)
-{
-	return libevdev_kernel_set_abs_info(dev, code, abs);
-}
-
-LIBEVDEV_EXPORT int
 libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs)
 {
 	int rc;
@@ -1298,21 +1284,11 @@ libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab)
 	return rc < 0 ? -errno : 0;
 }
 
-/* DEPRECATED */
-LIBEVDEV_EXPORT int
-libevdev_is_event_type(const struct input_event *ev, unsigned int type)
-ALIAS(libevdev_event_is_type);
-
 LIBEVDEV_EXPORT int
 libevdev_event_is_type(const struct input_event *ev, unsigned int type)
 {
 	return type < EV_CNT && ev->type == type;
 }
-
-/* DEPRECATED */
-LIBEVDEV_EXPORT int
-libevdev_is_event_code(const struct input_event *ev, unsigned int type, unsigned int code)
-ALIAS(libevdev_event_is_code);
 
 LIBEVDEV_EXPORT int
 libevdev_event_is_code(const struct input_event *ev, unsigned int type, unsigned int code)
@@ -1326,11 +1302,6 @@ libevdev_event_is_code(const struct input_event *ev, unsigned int type, unsigned
 	return (max > -1 && code <= (unsigned int)max && ev->code == code);
 }
 
-/* DEPRECATED */
-LIBEVDEV_EXPORT const char*
-libevdev_get_event_type_name(unsigned int type)
-ALIAS(libevdev_event_type_get_name);
-
 LIBEVDEV_EXPORT const char*
 libevdev_event_type_get_name(unsigned int type)
 {
@@ -1339,11 +1310,6 @@ libevdev_event_type_get_name(unsigned int type)
 
 	return ev_map[type];
 }
-
-/* DEPRECATED */
-LIBEVDEV_EXPORT const char*
-libevdev_get_event_code_name(unsigned int type, unsigned int code)
-ALIAS(libevdev_event_code_get_name);
 
 LIBEVDEV_EXPORT const char*
 libevdev_event_code_get_name(unsigned int type, unsigned int code)
@@ -1356,16 +1322,6 @@ libevdev_event_code_get_name(unsigned int type, unsigned int code)
 	return event_type_map[type][code];
 }
 
-/* DEPRECATED */
-LIBEVDEV_EXPORT const char*
-libevdev_get_input_prop_name(unsigned int prop)
-ALIAS(libevdev_property_get_name);
-
-/* DEPRECATED */
-LIBEVDEV_EXPORT const char*
-libevdev_get_property_name(unsigned int prop)
-ALIAS(libevdev_property_get_name);
-
 LIBEVDEV_EXPORT const char*
 libevdev_property_get_name(unsigned int prop)
 {
@@ -1374,11 +1330,6 @@ libevdev_property_get_name(unsigned int prop)
 
 	return input_prop_map[prop];
 }
-
-/* DEPRECATED */
-LIBEVDEV_EXPORT int
-libevdev_get_event_type_max(unsigned int type)
-ALIAS(libevdev_event_type_get_max);
 
 LIBEVDEV_EXPORT int
 libevdev_event_type_get_max(unsigned int type)
