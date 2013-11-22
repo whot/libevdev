@@ -1,5 +1,5 @@
 if BUILD_TESTS
-noinst_PROGRAMS = test-libevdev
+noinst_PROGRAMS = test-libevdev test-compile-pedantic
 
 TESTS = $(noinst_PROGRAMS)
 
@@ -32,6 +32,9 @@ test_libevdev_SOURCES = \
 			$(common_sources)
 
 test_libevdev_LDADD =  $(CHECK_LIBS) $(GCOV_LDFLAGS)
+
+test_compile_pedantic_SOURCES = test-compile-pedantic.c
+test_compile_pedantic_CFLAGS = $(AM_CPPFLAGS) -Wpedantic -Werror -std=c90
 
 if GCOV_ENABLED
 

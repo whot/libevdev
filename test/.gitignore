@@ -1,2 +1,3 @@
 gcov-report.txt
 test-libevdev
+test-compile-pedantic
