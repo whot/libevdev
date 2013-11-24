@@ -1,16 +1,20 @@
 if HAVE_DOXYGEN
-all-local: doxygen
 
-doxygen: libevdev.doxygen
+noinst_DATA = html/index.html
+
+header_files = \
+	$(top_srcdir)/libevdev/libevdev.h \
+	$(top_srcdir)/libevdev/libevdev-uinput.h
+
+html/index.html: libevdev.doxygen $(header_files)
 	$(AM_V_GEN)$(DOXYGEN) $<
 
 clean-local:
 	$(AM_V_at)rm -rf html
 
-.PHONY: doxygen
-
 doc_src= $(shell find html -type f -printf "html/%P\n" 2>/dev/null)
 EXTRA_DIST = $(doc_src) libevdev.css
+
 endif
 
 # make sure doc was built before running dist
