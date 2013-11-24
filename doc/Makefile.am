@@ -2,10 +2,10 @@ if HAVE_DOXYGEN
 all-local: doxygen
 
 doxygen: libevdev.doxygen
-	$(DOXYGEN) $<
+	$(AM_V_GEN)$(DOXYGEN) $<
 
 clean-local:
-	rm -rf html
+	$(AM_V_at)rm -rf html
 
 .PHONY: doxygen
 
