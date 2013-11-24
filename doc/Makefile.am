@@ -2,7 +2,7 @@ if HAVE_DOXYGEN
 all-local: doxygen
 
 doxygen: libevdev.doxygen
-	doxygen $<
+	$(DOXYGEN) $<
 
 clean-local:
 	rm -rf html
