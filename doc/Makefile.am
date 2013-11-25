@@ -13,7 +13,7 @@ clean-local:
 	$(AM_V_at)rm -rf html
 
 doc_src= $(shell find html -type f -printf "html/%P\n" 2>/dev/null)
-EXTRA_DIST = $(builddir)/html/index.html $(doc_src) libevdev.css
+EXTRA_DIST = html/index.html $(doc_src) libevdev.css
 
 endif
 
