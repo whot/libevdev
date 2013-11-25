@@ -34,7 +34,7 @@ test_libevdev_SOURCES = \
 test_libevdev_LDADD =  $(CHECK_LIBS) $(GCOV_LDFLAGS)
 
 test_compile_pedantic_SOURCES = test-compile-pedantic.c
-test_compile_pedantic_CFLAGS = $(AM_CPPFLAGS) -Wpedantic -Werror -std=c90
+test_compile_pedantic_CFLAGS = $(AM_CPPFLAGS) -pedantic -Werror -std=c90
 
 if GCOV_ENABLED
 
