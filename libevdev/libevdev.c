@@ -36,12 +36,6 @@
 
 #define MAXEVENTS 64
 
-/* DEPRECATED */
-LIBEVDEV_EXPORT const enum libevdev_read_flag LIBEVDEV_READ_SYNC = LIBEVDEV_READ_FLAG_SYNC;
-LIBEVDEV_EXPORT const enum libevdev_read_flag LIBEVDEV_READ_NORMAL = LIBEVDEV_READ_FLAG_NORMAL;
-LIBEVDEV_EXPORT const enum libevdev_read_flag LIBEVDEV_FORCE_SYNC = LIBEVDEV_READ_FLAG_FORCE_SYNC;
-LIBEVDEV_EXPORT const enum libevdev_read_flag LIBEVDEV_READ_BLOCKING = LIBEVDEV_READ_FLAG_BLOCKING;
-
 static int sync_mt_state(struct libevdev *dev, int create_events);
 
 static int
