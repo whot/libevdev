@@ -1614,7 +1614,7 @@ int libevdev_event_code_from_name_n(unsigned int type, const char *name,
  *
  * @note This function is signal-safe
  */
-int libevdev_get_repeat(struct libevdev *dev, int *delay, int *period);
+int libevdev_get_repeat(const struct libevdev *dev, int *delay, int *period);
 
 
 /********* DEPRECATED SECTION *********/
