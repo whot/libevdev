@@ -141,8 +141,19 @@ extern "C" {
  * If features required are not available, libevdev attempts to work around them
  * in the most reasonable way. For more details see \ref backwardscompatibility.
  *
- * libevdev internal test suite
- * ============================
+ * License information
+ * ===================
+ * libevdev is licensed under the
+ * [X11 license](http://cgit.freedesktop.org/libevdev/tree/COPYING).
+ *
+ * Reporting bugs
+ * ==============
+ * Please report bugs in the freedesktop.org bugzilla under the libevdev product:
+ * https://bugs.freedesktop.org/enter_bug.cgi?product=libevdev
+ */
+
+/**
+ * @page testing libevdev-internal test suite
  *
  * libevdev's internal test suite uses the
  * [Check unit testing framework](http://check.sourceforge.net/). Tests are
@@ -184,15 +195,6 @@ extern "C" {
  *             Option "Ignore" "on"
  *     EndSection
  *
- * License information
- * ===================
- * libevdev is licensed under the
- * [X11 license](http://cgit.freedesktop.org/libevdev/tree/COPYING).
- *
- * Reporting bugs
- * ==============
- * Please report bugs in the freedesktop.org bugzilla under the libevdev product:
- * https://bugs.freedesktop.org/enter_bug.cgi?product=libevdev
  */
 
 /**
