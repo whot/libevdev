@@ -34,7 +34,7 @@ extern "C" {
  * @mainpage
  *
  * **libevdev** is a library for handling evdev kernel devices. It abstracts
- * the ioctls through type-safe interfaces and provides functions to change
+ * the \ref ioctls through type-safe interfaces and provides functions to change
  * the appearance of the device.
  *
  * Development of libevdev is discussed on
@@ -242,6 +242,68 @@ extern "C" {
  * ====================
  * A kernel without SYN_DROPPED, won't send the event. libevdev_next_event()
  * will never require the switch to sync mode.
+ *
+ */
+
+/**
+ * @page ioctls evdev ioctls
+ *
+ * This page lists the status of the evdev-specific ioctls in libevdev.
+ *
+ * <dl>
+ * <dt>EVIOCGVERSION:</dt>
+ * <dd>supported, see libevdev_get_driver_version()</dd>
+ * <dt>EVIOCGID:</dt>
+ * <dd>supported, see libevdev_get_id_product(), libevdev_get_id_vendor(),
+ * libevdev_get_id_bustype(), * * libevdev_get_id_version()</dd>
+ * <dt>EVIOCGREP:</dt>
+ * <dd>supported, see libevdev_get_repeat()</dd>
+ * <dt>EVIOCSREP:</dt>
+ * <dd>supported, see libevdev_enable_event_code()</dd>
+ * <dt>EVIOCGKEYCODE:</dt>
+ * <dd>currently not supported</dd>
+ * <dt>EVIOCGKEYCODE:</dt>
+ * <dd>currently not supported</dd>
+ * <dt>EVIOCSKEYCODE:</dt>
+ * <dd>currently not supported</dd>
+ * <dt>EVIOCSKEYCODE:</dt>
+ * <dd>currently not supported</dd>
+ * <dt>EVIOCGNAME:</dt>
+ * <dd>supported, see libevdev_get_name()</dd>
+ * <dt>EVIOCGPHYS:</dt>
+ * <dd>supported, see libevdev_get_phys()</dd>
+ * <dt>EVIOCGUNIQ:</dt>
+ * <dd>supported, see libevdev_get_uniq()</dd>
+ * <dt>EVIOCGPROP:</dt>
+ * <dd>supported, see libevdev_has_property()</dd>
+ * <dt>EVIOCGMTSLOTS:</dt>
+ * <dd>supported, see libevdev_get_num_slots(), libevdev_get_slot_value()</dd>
+ * <dt>EVIOCGKEY:</dt>
+ * <dd>supported, see libevdev_has_event_code(), libevdev_get_event_value()</dd>
+ * <dt>EVIOCGLED:</dt>
+ * <dd>supported, see libevdev_has_event_code(), libevdev_get_event_value()</dd>
+ * <dt>EVIOCGSND:</dt>
+ * <dd>currently not supported</dd>
+ * <dt>EVIOCGSW:</dt>
+ * <dd>supported, see libevdev_has_event_code(), libevdev_get_event_value()</dd>
+ * <dt>EVIOCGBIT:</dt>
+ * <dd>supported, see libevdev_has_event_code(), libevdev_get_event_value()</dd>
+ * <dt>EVIOCGABS:</dt>
+ * <dd>supported, see libevdev_has_event_code(), libevdev_get_event_value(),
+ * libevdev_get_abs_info()</dd>
+ * <dt>EVIOCSABS:</dt>
+ * <dd>supported, see libevdev_kernel_set_abs_info()</dd>
+ * <dt>EVIOCSFF:</dt>
+ * <dd>currently not supported</dd>
+ * <dt>EVIOCRMFF:</dt>
+ * <dd>currently not supported</dd>
+ * <dt>EVIOCGEFFECTS:</dt>
+ * <dd>currently not supported</dd>
+ * <dt>EVIOCGRAB:</dt>
+ * <dd>supported, see libevdev_grab()</dd>
+ * <dt>EVIOCSCLOCKID:</dt>
+ * <dd>supported, see libevdev_set_clock_id()</dd>
+ * </dl>
  *
  */
 
