@@ -967,6 +967,19 @@ libevdev_get_event_value(const struct libevdev *dev, unsigned int type, unsigned
 		case EV_KEY: value = bit_is_set(dev->key_values, code); break;
 		case EV_LED: value = bit_is_set(dev->led_values, code); break;
 		case EV_SW: value = bit_is_set(dev->sw_values, code); break;
+		case EV_REP:
+			    switch(code) {
+				    case REP_DELAY:
+					    libevdev_get_repeat(dev, &value, NULL);
+					    break;
+				    case REP_PERIOD:
+					    libevdev_get_repeat(dev, NULL, &value);
+					    break;
+				    default:
+					    value = 0;
+					    break;
+			    }
+			    break;
 		default:
 			value = 0;
 			break;

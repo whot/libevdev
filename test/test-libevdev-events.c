@@ -929,6 +929,31 @@ START_TEST(test_mt_event_values_invalid)
 }
 END_TEST
 
+START_TEST(test_ev_rep_values)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	int delay = 500, period = 200;
+	rc = test_create_device(&uidev, &dev,
+				EV_KEY, BTN_LEFT,
+				EV_REL, REL_X,
+				EV_REL, REL_Y,
+				EV_SYN, SYN_REPORT,
+				-1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	libevdev_enable_event_code(dev, EV_REP, REP_DELAY, &delay);
+	libevdev_enable_event_code(dev, EV_REP, REP_PERIOD, &period);
+
+	ck_assert_int_eq(libevdev_has_event_type(dev, EV_REP), 1);
+	ck_assert_int_eq(libevdev_has_event_code(dev, EV_REP, REP_DELAY), 1);
+	ck_assert_int_eq(libevdev_has_event_code(dev, EV_REP, REP_PERIOD), 1);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_REP, REP_DELAY), 500);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_REP, REP_PERIOD), 200);
+}
+END_TEST
+
 START_TEST(test_event_value_setters)
 {
 	struct uinput_device* uidev;
@@ -1203,6 +1228,7 @@ libevdev_events(void)
 	tcase_add_test(tc, test_event_values_invalid);
 	tcase_add_test(tc, test_mt_event_values);
 	tcase_add_test(tc, test_mt_event_values_invalid);
+	tcase_add_test(tc, test_ev_rep_values);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("event value setters");

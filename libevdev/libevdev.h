@@ -259,7 +259,7 @@ extern "C" {
  * <dd>supported, see libevdev_get_id_product(), libevdev_get_id_vendor(),
  * libevdev_get_id_bustype(), * * libevdev_get_id_version()</dd>
  * <dt>EVIOCGREP:</dt>
- * <dd>supported, see libevdev_get_repeat()</dd>
+ * <dd>supported, see libevdev_get_event_value())</dd>
  * <dt>EVIOCSREP:</dt>
  * <dd>supported, see libevdev_enable_event_code()</dd>
  * <dt>EVIOCGKEYCODE:</dt>
@@ -1604,7 +1604,9 @@ int libevdev_event_code_from_name_n(unsigned int type, const char *name,
 /**
  * @ingroup bits
  *
- * Get the repeat delay and repeat period values for this device.
+ * Get the repeat delay and repeat period values for this device. This
+ * function is a convenience function only, EV_REP is supported by
+ * libevdev_get_event_value().
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param delay If not null, set to the repeat delay value
@@ -1613,6 +1615,8 @@ int libevdev_event_code_from_name_n(unsigned int type, const char *name,
  * @return 0 on success, -1 if this device does not have repeat settings.
  *
  * @note This function is signal-safe
+ *
+ * @see libevdev_get_event_value
  */
 int libevdev_get_repeat(const struct libevdev *dev, int *delay, int *period);
 
