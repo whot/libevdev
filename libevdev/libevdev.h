@@ -1026,7 +1026,7 @@ int libevdev_fetch_event_value(const struct libevdev *dev, unsigned int type, un
  * @note The value for events other than ABS_MT_ is undefined, use
  * libevdev_fetch_value() instead
  *
- * @see libevdev_get_value
+ * @see libevdev_get_event_value
  */
 int libevdev_get_slot_value(const struct libevdev *dev, unsigned int slot, unsigned int code);
 
