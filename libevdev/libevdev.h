@@ -225,7 +225,7 @@ extern "C" {
  * Input properties
  * ================
  * If the kernel does not support input properties, specifically the
- * EVIOCGPROPS ioclt, libevdev does not expose input properties to the caller.
+ * EVIOCGPROPS ioctl, libevdev does not expose input properties to the caller.
  * Specifically, libevdev_has_property() will always return 0 unless the
  * property has been manually set with libevdev_enable_property().
  *
