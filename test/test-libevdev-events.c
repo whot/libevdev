@@ -108,6 +108,8 @@ START_TEST(test_syn_event)
 	ck_assert_int_eq(ev.code, SYN_REPORT);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
 	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+	ck_assert_int_eq(ev.type, EV_SYN);
+	ck_assert_int_eq(ev.code, SYN_DROPPED);
 
 	/* only check for the rc, nothing actually changed on the device */
 

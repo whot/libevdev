@@ -657,7 +657,8 @@ enum libevdev_read_status {
  * time, it returns -EAGAIN and ev is undefined.
  *
  * If a SYN_DROPPED is read from the device, this function returns
- * LIBEVDEV_READ_STATUS_SYNC. The caller should now call this function with the
+ * LIBEVDEV_READ_STATUS_SYNC and ev is set to the EV_SYN event.
+ * The caller should now call this function with the
  * LIBEVDEV_READ_FLAG_SYNC flag set, to get the set of events that make up the
  * device state delta. This function returns LIBEVDEV_READ_STATUS_SYNC for
  * each event part of that delta, until it returns -EAGAIN once all events
@@ -673,10 +674,11 @@ enum libevdev_read_status {
  * set, the next event is read in sync mode.
  * @param ev On success, set to the current event.
  * @return On failure, a negative errno is returned.
- * @retval LIBEVDEV_READ_STATUS_SUCCESS One or more events where read of the device
+ * @retval LIBEVDEV_READ_STATUS_SUCCESS One or more events were read of the
+ * device and ev points to the next event in the queue
  * @retval -EAGAIN No events are currently available on the device
  * @retval LIBEVDEV_READ_STATUS_SYNC A SYN_DROPPED event was received, or a
- * synced event was returned.
+ * synced event was returned and ev points to the SYN_DROPPED event
  *
  * @note This function is signal-safe.
  */
