@@ -129,6 +129,7 @@ AC_CONFIG_FILES([Makefile
 		 libevdev/Makefile
 		 doc/Makefile
 		 doc/libevdev.doxygen
+		 doc/libevdev.man
 		 tools/Makefile
 		 test/Makefile
 		 libevdev.pc])

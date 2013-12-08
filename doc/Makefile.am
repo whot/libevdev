@@ -1,3 +1,5 @@
+man3_MANS = libevdev.man
+
 if HAVE_DOXYGEN
 
 noinst_DATA = html/index.html
