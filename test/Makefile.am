@@ -1,7 +1,10 @@
 if BUILD_TESTS
-noinst_PROGRAMS = test-libevdev test-compile-pedantic
+run_tests = test-libevdev
+build_tests = test-compile-pedantic
 
-TESTS = $(noinst_PROGRAMS)
+noinst_PROGRAMS = $(run_tests) $(build_tests)
+
+TESTS = $(run_tests)
 
 libevdev_sources = $(top_srcdir)/libevdev/libevdev.c \
 		   $(top_srcdir)/libevdev/libevdev.h \
