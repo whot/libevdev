@@ -1,6 +1,6 @@
 if BUILD_TESTS
 run_tests = test-libevdev
-build_tests = test-compile-pedantic
+build_tests = test-compile-pedantic test-link
 
 noinst_PROGRAMS = $(run_tests) $(build_tests)
 
@@ -38,6 +38,10 @@ test_libevdev_LDADD =  $(CHECK_LIBS) $(GCOV_LDFLAGS)
 
 test_compile_pedantic_SOURCES = test-compile-pedantic.c
 test_compile_pedantic_CFLAGS = $(AM_CPPFLAGS) -pedantic -Werror -std=c90
+
+test_link_SOURCES = test-link.c
+test_link_CFLAGS = -I$(top_srcdir)
+test_link_LDADD = $(top_builddir)/libevdev/libevdev.la
 
 if GCOV_ENABLED
 
