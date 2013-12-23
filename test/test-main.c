@@ -22,6 +22,10 @@
 
 #include <config.h>
 #include <check.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/ptrace.h>
+#include <sys/wait.h>
 
 extern Suite *event_name_suite(void);
 extern Suite *event_code_suite(void);
@@ -31,9 +35,42 @@ extern Suite *libevdev_has_event_test(void);
 extern Suite *libevdev_events(void);
 extern Suite *uinput_suite(void);
 
+static int
+is_debugger_attached(void)
+{
+	int status;
+	int rc;
+	int pid = fork();
+
+	if (pid == -1)
+		return 0;
+
+	if (pid == 0) {
+		int ppid = getppid();
+		if (ptrace(PTRACE_ATTACH, ppid, NULL, NULL) == 0) {
+			waitpid(ppid, NULL, 0);
+			ptrace(PTRACE_CONT, NULL, NULL);
+			ptrace(PTRACE_DETACH, ppid, NULL, NULL);
+			rc = 0;
+		} else
+			rc = 1;
+		_exit(rc);
+	} else {
+		waitpid(pid, &status, 0);
+		rc = WEXITSTATUS(status);
+	}
+
+	return rc;
+}
+
+
 int main(int argc, char **argv)
 {
 	int failed;
+
+	if (is_debugger_attached())
+		setenv("CK_FORK", "no", 0);
+
 	Suite *s = libevdev_has_event_test();
 	SRunner *sr = srunner_create(s);
 	srunner_add_suite(sr, libevdev_events());

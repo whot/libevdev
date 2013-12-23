@@ -177,8 +177,9 @@ extern "C" {
  *     git grep "suite_create"
  *     git grep "tcase_create"
  *
- * By default, check forks, making debugging harder. Run gdb as below to avoid
- * forking.
+ * By default, Check forks, making debugging harder. The test suite tries to detect
+ * if it is running inside gdb and disable forking. If that doesn't work for
+ * some reason, run gdb as below to avoid forking.
  *
  *     sudo CK_FORK=no CK_RUN_TEST="test case name" gdb ./test/test-libevdev
  *
