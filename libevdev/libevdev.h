@@ -64,6 +64,10 @@ extern "C" {
  * Device handling
  * ===============
  *
+ * A libevdev context is valid for a given file descriptor and its
+ * duration. Closing the file descriptor will not destroy the libevdev device
+ * but libevdev will not be able to read further events.
+ *
  * libevdev does not attempt duplicate detection. Initializing two libevdev
  * devices for the same fd is valid and behaves the same as for two different
  * devices.
@@ -395,10 +399,9 @@ extern "C" {
  * @defgroup misc Miscellaneous helper functions
  *
  * Functions for printing or querying event ranges. The list of names is
- * compiled into libevdev and will not change when the kernel changes. Adding
- * or removing names requires a re-compilation of libevdev. Likewise, the max
- * for each event type is compiled in and does not check the underlying
- * kernel.
+ * compiled into libevdev and is independent of the run-time kernel.
+ * Likewise, the max for each event type is compiled in and does not check
+ * the kernel at run-time.
  */
 
 /**
@@ -1370,8 +1373,8 @@ int libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const 
  * @ingroup kernel
  */
 enum libevdev_led_value {
-	LIBEVDEV_LED_ON = 3,
-	LIBEVDEV_LED_OFF = 4
+	LIBEVDEV_LED_ON = 3, /**< Turn the LED on */
+	LIBEVDEV_LED_OFF = 4 /**< Turn the LED off */
 };
 
 /**
