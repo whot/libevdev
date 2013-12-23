@@ -100,37 +100,37 @@ extern "C" {
  * finds them monitors the device to print the event.
  *
  * @code
- *      struct libevdev *dev = NULL;
- *      int fd;
- *      int rc = 1;
- *
- *      fd = open("/dev/input/event0", O_RDONLY|O_NONBLOCK);
- *      rc = libevdev_new_from_fd(fd, &dev);
- *      if (rc < 0) {
- *              fprintf(stderr, "Failed to init libevdev (%s)\n", strerror(-rc));
- *              exit(1);
- *      }
- *      printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
- *      printf("Input device ID: bus %#x vendor %#x product %#x\n",
- *             libevdev_get_id_bustype(dev),
- *             libevdev_get_id_vendor(dev),
- *             libevdev_get_id_product(dev));
- *      if (!libevdev_has_event_type(dev, EV_REL) ||
- *          !libevdev_has_event_code(dev, EV_KEY, BTN_LEFT)) {
- *              printf("This device does not look like a mouse\n");
- *              exit(1);
- *      }
- *
- *      do {
- *              struct input_event ev;
- *              rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
- *              if (rc == 0)
- *                      printf("Event: %s %s %d\n",
- *                             libevdev_get_event_type_name(ev.type),
- *                             libevdev_get_event_code_name(ev.type, ev.code),
- *                             ev.value);
- *      } while (rc == 1 || rc == 0 || rc == -EAGAIN);
- * @endcode
+       struct libevdev *dev = NULL;
+       int fd;
+       int rc = 1;
+
+       fd = open("/dev/input/event0", O_RDONLY|O_NONBLOCK);
+       rc = libevdev_new_from_fd(fd, &dev);
+       if (rc < 0) {
+               fprintf(stderr, "Failed to init libevdev (%s)\n", strerror(-rc));
+               exit(1);
+       }
+       printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
+       printf("Input device ID: bus %#x vendor %#x product %#x\n",
+              libevdev_get_id_bustype(dev),
+              libevdev_get_id_vendor(dev),
+              libevdev_get_id_product(dev));
+       if (!libevdev_has_event_type(dev, EV_REL) ||
+           !libevdev_has_event_code(dev, EV_KEY, BTN_LEFT)) {
+               printf("This device does not look like a mouse\n");
+               exit(1);
+       }
+
+       do {
+               struct input_event ev;
+               rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+               if (rc == 0)
+                       printf("Event: %s %s %d\n",
+                              libevdev_get_event_type_name(ev.type),
+                              libevdev_get_event_code_name(ev.type, ev.code),
+                              ev.value);
+       } while (rc == 1 || rc == 0 || rc == -EAGAIN);
+  @endcode
  *
  * A more complete example is available with the libevdev-events tool here:
  * http://cgit.freedesktop.org/libevdev/tree/tools/libevdev-events.c
@@ -451,11 +451,11 @@ struct libevdev* libevdev_new(void);
  *
  * This is a shortcut for
  *
- * @code
- * int err;
- * struct libevdev *dev = libevdev_new();
- * err = libevdev_set_fd(dev, fd);
- * @endcode
+ @code
+ int err;
+ struct libevdev *dev = libevdev_new();
+ err = libevdev_set_fd(dev, fd);
+ @endcode
  *
  * @param fd A file descriptor to the device in O_RDWR or O_RDONLY mode.
  * @param[out] dev The newly initialized evdev device.
@@ -1061,10 +1061,10 @@ int libevdev_set_event_value(struct libevdev *dev, unsigned int type, unsigned i
  *
  * Fetch the current value of the event type. This is a shortcut for
  *
- * @code
- *   if (libevdev_has_event_type(dev, t) && libevdev_has_event_code(dev, t, c))
- *       val = libevdev_get_event_value(dev, t, c);
- * @endcode
+ @code
+   if (libevdev_has_event_type(dev, t) && libevdev_has_event_code(dev, t, c))
+        val = libevdev_get_event_value(dev, t, c);
+ @endcode
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type for the code to query (EV_SYN, EV_REL, etc.)
@@ -1138,12 +1138,12 @@ int libevdev_set_slot_value(struct libevdev *dev, unsigned int slot, unsigned in
  *
  * Fetch the current value of the code for the given slot. This is a shortcut for
  *
- * @code
- *   if (libevdev_has_event_type(dev, EV_ABS) &&
- *       libevdev_has_event_code(dev, EV_ABS, c) &&
- *       slot < device->number_of_slots)
- *       val = libevdev_get_slot_value(dev, slot, c);
- * @endcode
+ @code
+   if (libevdev_has_event_type(dev, EV_ABS) &&
+       libevdev_has_event_code(dev, EV_ABS, c) &&
+       slot < device->number_of_slots)
+       val = libevdev_get_slot_value(dev, slot, c);
+ @endcode
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param slot The numerical slot number, must be smaller than the total number
@@ -1396,11 +1396,11 @@ int libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum 
  * of LED codes and values to set them to, terminated by a -1. For example, to
  * switch the NumLock LED on but the CapsLock LED off, use:
  *
- * @code
- *     libevdev_kernel_set_led_values(dev, LED_NUML, LIBEVDEV_LED_ON,
- *                                         LED_CAPSL, LIBEVDEV_LED_OFF,
- *                                         -1);
- * @endcode
+ @code
+     libevdev_kernel_set_led_values(dev, LED_NUML, LIBEVDEV_LED_ON,
+                                         LED_CAPSL, LIBEVDEV_LED_OFF,
+                                         -1);
+ @endcode
  *
  * If any LED code or value is invalid, this function returns -EINVAL and no
  * LEDs are modified.

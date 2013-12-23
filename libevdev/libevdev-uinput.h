@@ -38,66 +38,66 @@ struct libevdev_uinput;
  * help to create uinput devices that emulate libevdev devices. In the simplest
  * form it serves to duplicate an existing device:
  *
- * @code
- * int err;
- * int new_fd;
- * struct libevdev *dev;
- * struct libevdev_uinput *uidev;
- * struct input_event ev[2];
- *
- * err = libevdev_new_from_fd(&dev, fd);
- * if (err != 0)
- *     return err;
- *
- * uifd = open("/dev/uinput", O_RDWR);
- * if (uidev < 0)
- *     return -errno;
- *
- * err = libevdev_uinput_create_from_device(dev, uifd, &uidev);
- * if (err != 0)
- *     return err;
- *
- * // post a REL_X event
- * err = libevdev_uinput_write_event(uidev, EV_REL, REL_X, -1);
- * if (err != 0)
- *     return err;
- * libevdev_uinput_write_event(uidev, EV_SYN, SYN_REPORT, 0);
- * if (err != 0)
- *     return err;
- *
- * libevdev_uinput_destroy(uidev);
- * close(uifd);
- *
- * @endcode
+ @code
+ int err;
+ int new_fd;
+ struct libevdev *dev;
+ struct libevdev_uinput *uidev;
+ struct input_event ev[2];
+
+ err = libevdev_new_from_fd(&dev, fd);
+ if (err != 0)
+     return err;
+
+ uifd = open("/dev/uinput", O_RDWR);
+ if (uidev < 0)
+     return -errno;
+
+ err = libevdev_uinput_create_from_device(dev, uifd, &uidev);
+ if (err != 0)
+     return err;
+
+ // post a REL_X event
+ err = libevdev_uinput_write_event(uidev, EV_REL, REL_X, -1);
+ if (err != 0)
+     return err;
+ libevdev_uinput_write_event(uidev, EV_SYN, SYN_REPORT, 0);
+ if (err != 0)
+     return err;
+
+ libevdev_uinput_destroy(uidev);
+ close(uifd);
+
+ @endcode
  *
  * Alternatively, a device can be constructed from scratch:
  *
- * @code
- * int err;
- * struct libevdev *dev;
- * struct libevdev_uinput *uidev;
- *
- * dev = libevdev_new();
- * libevdev_set_name(dev, "test device");
- * libevdev_enable_event_type(dev, EV_REL);
- * libevdev_enable_event_code(dev, EV_REL, REL_X);
- * libevdev_enable_event_code(dev, EV_REL, REL_Y);
- * libevdev_enable_event_type(dev, EV_KEY);
- * libevdev_enable_event_code(dev, EV_KEY, BTN_LEFT);
- * libevdev_enable_event_code(dev, EV_KEY, BTN_MIDDLE);
- * libevdev_enable_event_code(dev, EV_KEY, BTN_RIGHT);
- *
- * err = libevdev_uinput_create_from_device(dev,
- *                                          LIBEVDEV_UINPUT_OPEN_MANAGED,
- *                                          &uidev);
- * if (err != 0)
- *     return err;
- *
- * // ... do something ...
- *
- * libevdev_uinput_destroy(uidev);
- *
- * @endcode
+ @code
+ int err;
+ struct libevdev *dev;
+ struct libevdev_uinput *uidev;
+
+ dev = libevdev_new();
+ libevdev_set_name(dev, "test device");
+ libevdev_enable_event_type(dev, EV_REL);
+ libevdev_enable_event_code(dev, EV_REL, REL_X);
+ libevdev_enable_event_code(dev, EV_REL, REL_Y);
+ libevdev_enable_event_type(dev, EV_KEY);
+ libevdev_enable_event_code(dev, EV_KEY, BTN_LEFT);
+ libevdev_enable_event_code(dev, EV_KEY, BTN_MIDDLE);
+ libevdev_enable_event_code(dev, EV_KEY, BTN_RIGHT);
+
+ err = libevdev_uinput_create_from_device(dev,
+                                          LIBEVDEV_UINPUT_OPEN_MANAGED,
+                                          &uidev);
+ if (err != 0)
+     return err;
+
+ // ... do something ...
+
+ libevdev_uinput_destroy(uidev);
+
+ @endcode
  */
 
 enum libevdev_uinput_open_mode {
