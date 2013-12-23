@@ -607,8 +607,8 @@ int libevdev_set_fd(struct libevdev* dev, int fd);
  * changed, libevdev's behavior is undefined.
  *
  * libevdev does not sync itself after changing the fd and keeps the current
- * device state. Use libevdev_next_event with the LIBEVDEV_FORCE_SYNC flag to
- * force a re-sync.
+ * device state. Use libevdev_next_event with the
+ * @ref LIBEVDEV_READ_FLAG_FORCE_SYNC flag to force a re-sync.
  *
  * The fd may be open in O_RDONLY or O_RDWR.
  *
@@ -661,25 +661,25 @@ enum libevdev_read_status {
  * Get the next event from the device. This function operates in two different
  * modes: normal mode or sync mode.
  *
- * In normal mode, this function returns LIBEVDEV_READ_STATUS_SUCCESS and
+ * In normal mode, this function returns @ref LIBEVDEV_READ_STATUS_SUCCESS and
  * returns the event in the parameter ev. If no events are available at this
  * time, it returns -EAGAIN and ev is undefined.
  *
  * If a SYN_DROPPED is read from the device, this function returns
- * LIBEVDEV_READ_STATUS_SYNC and ev is set to the EV_SYN event.
+ * @ref LIBEVDEV_READ_STATUS_SYNC and ev is set to the EV_SYN event.
  * The caller should now call this function with the
- * LIBEVDEV_READ_FLAG_SYNC flag set, to get the set of events that make up the
- * device state delta. This function returns LIBEVDEV_READ_STATUS_SYNC for
+ * @ref LIBEVDEV_READ_FLAG_SYNC flag set, to get the set of events that make up the
+ * device state delta. This function returns @ref LIBEVDEV_READ_STATUS_SYNC for
  * each event part of that delta, until it returns -EAGAIN once all events
  * have been synced.
  *
  * If a device needs to be synced by the caller but the caller does not call
- * with the LIBEVDEV_READ_STATUS_SYNC flag set, all events from the diff are
+ * with the @ref LIBEVDEV_READ_STATUS_SYNC flag set, all events from the diff are
  * dropped and event processing continues as normal.
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
- * @param flags Set of flags to determine behaviour. If LIBEVDEV_READ_FLAG_NORMAL
- * is set, the next event is read in normal mode. If LIBEVDEV_READ_FLAG_SYNC is
+ * @param flags Set of flags to determine behaviour. If @ref LIBEVDEV_READ_FLAG_NORMAL
+ * is set, the next event is read in normal mode. If @ref LIBEVDEV_READ_FLAG_SYNC is
  * set, the next event is read in sync mode.
  * @param ev On success, set to the current event.
  * @return On failure, a negative errno is returned.

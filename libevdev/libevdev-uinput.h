@@ -114,7 +114,7 @@ enum libevdev_uinput_open_mode {
  * will be an exact copy of the libevdev device, minus the bits that uinput doesn't
  * allow to be set.
  *
- * If uinput_fd is LIBEVDEV_UINPUT_OPEN_MANAGED, libevdev_uinput_create_from_device()
+ * If uinput_fd is @ref LIBEVDEV_UINPUT_OPEN_MANAGED, libevdev_uinput_create_from_device()
  * will open @c /dev/uinput in read/write mode and manage the file descriptor.
  * Otherwise, uinput_fd must be opened by the caller and opened with the
  * appropriate permissions.
@@ -133,7 +133,7 @@ enum libevdev_uinput_open_mode {
  * source device.
  *
  * @param dev The device to duplicate
- * @param uinput_fd LIBEVDEV_UINPUT_OPEN_MANAGED or a file descriptor to @c /dev/uinput,
+ * @param uinput_fd @ref LIBEVDEV_UINPUT_OPEN_MANAGED or a file descriptor to @c /dev/uinput,
  * @param[out] uinput_dev The newly created libevdev device.
  *
  * @return 0 on success or a negative errno on failure. On failure, the value of
@@ -150,9 +150,9 @@ int libevdev_uinput_create_from_device(const struct libevdev *dev,
  *
  * Destroy a previously created uinput device and free associated memory.
  *
- * If the device was opened with LIBEVDEV_UINPUT_OPEN_MANAGED, libevdev_uinput_destroy()
- * also closes the file descriptor. Otherwise, the fd is left as-is and
- * must be closed by the caller.
+ * If the device was opened with @ref LIBEVDEV_UINPUT_OPEN_MANAGED,
+ * libevdev_uinput_destroy() also closes the file descriptor. Otherwise, the
+ * fd is left as-is and must be closed by the caller.
  *
  * @param uinput_dev A previously created uinput device.
  *
