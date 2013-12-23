@@ -75,7 +75,7 @@ extern "C" {
  * Where does libevdev sit?
  * ========================
  *
- * libevdev is essentially a `read(2)` on steroids for `/dev/input/eventX
+ * libevdev is essentially a `read(2)` on steroids for `/dev/input/eventX`
  * devices. It sits below the process that handles input events, in between
  * the kernel and that process. In the simplest case, e.g. an evtest-like tool
  * the stack would look like this:
@@ -340,13 +340,13 @@ extern "C" {
  * @defgroup bits Querying device capabilities
  *
  * Abstraction functions to handle device capabilities, specificially
- * device propeties such as the name of the device and the bits
+ * device properties such as the name of the device and the bits
  * representing the events suppported by this device.
  *
  * The logical state returned may lag behind the physical state of the device.
  * libevdev queries the device state on libevdev_set_fd() and then relies on
- * the caller to parse events through libevdev_next_fd(). If a caller does not
- * use libevdev_next_fd(), libevdev will not update the internal state of the
+ * the caller to parse events through libevdev_next_event(). If a caller does not
+ * use libevdev_next_event(), libevdev will not update the internal state of the
  * device and thus returns outdated values.
  */
 
