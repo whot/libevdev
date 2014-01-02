@@ -42,7 +42,7 @@ AM_INIT_AUTOMAKE([1.11 foreign no-dist-gzip dist-xz])
 # - If binary compatibility has been broken (eg removed or changed interfaces)
 #   change to C+1:0:0
 # - If the interface is the same as the previous version, change to C:R+1:A
-LIBEVDEV_LT_VERSION=1:0:0
+LIBEVDEV_LT_VERSION=2:0:0
 AC_SUBST(LIBEVDEV_LT_VERSION)
 
 
