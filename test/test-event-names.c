@@ -190,8 +190,7 @@ START_TEST(test_code_syn_name)
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_SYN, SYN_CONFIG), "SYN_CONFIG");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_SYN, SYN_MT_REPORT), "SYN_MT_REPORT");
 	ck_assert_str_eq(libevdev_event_code_get_name(EV_SYN, SYN_DROPPED), "SYN_DROPPED");
-
-	/* there is no SYN_MAX */
+	ck_assert_str_eq(libevdev_event_code_get_name(EV_SYN, SYN_MAX), "SYN_MAX");
 }
 END_TEST
 

@@ -157,10 +157,6 @@ def print_mapping_table(bits):
 	print("#ifndef EVENT_NAMES_H")
 	print("#define EVENT_NAMES_H")
 	print("")
-	print("#ifndef SYN_MAX /* added in 3.12  */")
-	print("#define SYN_MAX 0xf")
-	print("#endif")
-	print("")
 
 	for prefix in prefixes:
 		if prefix == "BTN_":
