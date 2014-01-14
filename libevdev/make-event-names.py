@@ -7,7 +7,6 @@
 from __future__ import print_function
 import re
 import sys
-import argparse
 
 class Bits(object):
 	pass
@@ -190,12 +189,14 @@ def parse(fp):
 
 	return bits
 
-if __name__ == "__main__":
-	parser = argparse.ArgumentParser()
-	parser.add_argument('source', metavar="/path/to/linux/input.h",
-			    type=argparse.FileType('r'),
-			    help='source file to parse')
+def usage(prog):
+	print("Usage: %s /path/to/linux/input.h" % prog)
 
-	args = parser.parse_args(sys.argv[1:])
-	bits = parse(args.source)
-	print_mapping_table(bits)
+if __name__ == "__main__":
+	if len(sys.argv) != 2:
+		usage(sys.argv[0])
+		sys.exit(2)
+
+	with open(sys.argv[1]) as f:
+		bits = parse(f)
+		print_mapping_table(bits)
