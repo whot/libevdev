@@ -72,21 +72,6 @@ def print_bits(bits, prefix):
 	print("};")
 	print("")
 
-def print_python_bits(bits, prefix):
-	if  not hasattr(bits, prefix):
-		return
-
-	print("%s_map = {" % (prefix))
-	for val, name in list(getattr(bits, prefix).items()):
-		print("	%d : \"%s\"," % (val, name))
-	if prefix == "key":
-		for val, name in list(getattr(bits, "btn").items()):
-			print("	%d : \"%s\"," % (val, name))
-	print("}")
-	print("for k, v in %s_map.items():" % (prefix))
-	print("	%s_map[v] = k" % (prefix))
-	print("")
-
 def print_map(bits):
 	print("static const char * const * const event_type_map[EV_MAX + 1] = {")
 
@@ -168,27 +153,6 @@ def print_mapping_table(bits):
 
 	print("#endif /* EVENT_NAMES_H */")
 
-def print_python_mapping_table(bits):
-	print("# THIS FILE IS GENERATED, DO NOT EDIT")
-	print("")
-
-	for prefix in prefixes:
-		if prefix == "BTN_":
-			continue
-		print_python_bits(bits, prefix[:-1].lower())
-
-	print_python_map(bits)
-
-	print("def event_get_type_name(type):")
-	print("	return ev_map[type]")
-	print("")
-	print("")
-	print("def event_get_code_name(type, code):")
-	print("	if map.has_key(type) and map[type].has_key(code):")
-	print("		return map[type][code]")
-	print("	return 'UNKNOWN'")
-	print("")
-
 def parse_define(bits, line):
 	m = re.match(r"^#define\s+(\w+)\s+(\w+)", line)
 	if m == None:
@@ -228,14 +192,10 @@ def parse(fp):
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--output", default="c")
 	parser.add_argument('source', metavar="/path/to/linux/input.h",
 			    type=argparse.FileType('r'),
 			    help='source file to parse')
 
 	args = parser.parse_args(sys.argv[1:])
 	bits = parse(args.source)
-	if args.output == "python":
-		print_python_mapping_table(bits)
-	else:
-		print_mapping_table(bits)
+	print_mapping_table(bits)
