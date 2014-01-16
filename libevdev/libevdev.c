@@ -41,12 +41,38 @@ static int sync_mt_state(struct libevdev *dev, int create_events);
 static int
 init_event_queue(struct libevdev *dev)
 {
-	/* FIXME: count the number of axes, keys, etc. to get a better idea at how many events per
-	   EV_SYN we could possibly get. Then multiply that by the actual buffer size we care about */
+	const int MIN_QUEUE_SIZE = 256;
+	int nevents = 1; /* terminating SYN_REPORT */
+	int nslots;
+	unsigned int type, code;
 
-	const int QUEUE_SIZE = 256;
+	/* count the number of axes, keys, etc. to get a better idea at how
+	   many events per EV_SYN we could possibly get. That's the max we
+	   may get during SYN_DROPPED too. Use double that, just so we have
+	   room for events while syncing an event.
+	 */
+	for (type = EV_KEY; type < EV_MAX; type++) {
+		int max = libevdev_event_type_get_max(type);
+		for (code = 0; max > 0 && code < (unsigned int) max; code++) {
+			if (libevdev_has_event_code(dev, type, code))
+				nevents++;
+		}
+	}
 
-	return queue_alloc(dev, QUEUE_SIZE);
+	nslots = libevdev_get_num_slots(dev);
+	if (nslots > 1) {
+		int num_mt_axes = 0;
+
+		for (code = ABS_MT_SLOT; code < ABS_MAX; code++) {
+			if (libevdev_has_event_code(dev, EV_ABS, code))
+				num_mt_axes++;
+		}
+
+		/* We already counted the first slot in the initial count */
+		nevents += num_mt_axes * (nslots - 1);
+	}
+
+	return queue_alloc(dev, min(MIN_QUEUE_SIZE, nevents * 2));
 }
 
 static void
