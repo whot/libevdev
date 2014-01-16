@@ -76,7 +76,7 @@ START_TEST(test_syn_dropped_event)
 				-1);
 	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
 
-	/* This is a bid complicated:
+	/* This is a bit complicated:
 	   we can't get SYN_DROPPED through uinput, so we push two events down
 	   uinput, and fetch one off libevdev (reading in the other one on the
 	   way). Then write a SYN_DROPPED on a pipe, switch the fd and read
