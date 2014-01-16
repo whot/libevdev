@@ -59,7 +59,7 @@ START_TEST(test_next_event)
 }
 END_TEST
 
-START_TEST(test_syn_event)
+START_TEST(test_syn_dropped_event)
 {
 	struct uinput_device* uidev;
 	struct libevdev *dev;
@@ -1205,7 +1205,7 @@ libevdev_events(void)
 
 	TCase *tc = tcase_create("event polling");
 	tcase_add_test(tc, test_next_event);
-	tcase_add_test(tc, test_syn_event);
+	tcase_add_test(tc, test_syn_dropped_event);
 	tcase_add_test(tc, test_event_type_filtered);
 	tcase_add_test(tc, test_event_code_filtered);
 	tcase_add_test(tc, test_has_event_pending);
