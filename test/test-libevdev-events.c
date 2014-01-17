@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 #include "test-common.h"
 
@@ -119,6 +120,112 @@ START_TEST(test_syn_dropped_event)
 	close(pipefd[0]);
 	close(pipefd[1]);
 
+}
+END_TEST
+
+void double_syn_dropped_logfunc(enum libevdev_log_priority priority,
+				void *data,
+				const char *file, int line,
+				const char *func,
+				const char *format, va_list args)
+{
+	unsigned int *hit = data;
+	*hit = 1;
+}
+
+START_TEST(test_double_syn_dropped_event)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+	int pipefd[2];
+	unsigned int logfunc_hit = 0;
+
+	rc = test_create_device(&uidev, &dev,
+				EV_SYN, SYN_REPORT,
+				EV_SYN, SYN_DROPPED,
+				EV_REL, REL_X,
+				EV_REL, REL_Y,
+				EV_KEY, BTN_LEFT,
+				-1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	libevdev_set_log_function(double_syn_dropped_logfunc,  &logfunc_hit);
+
+	/* This is a bit complicated:
+	   we can't get SYN_DROPPED through uinput, so we push two events down
+	   uinput, and fetch one off libevdev (reading in the other one on the
+	   way). Then write a SYN_DROPPED on a pipe, switch the fd and read
+	   one event off the wire (but returning the second event from
+	   before). Switch back, so that when we do read off the SYN_DROPPED
+	   we have the fd back on the device and the ioctls work.
+	 */
+	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	ck_assert_int_eq(ev.type, EV_KEY);
+	ck_assert_int_eq(ev.code, BTN_LEFT);
+	rc = pipe2(pipefd, O_NONBLOCK);
+	ck_assert_int_eq(rc, 0);
+
+	libevdev_change_fd(dev, pipefd[0]);
+	ev.type = EV_SYN;
+	ev.code = SYN_DROPPED;
+	ev.value = 0;
+	rc = write(pipefd[1], &ev, sizeof(ev));
+	ck_assert_int_eq(rc, sizeof(ev));
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+
+	/* sneak in a button change event while we're not looking, this way
+	 * the sync queue contains 2 events: BTN_LEFT and SYN_REPORT. */
+	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 0);
+	read(pipefd[0], &ev, sizeof(ev));
+
+	libevdev_change_fd(dev, uinput_device_get_fd(uidev));
+
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	ck_assert_int_eq(ev.type, EV_SYN);
+	ck_assert_int_eq(ev.code, SYN_REPORT);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+	ck_assert_int_eq(ev.type, EV_SYN);
+	ck_assert_int_eq(ev.code, SYN_DROPPED);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+	ck_assert_int_eq(ev.type, EV_KEY);
+	ck_assert_int_eq(ev.code, BTN_LEFT);
+	ck_assert_int_eq(ev.value, 0);
+
+	/* now write the second SYN_DROPPED on the pipe so we pick it up
+	 * before we finish syncing. */
+	libevdev_change_fd(dev, pipefd[0]);
+	ev.type = EV_SYN;
+	ev.code = SYN_DROPPED;
+	ev.value = 0;
+	rc = write(pipefd[1], &ev, sizeof(ev));
+	ck_assert_int_eq(rc, sizeof(ev));
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+	ck_assert_int_eq(ev.type, EV_SYN);
+	ck_assert_int_eq(ev.code, SYN_REPORT);
+	ck_assert_int_eq(ev.value, 0);
+
+	/* back to enable the ioctls again */
+	libevdev_change_fd(dev, uinput_device_get_fd(uidev));
+
+	ck_assert_int_eq(logfunc_hit, 1);
+
+	libevdev_free(dev);
+	uinput_device_free(uidev);
+
+	close(pipefd[0]);
+	close(pipefd[1]);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
 }
 END_TEST
 
@@ -1206,6 +1313,7 @@ libevdev_events(void)
 	TCase *tc = tcase_create("event polling");
 	tcase_add_test(tc, test_next_event);
 	tcase_add_test(tc, test_syn_dropped_event);
+	tcase_add_test(tc, test_double_syn_dropped_event);
 	tcase_add_test(tc, test_event_type_filtered);
 	tcase_add_test(tc, test_event_code_filtered);
 	tcase_add_test(tc, test_has_event_pending);

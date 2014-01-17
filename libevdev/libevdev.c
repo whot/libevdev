@@ -816,8 +816,6 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 		dev->sync_state = SYNC_NONE;
 	}
 
-	/* FIXME: if the first event after SYNC_IN_PROGRESS is a SYN_DROPPED, log this */
-
 	/* Always read in some more events. Best case this smoothes over a potential SYN_DROPPED,
 	   worst case we don't read fast enough and end up with SYN_DROPPED anyway.
 
@@ -856,8 +854,15 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 	if (flags & LIBEVDEV_READ_FLAG_SYNC && dev->queue_nsync > 0) {
 		dev->queue_nsync--;
 		rc = LIBEVDEV_READ_STATUS_SYNC;
-		if (dev->queue_nsync == 0)
+		if (dev->queue_nsync == 0) {
+			struct input_event next;
 			dev->sync_state = SYNC_NONE;
+
+			if (queue_peek(dev, 0, &next) == 0 &&
+			    next.type == EV_SYN && next.code == SYN_DROPPED)
+				log_info("SYN_DROPPED received after finished "
+					 "sync - you're not keeping up\n");
+		}
 	}
 
 out:
