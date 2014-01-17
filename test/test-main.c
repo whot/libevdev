@@ -26,6 +26,9 @@
 #include <unistd.h>
 #include <sys/ptrace.h>
 #include <sys/wait.h>
+#include <libevdev/libevdev.h>
+
+#include "test-common.h"
 
 extern Suite *event_name_suite(void);
 extern Suite *event_code_suite(void);
@@ -70,6 +73,8 @@ int main(int argc, char **argv)
 
 	if (is_debugger_attached())
 		setenv("CK_FORK", "no", 0);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
 
 	Suite *s = libevdev_has_event_test();
 	SRunner *sr = srunner_create(s);

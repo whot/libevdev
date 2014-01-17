@@ -101,9 +101,11 @@ START_TEST(test_uinput_create_device_invalid)
 	libevdev_enable_event_code(dev, EV_REL, REL_X, NULL);
 	libevdev_enable_event_code(dev, EV_REL, REL_Y, NULL);
 
+	libevdev_set_log_function(test_logfunc_ignore_error, NULL);
 	rc = libevdev_uinput_create_from_device(dev, -1, &uidev);
 	ck_assert_int_eq(rc, -EBADF);
 	ck_assert(uidev == NULL);
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
 
 	libevdev_free(dev);
 }

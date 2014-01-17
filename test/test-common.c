@@ -24,8 +24,27 @@
 #include <check.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 #include "test-common.h"
+
+void test_logfunc_abort_on_error(enum libevdev_log_priority priority,
+				 void *data,
+				 const char *file, int line,
+				 const char *func,
+				 const char *format, va_list args)
+{
+	vprintf(format, args);
+	ck_abort();
+}
+
+void test_logfunc_ignore_error(enum libevdev_log_priority priority,
+			       void *data,
+			       const char *file, int line,
+			       const char *func,
+			       const char *format, va_list args)
+{
+}
 
 int test_create_device(struct uinput_device **uidev_return,
 		       struct libevdev **dev_return,

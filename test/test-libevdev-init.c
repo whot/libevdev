@@ -73,7 +73,10 @@ START_TEST(test_init_and_change_fd)
 	dev = libevdev_new();
 	ck_assert(dev != NULL);
 	ck_assert_int_eq(libevdev_set_fd(dev, -1), -EBADF);
+
+	libevdev_set_log_function(test_logfunc_ignore_error, NULL);
 	ck_assert_int_eq(libevdev_change_fd(dev, -1), -1);
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
 
 	rc = uinput_device_new_with_events(&uidev,
 					   TEST_DEVICE_NAME, DEFAULT_IDS,
@@ -87,7 +90,10 @@ START_TEST(test_init_and_change_fd)
 					   -1);
 	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
 	ck_assert_int_eq(libevdev_set_fd(dev, uinput_device_get_fd(uidev)), 0);
+
+	libevdev_set_log_function(test_logfunc_ignore_error, NULL);
 	ck_assert_int_eq(libevdev_set_fd(dev, 0), -EBADF);
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
 
 	ck_assert_int_eq(libevdev_get_fd(dev), uinput_device_get_fd(uidev));
 
@@ -136,6 +142,8 @@ START_TEST(test_log_init)
 	ck_assert_int_eq(log_fn_called, 2);
 
 	libevdev_free(dev);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
 }
 END_TEST
 
@@ -247,10 +255,12 @@ START_TEST(test_device_grab)
 				-1);
 	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
 
+	libevdev_set_log_function(test_logfunc_ignore_error, NULL);
 	rc = libevdev_grab(dev, 0);
 	ck_assert_int_eq(rc, -EINVAL);
 	rc = libevdev_grab(dev, 1);
 	ck_assert_int_eq(rc, -EINVAL);
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
 
 	rc = libevdev_grab(dev, LIBEVDEV_UNGRAB);
 	ck_assert_int_eq(rc, 0);

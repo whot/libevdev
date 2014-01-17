@@ -42,4 +42,14 @@ int test_create_abs_device(struct uinput_device **uidev,
 			   const struct input_absinfo *abs,
 			   ...);
 
+void test_logfunc_abort_on_error(enum libevdev_log_priority priority,
+				 void *data,
+				 const char *file, int line,
+				 const char *func,
+				 const char *format, va_list args);
+void test_logfunc_ignore_error(enum libevdev_log_priority priority,
+			       void *data,
+			       const char *file, int line,
+			       const char *func,
+			       const char *format, va_list args);
 #endif /* _TEST_COMMON_H_ */
