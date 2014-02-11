@@ -8,8 +8,6 @@ interface to the callers, thus avoiding erroneous ioctls, etc.
 git://git.freedesktop.org/git/libevdev
 http://cgit.freedesktop.org/libevdev/
 
-**libevdev is currently in early stages of development. Use at your own risk**
-
 The eventual goal is that libevdev wraps all ioctls available to evdev
 devices, thus making direct access unnecessary.
 
