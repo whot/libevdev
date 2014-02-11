@@ -310,6 +310,9 @@ extern "C" {
  * <dd>supported, see libevdev_grab()</dd>
  * <dt>EVIOCSCLOCKID:</dt>
  * <dd>supported, see libevdev_set_clock_id()</dd>
+ * <dt>EVIOCREVOKE:</dt>
+ * <dd>currently not supported, see
+ * http://lists.freedesktop.org/archives/input-tools/2014-January/000688.html</dd>
  * </dl>
  *
  */
