@@ -217,17 +217,17 @@ extern "C" {
  * Minimum requirements
  * ====================
  * libevdev requires a 2.6.36 kernel as minimum. Specifically, it requires
- * ABS_MT_SLOT and the matching behavior.
+ * kernel-support for ABS_MT_SLOT.
  *
  * Event and input property names
  * ==============================
  * Event names and input property names are defined at build-time by the
- * linux/input.h shipped with libevedv.
- * The list of event names is compiled at build-time and thus any events not defined
+ * linux/input.h shipped with libevdev.
+ * The list of event names is compiled at build-time, any events not defined
  * at build time will not resolve. Specifically,
- * libevdev_event_code_get_name(type, code) for an undefined type or code will
+ * libevdev_event_code_get_name() for an undefined type or code will
  * always return NULL. Likewise, libevdev_property_get_name() will return NULL
- * for properties undefined on the build system.
+ * for properties undefined at build-time.
  *
  * Input properties
  * ================
@@ -242,14 +242,13 @@ extern "C" {
  *
  * MT slot behavior
  * =================
- * If the kernel does not support the EVIOCGMTSLOTS ioctl, libevdev continues
- * as normal and assumes all values in all slots to be 0.
+ * If the kernel does not support the EVIOCGMTSLOTS ioctl, libevdev
+ * assumes all values in all slots are 0 and continues without an error.
  *
  * SYN_DROPPED behavior
  * ====================
- * A kernel without SYN_DROPPED, won't send the event. libevdev_next_event()
+ * A kernel without SYN_DROPPED won't send such an event. libevdev_next_event()
  * will never require the switch to sync mode.
- *
  */
 
 /**
@@ -262,7 +261,7 @@ extern "C" {
  * <dd>supported, see libevdev_get_driver_version()</dd>
  * <dt>EVIOCGID:</dt>
  * <dd>supported, see libevdev_get_id_product(), libevdev_get_id_vendor(),
- * libevdev_get_id_bustype(), * * libevdev_get_id_version()</dd>
+ * libevdev_get_id_bustype(), libevdev_get_id_version()</dd>
  * <dt>EVIOCGREP:</dt>
  * <dd>supported, see libevdev_get_event_value())</dd>
  * <dt>EVIOCSREP:</dt>
@@ -547,6 +546,9 @@ void libevdev_set_log_priority(enum libevdev_log_priority priority);
 /**
  * @ingroup init
  *
+ * Return the current log priority level. Messages higher than this level
+ * are printed, others are discarded. This is a global setting.
+ *
  * @return the current log level
  */
 enum libevdev_log_priority libevdev_get_log_priority(void);
@@ -596,7 +598,7 @@ int libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab);
  * @param dev The evdev device
  * @param fd The file descriptor for the device
  *
- * @return 0 on success, or a negative error code on failure
+ * @return 0 on success, or a negative errno on failure
  *
  * @see libevdev_change_fd
  * @see libevdev_new
@@ -616,6 +618,17 @@ int libevdev_set_fd(struct libevdev* dev, int fd);
  * libevdev does not sync itself after changing the fd and keeps the current
  * device state. Use libevdev_next_event with the
  * @ref LIBEVDEV_READ_FLAG_FORCE_SYNC flag to force a re-sync.
+ *
+ * The example code below illustrates how to force a re-sync of the
+ * library-internal state. Note that this code doesn't handle the events in
+ * the caller, it merely forces an update of the internal library state.
+ @code
+     struct input_event ev;
+     libevdev_change_fd(dev, new_fd);
+     libevdev_next_event(dev, LIBEVDEV_READ_FLAG_FORCE_SYNC, &ev);
+     while (libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev) == LIBEVDEV_READ_STATUS_SYNC)
+	                     ; // noop
+ @endcode
  *
  * The fd may be open in O_RDONLY or O_RDWR.
  *
