@@ -120,6 +120,8 @@ START_TEST(test_log_init)
 {
 	struct libevdev *dev = NULL;
 
+	libevdev_set_log_priority(LIBEVDEV_LOG_DEBUG);
+
 	libevdev_set_log_function(logfunc, NULL);
 	libevdev_set_log_function(NULL, NULL);
 
@@ -144,6 +146,77 @@ START_TEST(test_log_init)
 	libevdev_free(dev);
 
 	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+	log_fn_called = 0;
+}
+END_TEST
+
+START_TEST(test_log_default_priority)
+{
+	ck_assert_int_eq(libevdev_get_log_priority(), LIBEVDEV_LOG_INFO);
+}
+END_TEST
+
+START_TEST(test_log_set_get_priority)
+{
+	enum libevdev_log_priority pri;
+
+	pri = LIBEVDEV_LOG_DEBUG;
+	libevdev_set_log_priority(pri);
+	ck_assert_int_eq(libevdev_get_log_priority(), pri);
+
+	pri = LIBEVDEV_LOG_INFO;
+	libevdev_set_log_priority(pri);
+	ck_assert_int_eq(libevdev_get_log_priority(), pri);
+
+	pri = LIBEVDEV_LOG_ERROR;
+	libevdev_set_log_priority(pri);
+	ck_assert_int_eq(libevdev_get_log_priority(), pri);
+
+	/* debug and above is clamped */
+	pri = LIBEVDEV_LOG_DEBUG + 1;
+	libevdev_set_log_priority(pri);
+	ck_assert_int_eq(libevdev_get_log_priority(), LIBEVDEV_LOG_DEBUG);
+
+	/*  error and below is not clamped, we need this for another test */
+	pri = LIBEVDEV_LOG_ERROR - 1;
+	libevdev_set_log_priority(pri);
+	ck_assert_int_eq(libevdev_get_log_priority(), pri);
+}
+END_TEST
+
+START_TEST(test_log_priority)
+{
+	struct libevdev *dev = NULL;
+
+	libevdev_set_log_function(logfunc, logdata);
+
+	dev = libevdev_new();
+	ck_assert(dev != NULL);
+
+	libevdev_set_log_priority(LIBEVDEV_LOG_DEBUG);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
+	ck_assert_int_eq(log_fn_called, 1);
+
+	libevdev_set_log_priority(LIBEVDEV_LOG_INFO);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
+	ck_assert_int_eq(log_fn_called, 2);
+
+	libevdev_set_log_priority(LIBEVDEV_LOG_ERROR);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
+	ck_assert_int_eq(log_fn_called, 3);
+
+	/* we don't have any log msgs > ERROR at the moment, so test it by
+	   setting an invalid priority. */
+	libevdev_set_log_priority(LIBEVDEV_LOG_ERROR - 1);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
+	ck_assert_int_eq(log_fn_called, 3);
+
+	libevdev_free(dev);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+	log_fn_called = 0;
 }
 END_TEST
 
@@ -390,6 +463,9 @@ libevdev_init_test(void)
 
 	tc = tcase_create("log init");
 	tcase_add_test(tc, test_log_init);
+	tcase_add_test(tc, test_log_priority);
+	tcase_add_test(tc, test_log_set_get_priority);
+	tcase_add_test(tc, test_log_default_priority);
 	tcase_add_test(tc, test_log_data);
 	suite_add_tcase(s, tc);
 

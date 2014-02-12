@@ -122,7 +122,7 @@ log_msg(enum libevdev_log_priority priority,
 {
 	va_list args;
 
-	if (!log_data.handler)
+	if (!log_data.handler || priority > log_data.priority)
 		return;
 
 	va_start(args, format);
