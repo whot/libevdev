@@ -466,7 +466,7 @@ struct libevdev* libevdev_new(void);
  * @param fd A file descriptor to the device in O_RDWR or O_RDONLY mode.
  * @param[out] dev The newly initialized evdev device.
  *
- * @return On success, zero is returned and dev is set to the newly
+ * @return On success, 0 is returned and dev is set to the newly
  * allocated struct. On failure, a negative errno is returned and the value
  * of dev is undefined.
  *
@@ -1107,7 +1107,7 @@ int libevdev_set_event_value(struct libevdev *dev, unsigned int type, unsigned i
  *
  * @return If the device supports this event type and code, the return value is
  * non-zero and value is set to the current value of this axis. Otherwise,
- * zero is returned and value is unmodified.
+ * 0 is returned and value is unmodified.
  *
  * @note This function is signal-safe.
  * @note The value for ABS_MT_ events is undefined, use
@@ -1187,7 +1187,7 @@ int libevdev_set_slot_value(struct libevdev *dev, unsigned int slot, unsigned in
  * @param code The event code to query for, one of ABS_MT_POSITION_X, etc.
  * @return If the device supports this event code, the return value is
  * non-zero and value is set to the current value of this axis. Otherwise, or
- * if the event code is not an ABS_MT_* event code, zero is returned and value
+ * if the event code is not an ABS_MT_* event code, 0 is returned and value
  * is unmodified.
  *
  * @note This function is signal-safe.
@@ -1421,7 +1421,7 @@ int libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigne
  * @param code The EV_ABS event code to modify, one of ABS_X, ABS_Y, etc.
  * @param abs Axis info to set the kernel axis to
  *
- * @return zero on success, or a negative errno on failure
+ * @return 0 on success, or a negative errno on failure
  *
  * @see libevdev_enable_event_code
  */
@@ -1447,7 +1447,7 @@ enum libevdev_led_value {
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param code The EV_LED event code to modify, one of LED_NUML, LED_CAPSL, ...
  * @param value Specifies whether to turn the LED on or off
- * @return zero on success, or a negative errno on failure
+ * @return 0 on success, or a negative errno on failure
  */
 int libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum libevdev_led_value value);
 
@@ -1472,7 +1472,7 @@ int libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum 
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param ... A pair of LED_* event codes and libevdev_led_value_t, followed by
  * -1 to terminate the list.
- * @return zero on success, or a negative errno on failure
+ * @return 0 on success, or a negative errno on failure
  */
 int libevdev_kernel_set_led_values(struct libevdev *dev, ...);
 
@@ -1488,7 +1488,7 @@ int libevdev_kernel_set_led_values(struct libevdev *dev, ...);
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param clockid The clock to use for future events. Permitted values
  * are CLOCK_MONOTONIC and CLOCK_REALTIME (the default).
- * @return zero on success, or a negative errno on failure
+ * @return 0 on success, or a negative errno on failure
  */
 int libevdev_set_clock_id(struct libevdev *dev, int clockid);
 
