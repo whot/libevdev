@@ -110,7 +110,7 @@ enum libevdev_uinput_open_mode {
 /**
  * @ingroup uinput
  *
- * Create a uinput device based on the libevdev device given. The uinput device
+ * Create a uinput device based on the given libevdev device. The uinput device
  * will be an exact copy of the libevdev device, minus the bits that uinput doesn't
  * allow to be set.
  *
@@ -155,8 +155,6 @@ int libevdev_uinput_create_from_device(const struct libevdev *dev,
  * fd is left as-is and must be closed by the caller.
  *
  * @param uinput_dev A previously created uinput device.
- *
- * @return 0 on success or a negative errno on failure
  */
 void libevdev_uinput_destroy(struct libevdev_uinput *uinput_dev);
 
@@ -179,17 +177,18 @@ int libevdev_uinput_get_fd(const struct libevdev_uinput *uinput_dev);
  * @ingroup uinput
  *
  * Return the syspath representing this uinput device.
- * As of 3.11, the uinput kernel device does not
+ * At the time of writing, the uinput kernel device does not
  * provide a way to get the syspath directly through uinput so libevdev must guess.
  * In some cases libevdev is unable to derive the syspath. If the running kernel
- * supports the UI_GET_SYSPATH ioctl, the syspath is retrieved through that and will
- * be reliable and not be NULL.
+ * supports the UI_GET_SYSNAME ioctl, the syspath is retrieved through that and will
+ * be reliable and not be NULL. The UI_GET_SYSNAME ioctl is currently
+ * scheduled for 3.15.
  *
  * @note This function may return NULL. libevdev currently uses ctime and
  * the device name to guess devices. To avoid false positives, wait at least
  * wait at least 1.5s between creating devices that have the same name.
  * @param uinput_dev A previously created uinput device.
- * @return The syspath for this device, including preceding /sys.
+ * @return The syspath for this device, including the preceding /sys
  *
  * @see libevdev_uinput_get_devnode
  */

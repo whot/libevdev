@@ -410,7 +410,7 @@ extern "C" {
 /**
  * @defgroup events Event handling
  *
- * Functions to handle events and fetch the current state of the event. Generally,
+ * Functions to handle events and fetch the current state of the event.
  * libevdev updates its internal state as the event is processed and forwarded
  * to the caller. Thus, the libevdev state of the device should always be identical
  * to the caller's state. It may however lag behind the actual state of the device.
@@ -681,11 +681,12 @@ enum libevdev_read_status {
  * Get the next event from the device. This function operates in two different
  * modes: normal mode or sync mode.
  *
- * In normal mode, this function returns @ref LIBEVDEV_READ_STATUS_SUCCESS and
- * returns the event in the parameter ev. If no events are available at this
+ * In normal mode (when flags has @ref LIBEVDEV_READ_FLAG_NORMAL set), this
+ * function returns @ref LIBEVDEV_READ_STATUS_SUCCESS and returns the event
+ * in the argument @p ev. If no events are available at this
  * time, it returns -EAGAIN and ev is undefined.
  *
- * If a SYN_DROPPED is read from the device, this function returns
+ * If the current event is an EV_SYN SYN_DROPPED event, this function returns
  * @ref LIBEVDEV_READ_STATUS_SYNC and ev is set to the EV_SYN event.
  * The caller should now call this function with the
  * @ref LIBEVDEV_READ_FLAG_SYNC flag set, to get the set of events that make up the
@@ -695,7 +696,8 @@ enum libevdev_read_status {
  *
  * If a device needs to be synced by the caller but the caller does not call
  * with the @ref LIBEVDEV_READ_STATUS_SYNC flag set, all events from the diff are
- * dropped and event processing continues as normal.
+ * dropped after libevdev updates its internal state and event processing
+ * continues as normal.
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param flags Set of flags to determine behaviour. If @ref LIBEVDEV_READ_FLAG_NORMAL
@@ -716,10 +718,10 @@ int libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_e
 /**
  * @ingroup events
  *
- * Check if there are events waiting for us. This does not read an event off
- * the fd and may not access the fd at all. If there are events queued
- * internally this function will return non-zero. If the internal queue is empty,
- * this function will poll the file descriptor for data.
+ * Check if there are events waiting for us. This function does not read an
+ * event off the fd and may not access the fd at all. If there are events
+ * queued internally this function will return non-zero. If the internal
+ * queue is empty, this function will poll the file descriptor for data.
  *
  * This is a convenience function for simple processes, most complex programs
  * are expected to use select(2) or poll(2) on the file descriptor. The kernel
@@ -777,7 +779,7 @@ const char * libevdev_get_phys(const struct libevdev *dev);
  * @ingroup kernel
  *
  * @param dev The evdev device
- * @param phys The new, non-NULL, phys to assign to this device.
+ * @param phys The new phys to assign to this device.
  *
  * @note This function may be called before libevdev_set_fd(). A call to
  * libevdev_set_fd() will overwrite any previously set value.
@@ -799,7 +801,7 @@ const char * libevdev_get_uniq(const struct libevdev *dev);
  * @ingroup kernel
  *
  * @param dev The evdev device
- * @param uniq The new, non-NULL, uniq to assign to this device.
+ * @param uniq The new uniq to assign to this device.
  *
  * @note This function may be called before libevdev_set_fd(). A call to
  * libevdev_set_fd() will overwrite any previously set value.
@@ -1230,6 +1232,10 @@ int libevdev_get_current_slot(const struct libevdev *dev);
  * Change the minimum for the given EV_ABS event code, if the code exists.
  * This function has no effect if libevdev_has_event_code() returns false for
  * this code.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code One of ABS_X, ABS_Y, ...
+ * @param min The new minimum for this axis
  */
 void libevdev_set_abs_minimum(struct libevdev *dev, unsigned int code, int min);
 
@@ -1239,6 +1245,10 @@ void libevdev_set_abs_minimum(struct libevdev *dev, unsigned int code, int min);
  * Change the maximum for the given EV_ABS event code, if the code exists.
  * This function has no effect if libevdev_has_event_code() returns false for
  * this code.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code One of ABS_X, ABS_Y, ...
+ * @param max The new maxium for this axis
  */
 void libevdev_set_abs_maximum(struct libevdev *dev, unsigned int code, int max);
 
@@ -1248,6 +1258,10 @@ void libevdev_set_abs_maximum(struct libevdev *dev, unsigned int code, int max);
  * Change the fuzz for the given EV_ABS event code, if the code exists.
  * This function has no effect if libevdev_has_event_code() returns false for
  * this code.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code One of ABS_X, ABS_Y, ...
+ * @param fuzz The new fuzz for this axis
  */
 void libevdev_set_abs_fuzz(struct libevdev *dev, unsigned int code, int fuzz);
 
@@ -1257,6 +1271,10 @@ void libevdev_set_abs_fuzz(struct libevdev *dev, unsigned int code, int fuzz);
  * Change the flat for the given EV_ABS event code, if the code exists.
  * This function has no effect if libevdev_has_event_code() returns false for
  * this code.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code One of ABS_X, ABS_Y, ...
+ * @param flat The new flat for this axis
  */
 void libevdev_set_abs_flat(struct libevdev *dev, unsigned int code, int flat);
 
@@ -1266,6 +1284,10 @@ void libevdev_set_abs_flat(struct libevdev *dev, unsigned int code, int flat);
  * Change the resolution for the given EV_ABS event code, if the code exists.
  * This function has no effect if libevdev_has_event_code() returns false for
  * this code.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code One of ABS_X, ABS_Y, ...
+ * @param resolution The new axis resolution
  */
 void libevdev_set_abs_resolution(struct libevdev *dev, unsigned int code, int resolution);
 
@@ -1275,6 +1297,10 @@ void libevdev_set_abs_resolution(struct libevdev *dev, unsigned int code, int re
  * Change the abs info for the given EV_ABS event code, if the code exists.
  * This function has no effect if libevdev_has_event_code() returns false for
  * this code.
+ *
+ * @param dev The evdev device, already initialized with libevdev_set_fd()
+ * @param code One of ABS_X, ABS_Y, ...
+ * @param abs The new absolute axis data (min, max, fuzz, flat, resolution)
  */
 void libevdev_set_abs_info(struct libevdev *dev, unsigned int code, const struct input_absinfo *abs);
 
@@ -1334,7 +1360,9 @@ int libevdev_disable_event_type(struct libevdev *dev, unsigned int type);
  *
  * The last argument depends on the type and code:
  * - If type is EV_ABS, data must be a pointer to a struct input_absinfo
- * containing the data for this axis.
+ *   containing the data for this axis.
+ * - If type is EV_REP, daat must be a pointer to a int containing the data
+ *   for this axis
  * - For all other types, the argument must be NULL.
  *
  * This function calls libevdev_enable_event_type() if necessary.
@@ -1521,7 +1549,7 @@ int libevdev_event_is_code(const struct input_event *ev, unsigned int type, unsi
  * invalid type
  *
  * @note The list of names is compiled into libevdev. If the kernel adds new
- * defines for new properties libevdev will not automatically pick these up.
+ * defines for new event types, libevdev will not automatically pick these up.
  */
 const char * libevdev_event_type_get_name(unsigned int type);
 /**
@@ -1534,7 +1562,7 @@ const char * libevdev_event_type_get_name(unsigned int type);
  * invalid type or code
  *
  * @note The list of names is compiled into libevdev. If the kernel adds new
- * defines for new properties libevdev will not automatically pick these up.
+ * defines for new event codes, libevdev will not automatically pick these up.
  */
 const char * libevdev_event_code_get_name(unsigned int type, unsigned int code);
 
@@ -1604,14 +1632,14 @@ int libevdev_event_type_from_name_n(const char *name, size_t len);
 /**
  * @ingroup misc
  *
- * Look up an event-code by its type and name. Event-codes start with a fixed
+ * Look up an event code by its type and name. Event codes start with a fixed
  * prefix followed by their name (eg., "ABS_X"). The prefix must be included in
- * the name. It returns the constant assigned to the event-code or -1 if not
+ * the name. It returns the constant assigned to the event code or -1 if not
  * found.
  *
- * You have to pass the event-type where to look for the name. For instance, to
+ * You have to pass the event type where to look for the name. For instance, to
  * resolve "ABS_X" you need to pass EV_ABS as type and "ABS_X" as string.
- * Supported event-codes are codes starting with SYN_, KEY_, BTN_, REL_, ABS_,
+ * Supported event codes are codes starting with SYN_, KEY_, BTN_, REL_, ABS_,
  * MSC_, SND_, SW_, LED_, REP_, FF_.
  *
  * @param type The event type (EV_* constant) where to look for the name.
@@ -1625,23 +1653,23 @@ int libevdev_event_code_from_name(unsigned int type, const char *name);
 /**
  * @ingroup misc
  *
- * Look up an event-code by its type and name. Event-codes start with a fixed
+ * Look up an event code by its type and name. Event codes start with a fixed
  * prefix followed by their name (eg., "ABS_X"). The prefix must be included in
- * the name. It returns the constant assigned to the event-code or -1 if not
+ * the name. It returns the constant assigned to the event code or -1 if not
  * found.
  *
- * You have to pass the event-type where to look for the name. For instance, to
+ * You have to pass the event type where to look for the name. For instance, to
  * resolve "ABS_X" you need to pass EV_ABS as type and "ABS_X" as string.
- * Supported event-codes are codes starting with SYN_, KEY_, BTN_, REL_, ABS_,
+ * Supported event codes are codes starting with SYN_, KEY_, BTN_, REL_, ABS_,
  * MSC_, SND_, SW_, LED_, REP_, FF_.
  *
  * @param type The event type (EV_* constant) where to look for the name.
  * @param name A non-NULL string describing an input-event code ("KEY_A",
  * "ABS_X", "BTN_Y", ...).
- * @param len The length of the passed string excluding any terminating 0
+ * @param len The length of the string in @p name excluding any terminating 0
  * character.
  *
- * @return The given code constant for the passed name or -1 if not found.
+ * @return The given code constant for the name or -1 if not found.
  */
 int libevdev_event_code_from_name_n(unsigned int type, const char *name,
 				    size_t len);
