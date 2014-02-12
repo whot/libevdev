@@ -964,6 +964,8 @@ int libevdev_has_event_code(const struct libevdev *dev, unsigned int type, unsig
  * @param code The EV_ABS event code to query for, one of ABS_X, ABS_Y, etc.
  *
  * @return axis minimum for the given axis or 0 if the axis is invalid
+ *
+ * @note This function is signal-safe.
  */
 int libevdev_get_abs_minimum(const struct libevdev *dev, unsigned int code);
 /**
@@ -975,6 +977,8 @@ int libevdev_get_abs_minimum(const struct libevdev *dev, unsigned int code);
  * @param code The EV_ABS event code to query for, one of ABS_X, ABS_Y, etc.
  *
  * @return axis maximum for the given axis or 0 if the axis is invalid
+ *
+ * @note This function is signal-safe.
  */
 int libevdev_get_abs_maximum(const struct libevdev *dev, unsigned int code);
 /**
@@ -986,6 +990,8 @@ int libevdev_get_abs_maximum(const struct libevdev *dev, unsigned int code);
  * @param code The EV_ABS event code to query for, one of ABS_X, ABS_Y, etc.
  *
  * @return axis fuzz for the given axis or 0 if the axis is invalid
+ *
+ * @note This function is signal-safe.
  */
 int libevdev_get_abs_fuzz(const struct libevdev *dev, unsigned int code);
 /**
@@ -997,6 +1003,8 @@ int libevdev_get_abs_fuzz(const struct libevdev *dev, unsigned int code);
  * @param code The EV_ABS event code to query for, one of ABS_X, ABS_Y, etc.
  *
  * @return axis flat for the given axis or 0 if the axis is invalid
+ *
+ * @note This function is signal-safe.
  */
 int libevdev_get_abs_flat(const struct libevdev *dev, unsigned int code);
 /**
@@ -1008,6 +1016,8 @@ int libevdev_get_abs_flat(const struct libevdev *dev, unsigned int code);
  * @param code The EV_ABS event code to query for, one of ABS_X, ABS_Y, etc.
  *
  * @return axis resolution for the given axis or 0 if the axis is invalid
+ *
+ * @note This function is signal-safe.
  */
 int libevdev_get_abs_resolution(const struct libevdev *dev, unsigned int code);
 
@@ -1021,6 +1031,8 @@ int libevdev_get_abs_resolution(const struct libevdev *dev, unsigned int code);
  *
  * @return The input_absinfo for the given code, or NULL if the device does
  * not support this event code.
+ *
+ * @note This function is signal-safe.
  */
 const struct input_absinfo* libevdev_get_abs_info(const struct libevdev *dev, unsigned int code);
 
@@ -1207,6 +1219,8 @@ int libevdev_get_num_slots(const struct libevdev *dev);
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  *
  * @return the currently active slot (logically)
+ *
+ * @note This function is signal-safe.
  */
 int libevdev_get_current_slot(const struct libevdev *dev);
 
