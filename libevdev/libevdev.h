@@ -742,6 +742,10 @@ int libevdev_has_event_pending(struct libevdev *dev);
 /**
  * @ingroup bits
  *
+ * Retrieve the device's name, either as set by the caller or as read from
+ * the kernel. The string returned is valid until libevdev_free() or until
+ * libevdev_set_name(), whichever comes earlier.
+ *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  *
  * @return The device name as read off the kernel device. The name is never
@@ -754,6 +758,10 @@ const char* libevdev_get_name(const struct libevdev *dev);
 /**
  * @ingroup kernel
  *
+ * Change the device's name as returned by libevdev_get_name(). This
+ * function destroys the string previously returned by libevdev_get_name(),
+ * a caller must take care that no references are kept.
+ *
  * @param dev The evdev device
  * @param name The new, non-NULL, name to assign to this device.
  *
@@ -764,6 +772,10 @@ void libevdev_set_name(struct libevdev *dev, const char *name);
 
 /**
  * @ingroup bits
+ *
+ * Retrieve the device's physical location, either as set by the caller or
+ * as read from the kernel. The string returned is valid until
+ * libevdev_free() or until libevdev_set_phys(), whichever comes earlier.
  *
  * Virtual devices such as uinput devices have no phys location.
  *
@@ -778,6 +790,10 @@ const char * libevdev_get_phys(const struct libevdev *dev);
 /**
  * @ingroup kernel
  *
+ * Change the device's physical location as returned by libevdev_get_phys().
+ * This function destroys the string previously returned by
+ * libevdev_get_phys(), a caller must take care that no references are kept.
+ *
  * @param dev The evdev device
  * @param phys The new phys to assign to this device.
  *
@@ -789,6 +805,10 @@ void libevdev_set_phys(struct libevdev *dev, const char *phys);
 /**
  * @ingroup bits
  *
+ * Retrieve the device's unique identifier, either as set by the caller or
+ * as read from the kernel. The string returned is valid until
+ * libevdev_free() or until libevdev_set_uniq(), whichever comes earlier.
+ *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  *
  * @return The unique identifier for this device, or NULL if there is none
@@ -799,6 +819,10 @@ const char * libevdev_get_uniq(const struct libevdev *dev);
 
 /**
  * @ingroup kernel
+ *
+ * Change the device's unique identifier as returned by libevdev_get_uniq().
+ * This function destroys the string previously returned by
+ * libevdev_get_uniq(), a caller must take care that no references are kept.
  *
  * @param dev The evdev device
  * @param uniq The new uniq to assign to this device.
