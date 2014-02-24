@@ -845,7 +845,7 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 	/* if we disabled a code, get the next event instead */
 	} while(!libevdev_has_event_code(dev, ev->type, ev->code));
 
-	rc = 0;
+	rc = LIBEVDEV_READ_STATUS_SUCCESS;
 	if (ev->type == EV_SYN && ev->code == SYN_DROPPED) {
 		dev->sync_state = SYNC_NEEDED;
 		rc = LIBEVDEV_READ_STATUS_SYNC;
