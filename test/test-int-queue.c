@@ -25,9 +25,6 @@
 #include <libevdev/libevdev-int.h>
 #include "test-common.h"
 
-
-
-
 START_TEST(test_queue_alloc)
 {
 	struct libevdev dev;
