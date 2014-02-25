@@ -58,7 +58,7 @@ static int
 print_current_values(const struct dimensions *d)
 {
 	static int progress;
-	char status;
+	char status = 0;
 
 	switch (progress) {
 		case 0: status = '|'; break;
