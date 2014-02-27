@@ -518,6 +518,7 @@ START_TEST(test_syn_delta_mt)
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_FORCE_SYNC, &ev);
 	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 0);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
 	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
@@ -553,6 +554,8 @@ START_TEST(test_syn_delta_mt)
 	ck_assert_int_eq(ev.type, EV_ABS);
 	ck_assert_int_eq(ev.code, ABS_MT_SLOT);
 	ck_assert_int_eq(ev.value, 1);
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 1);
+
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
 	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_ABS);
