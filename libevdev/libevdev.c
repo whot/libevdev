@@ -133,6 +133,9 @@ log_msg(enum libevdev_log_priority priority,
 static void
 libevdev_reset(struct libevdev *dev)
 {
+	free(dev->name);
+	free(dev->phys);
+	free(dev->uniq);
 	memset(dev, 0, sizeof(*dev));
 	dev->fd = -1;
 	dev->initialized = false;
@@ -148,7 +151,7 @@ libevdev_new(void)
 {
 	struct libevdev *dev;
 
-	dev = malloc(sizeof(*dev));
+	dev = calloc(1, sizeof(*dev));
 	if (!dev)
 		return NULL;
 
