@@ -38,6 +38,21 @@
 
 static int sync_mt_state(struct libevdev *dev, int create_events);
 
+static inline int*
+slot_value(const struct libevdev *dev, int slot, int axis)
+{
+	if (unlikely(slot > dev->num_slots)) {
+		log_bug("Slot %d exceeds number of slots (%d)\n", slot, dev->num_slots);
+		slot = 0;
+	}
+	if (unlikely(axis < ABS_MT_MIN || axis > ABS_MT_MAX)) {
+		log_bug("MT axis %d is outside the valid range [%d,%d]\n",
+			axis, ABS_MT_MIN, ABS_MT_MAX);
+		axis = ABS_MT_MIN;
+	}
+	return &dev->mt_slot_vals[slot * ABS_MT_CNT + axis - ABS_MT_MIN];
+}
+
 static int
 init_event_queue(struct libevdev *dev)
 {
@@ -136,6 +151,7 @@ libevdev_reset(struct libevdev *dev)
 	free(dev->name);
 	free(dev->phys);
 	free(dev->uniq);
+	free(dev->mt_slot_vals);
 	memset(dev, 0, sizeof(*dev));
 	dev->fd = -1;
 	dev->initialized = false;
@@ -187,6 +203,7 @@ libevdev_free(struct libevdev *dev)
 	free(dev->name);
 	free(dev->phys);
 	free(dev->uniq);
+	free(dev->mt_slot_vals);
 	queue_free(dev);
 	free(dev);
 }
@@ -369,6 +386,11 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 			if (i == ABS_MT_SLOT &&
 			    !libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT - 1)) {
 				dev->num_slots = abs_info.maximum + 1;
+				dev->mt_slot_vals = calloc(dev->num_slots * ABS_MT_CNT, sizeof(int));
+				if (!dev->mt_slot_vals) {
+					rc = -ENOMEM;
+					goto out;
+				}
 				dev->current_slot = abs_info.value;
 			}
 
@@ -579,14 +601,14 @@ sync_mt_state(struct libevdev *dev, int create_events)
 			if (!libevdev_has_event_code(dev, EV_ABS, j))
 				continue;
 
-			if (dev->mt_slot_vals[i][jdx] == mt_state[jdx].val[i])
+			if (*slot_value(dev, i, j) == mt_state[jdx].val[i])
 				continue;
 
 			if (create_events) {
 				ev = queue_push(dev);
 				init_event(dev, ev, EV_ABS, j, mt_state[jdx].val[i]);
 			}
-			dev->mt_slot_vals[i][jdx] = mt_state[jdx].val[i];
+			*slot_value(dev, i, j) = mt_state[jdx].val[i];
 		}
 	}
 
@@ -667,14 +689,14 @@ update_mt_state(struct libevdev *dev, const struct input_event *e)
 		/* sync abs_info with the current slot values */
 		for (i = ABS_MT_SLOT + 1; i <= ABS_MT_MAX; i++) {
 			if (libevdev_has_event_code(dev, EV_ABS, i))
-				dev->abs_info[i].value = dev->mt_slot_vals[dev->current_slot][i - ABS_MT_MIN];
+				dev->abs_info[i].value = *slot_value(dev, dev->current_slot, i);
 		}
 
 		return 0;
 	} else if (dev->current_slot == -1)
 		return 1;
 
-	dev->mt_slot_vals[dev->current_slot][e->code - ABS_MT_MIN] = e->value;
+	*slot_value(dev, dev->current_slot, e->code) = e->value;
 
 	return 0;
 }
@@ -1070,13 +1092,13 @@ libevdev_get_slot_value(const struct libevdev *dev, unsigned int slot, unsigned 
 	if (!libevdev_has_event_type(dev, EV_ABS) || !libevdev_has_event_code(dev, EV_ABS, code))
 		return 0;
 
-	if (dev->num_slots < 0 || slot >= (unsigned int)dev->num_slots || slot >= MAX_SLOTS)
+	if (dev->num_slots < 0 || slot >= (unsigned int)dev->num_slots)
 		return 0;
 
 	if (code > ABS_MT_MAX || code < ABS_MT_MIN)
 		return 0;
 
-	return dev->mt_slot_vals[slot][code - ABS_MT_MIN];
+	return *slot_value(dev, slot, code);
 }
 
 LIBEVDEV_EXPORT int
@@ -1085,7 +1107,7 @@ libevdev_set_slot_value(struct libevdev *dev, unsigned int slot, unsigned int co
 	if (!libevdev_has_event_type(dev, EV_ABS) || !libevdev_has_event_code(dev, EV_ABS, code))
 		return -1;
 
-	if (dev->num_slots == -1 || slot >= (unsigned int)dev->num_slots || slot >= MAX_SLOTS)
+	if (dev->num_slots == -1 || slot >= (unsigned int)dev->num_slots)
 		return -1;
 
 	if (code > ABS_MT_MAX || code < ABS_MT_MIN)
@@ -1097,8 +1119,7 @@ libevdev_set_slot_value(struct libevdev *dev, unsigned int slot, unsigned int co
 		dev->current_slot = value;
 	}
 
-	dev->mt_slot_vals[slot][code - ABS_MT_MIN] = value;
-
+	*slot_value(dev, slot, code) = value;
 
 	return 0;
 }
@@ -1109,7 +1130,7 @@ libevdev_fetch_slot_value(const struct libevdev *dev, unsigned int slot, unsigne
 	if (libevdev_has_event_type(dev, EV_ABS) &&
 	    libevdev_has_event_code(dev, EV_ABS, code) &&
 	    dev->num_slots >= 0 &&
-	    slot < (unsigned int)dev->num_slots && slot < MAX_SLOTS) {
+	    slot < (unsigned int)dev->num_slots) {
 		*value = libevdev_get_slot_value(dev, slot, code);
 		return 1;
 	} else
