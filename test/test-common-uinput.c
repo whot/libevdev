@@ -119,6 +119,7 @@ uinput_device_free(struct uinput_device *dev)
 	if (dev->dev_fd != -1)
 		close(dev->dev_fd);
 	libevdev_free(dev->d);
+	libevdev_uinput_destroy(dev->uidev);
 	free(dev);
 }
 
