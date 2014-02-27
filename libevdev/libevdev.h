@@ -695,7 +695,7 @@ enum libevdev_read_status {
  * have been synced.
  * @note The implementation of libevdev limits the maximum number of slots
  * that can be synched. If your device exceeds the number of slots
- * (currently 32), slot indices equal and above this maximum are ignored and
+ * (currently 60), slot indices equal and above this maximum are ignored and
  * their value will not update until the next event in that slot.
  *
  * If a device needs to be synced by the caller but the caller does not call

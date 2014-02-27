@@ -29,7 +29,7 @@
 
 #include "test-common.h"
 
-#define MAX_SLOTS 32 /* as in libevdev-int.h */
+#define MAX_SLOTS 60 /* as in libevdev-int.h */
 
 START_TEST(test_next_event)
 {

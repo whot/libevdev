@@ -34,7 +34,7 @@
 #define NLONGS(x) (((x) + LONG_BITS - 1) / LONG_BITS)
 #define ARRAY_LENGTH(a) (sizeof(a) / (sizeof((a)[0])))
 #define MAX_NAME 256
-#define MAX_SLOTS 32
+#define MAX_SLOTS 60
 #define ABS_MT_MIN ABS_MT_SLOT
 #define ABS_MT_MAX ABS_MT_TOOL_Y
 #define ABS_MT_CNT (ABS_MT_MAX - ABS_MT_MIN + 1)
