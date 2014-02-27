@@ -29,6 +29,8 @@
 
 #include "test-common.h"
 
+#define MAX_SLOTS 32 /* as in libevdev-int.h */
+
 START_TEST(test_next_event)
 {
 	struct uinput_device* uidev;
@@ -571,6 +573,105 @@ START_TEST(test_syn_delta_mt)
 	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 	ck_assert_int_eq(ev.type, EV_SYN);
 	ck_assert_int_eq(ev.code, SYN_REPORT);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
+START_TEST(test_syn_delta_mt_too_many)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+	struct input_absinfo abs[6];
+	int i;
+	int num_slots = MAX_SLOTS + 20;
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+	abs[1].value = ABS_MT_POSITION_X;
+	abs[1].maximum = 1000;
+
+	abs[2].value = ABS_Y;
+	abs[2].maximum = 1000;
+	abs[3].value = ABS_MT_POSITION_Y;
+	abs[3].maximum = 1000;
+
+	abs[4].value = ABS_MT_SLOT;
+	abs[4].maximum = num_slots;
+	abs[5].value = ABS_MT_TOOL_Y;
+	abs[5].maximum = 500;
+
+	rc = test_create_abs_device(&uidev, &dev,
+				    6, abs,
+				    EV_SYN, SYN_REPORT,
+				    -1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	for (i = num_slots; i >= 0; i--) {
+		uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, i);
+		uinput_device_event(uidev, EV_ABS, ABS_X, 100 + i);
+		uinput_device_event(uidev, EV_ABS, ABS_Y, 500 + i);
+		uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 100 + i);
+		uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 500 + i);
+		uinput_device_event(uidev, EV_ABS, ABS_MT_TOOL_Y, 1 + i);
+		uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	}
+
+	/* drain the fd, so libevdev_next_event doesn't pick up any events
+	   before the FORCE_SYNC */
+	do {
+		rc = read(libevdev_get_fd(dev), &ev, sizeof(ev));
+	} while (rc > 0);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_FORCE_SYNC, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+
+	i = 0;
+	while (i < num_slots) {
+		int slot;
+
+		rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+		ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+
+		if (libevdev_event_is_code(&ev, EV_SYN, SYN_REPORT))
+			break;
+
+		if (libevdev_event_is_code(&ev, EV_ABS, ABS_X) ||
+		    libevdev_event_is_code(&ev, EV_ABS, ABS_Y))
+			continue;
+
+		ck_assert_int_eq(ev.type, EV_ABS);
+		ck_assert_int_eq(ev.code, ABS_MT_SLOT);
+		slot = ev.value;
+		ck_assert_int_lt(slot, MAX_SLOTS);
+
+		rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+		ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+		ck_assert_int_eq(ev.type, EV_ABS);
+		ck_assert_int_eq(ev.code, ABS_MT_POSITION_X);
+		ck_assert_int_eq(ev.value, 100 + slot);
+		rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+		ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+		ck_assert_int_eq(ev.type, EV_ABS);
+		ck_assert_int_eq(ev.code, ABS_MT_POSITION_Y);
+		ck_assert_int_eq(ev.value, 500 + slot);
+		rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+		ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+		ck_assert_int_eq(ev.type, EV_ABS);
+		ck_assert_int_eq(ev.code, ABS_MT_TOOL_Y);
+		ck_assert_int_eq(ev.value, 1 + slot);
+
+		i++;
+	}
+
+	/* we expect eactly MAX_SLOTS to be synced */
+	ck_assert_int_eq(i, MAX_SLOTS);
 	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
 	ck_assert_int_eq(rc, -EAGAIN);
 
@@ -1327,6 +1428,7 @@ libevdev_events(void)
 	tcase_add_test(tc, test_syn_delta_button);
 	tcase_add_test(tc, test_syn_delta_abs);
 	tcase_add_test(tc, test_syn_delta_mt);
+	tcase_add_test(tc, test_syn_delta_mt_too_many);
 	tcase_add_test(tc, test_syn_delta_led);
 	tcase_add_test(tc, test_syn_delta_sw);
 	suite_add_tcase(s, tc);
