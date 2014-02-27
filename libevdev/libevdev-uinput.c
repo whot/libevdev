@@ -155,16 +155,6 @@ set_props(const struct libevdev *dev, int fd, struct uinput_user_dev *uidev)
 	return rc;
 }
 
-static int
-open_uinput(void)
-{
-	int fd = open("/dev/uinput", O_RDWR|O_CLOEXEC);
-	if (fd < 0)
-		return -errno;
-
-	return fd;
-}
-
 LIBEVDEV_EXPORT int
 libevdev_uinput_get_fd(const struct libevdev_uinput *uinput_dev)
 {
@@ -277,14 +267,15 @@ libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct li
 		return -ENOMEM;
 
 	if (fd == LIBEVDEV_UINPUT_OPEN_MANAGED) {
-		fd = open_uinput();
+		fd = open("/dev/uinput", O_RDWR|O_CLOEXEC);
 		if (fd < 0)
-			return fd;
+			goto error;
 
 		new_device->fd_is_managed = 1;
 	} else if (fd < 0) {
 		log_bug("Invalid fd %d\n", fd);
-		return -EBADF;
+		errno = EBADF;
+		goto error;
 	}
 
 	memset(&uidev, 0, sizeof(uidev));
