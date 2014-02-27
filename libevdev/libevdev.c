@@ -561,7 +561,7 @@ sync_mt_state(struct libevdev *dev, int create_events)
 			ioctl_success = 1;
 	}
 
-	for (i = 0; i < dev->num_slots; i++) {
+	for (i = 0; i < min(dev->num_slots, MAX_SLOTS); i++) {
 		int j;
 		struct input_event *ev;
 
