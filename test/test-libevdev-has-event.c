@@ -455,6 +455,7 @@ START_TEST(test_invalid_mt_device)
 	ck_assert(libevdev_get_event_value(dev, EV_ABS, ABS_MT_SLOT) == 1);
 
 	uinput_device_free(uidev);
+	libevdev_free(dev);
 } END_TEST
 
 

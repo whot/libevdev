@@ -1060,6 +1060,9 @@ START_TEST(test_ev_rep_values)
 	ck_assert_int_eq(libevdev_has_event_code(dev, EV_REP, REP_PERIOD), 1);
 	ck_assert_int_eq(libevdev_get_event_value(dev, EV_REP, REP_DELAY), 500);
 	ck_assert_int_eq(libevdev_get_event_value(dev, EV_REP, REP_PERIOD), 200);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
 }
 END_TEST
 
