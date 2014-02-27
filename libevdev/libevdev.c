@@ -552,26 +552,26 @@ static int
 sync_mt_state(struct libevdev *dev, int create_events)
 {
 	int rc;
-	int i;
+	int axis, slot;
 	int ioctl_success = 0;
 	struct mt_state {
 		int code;
 		int val[MAX_SLOTS];
-	} mt_state[ABS_MT_CNT];
+	} mt_state;
+	unsigned long slot_update[NLONGS(MAX_SLOTS * ABS_MT_CNT)] = {0};
 
-	memset(&mt_state, 0, sizeof(mt_state));
+#define AXISBIT(_slot, _axis) (_slot * ABS_MT_CNT + _axis - ABS_MT_MIN)
 
-	for (i = ABS_MT_MIN; i <= ABS_MT_MAX; i++) {
-		int idx;
-		if (i == ABS_MT_SLOT)
+	for (axis = ABS_MT_MIN; axis <= ABS_MT_MAX; axis++) {
+		if (axis == ABS_MT_SLOT)
 			continue;
 
-		if (!libevdev_has_event_code(dev, EV_ABS, i))
+		if (!libevdev_has_event_code(dev, EV_ABS, axis))
 			continue;
 
-		idx = i - ABS_MT_MIN;
-		mt_state[idx].code = i;
-		rc = ioctl(dev->fd, EVIOCGMTSLOTS(sizeof(struct mt_state)), &mt_state[idx]);
+		memset(&mt_state, 0, sizeof(mt_state));
+		mt_state.code = axis;
+		rc = ioctl(dev->fd, EVIOCGMTSLOTS(sizeof(struct mt_state)), &mt_state);
 		if (rc < 0) {
 			/* if the first ioctl fails with -EINVAL, chances are the kernel
 			   doesn't support the ioctl. Simply continue */
@@ -579,38 +579,48 @@ sync_mt_state(struct libevdev *dev, int create_events)
 				rc = 0;
 			} else /* if the second, ... ioctl fails, really fail */
 				goto out;
-		} else if (ioctl_success == 0)
-			ioctl_success = 1;
+		} else {
+			if (ioctl_success == 0)
+				ioctl_success = 1;
+
+			for (slot = 0; slot < min(dev->num_slots, MAX_SLOTS); slot++) {
+
+				if (*slot_value(dev, slot, axis) == mt_state.val[slot])
+					continue;
+
+				*slot_value(dev, slot, axis) = mt_state.val[slot];
+
+				set_bit(slot_update, AXISBIT(slot, axis));
+				/* note that this slot has updates */
+				set_bit(slot_update, AXISBIT(slot, ABS_MT_SLOT));
+			}
+
+
+		}
 	}
 
-	for (i = 0; i < min(dev->num_slots, MAX_SLOTS); i++) {
-		int j;
+	for (slot = 0; create_events && slot < min(dev->num_slots, MAX_SLOTS); slot++) {
 		struct input_event *ev;
 
-		if (create_events) {
-			ev = queue_push(dev);
-			init_event(dev, ev, EV_ABS, ABS_MT_SLOT, i);
-		}
+		if (!bit_is_set(slot_update, AXISBIT(slot, ABS_MT_SLOT)))
+			continue;
 
-		for (j = ABS_MT_MIN; j <= ABS_MT_MAX; j++) {
-			int jdx = j - ABS_MT_MIN;
+		ev = queue_push(dev);
+		init_event(dev, ev, EV_ABS, ABS_MT_SLOT, slot);
 
-			if (j == ABS_MT_SLOT)
+		for (axis = ABS_MT_MIN; axis <= ABS_MT_MAX; axis++) {
+			if (axis == ABS_MT_SLOT ||
+			    !libevdev_has_event_code(dev, EV_ABS, axis))
 				continue;
 
-			if (!libevdev_has_event_code(dev, EV_ABS, j))
-				continue;
-
-			if (*slot_value(dev, i, j) == mt_state[jdx].val[i])
-				continue;
-
-			if (create_events) {
+			if (bit_is_set(slot_update, AXISBIT(slot, axis))) {
 				ev = queue_push(dev);
-				init_event(dev, ev, EV_ABS, j, mt_state[jdx].val[i]);
+				init_event(dev, ev, EV_ABS, axis, *slot_value(dev, slot, axis));
 			}
-			*slot_value(dev, i, j) = mt_state[jdx].val[i];
 		}
 	}
+
+#undef AXISBIT
 
 	rc = 0;
 out:
