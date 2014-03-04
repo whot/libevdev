@@ -699,6 +699,13 @@ enum libevdev_read_status {
  * dropped after libevdev updates its internal state and event processing
  * continues as normal.
  *
+ * If a device has changed state without events being enqueued in libevdev,
+ * e.g. after changing the file descriptor, use the @ref
+ * LIBEVDEV_READ_FLAG_FORCE_SYNC flag. This triggers an internal sync of the
+ * device and libevdev_next_event() returns @ref LIBEVDEV_READ_STATUS_SYNC.
+ * Any state changes are available as events as described above. If
+ * @ref LIBEVDEV_READ_FLAG_FORCE_SYNC is set, the value of ev is undefined.
+ *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param flags Set of flags to determine behaviour. If @ref LIBEVDEV_READ_FLAG_NORMAL
  * is set, the next event is read in normal mode. If @ref LIBEVDEV_READ_FLAG_SYNC is
