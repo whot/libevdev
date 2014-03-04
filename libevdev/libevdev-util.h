@@ -28,6 +28,8 @@
 #include <string.h>
 #include "libevdev-int.h"
 
+#define unlikely(x) (__builtin_expect(!!(x),0))
+
 static inline bool
 startswith(const char *str, size_t len, const char *prefix, size_t plen)
 {
