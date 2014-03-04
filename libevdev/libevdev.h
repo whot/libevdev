@@ -695,7 +695,7 @@ enum libevdev_read_status {
  * have been synced.
  *
  * If a device needs to be synced by the caller but the caller does not call
- * with the @ref LIBEVDEV_READ_STATUS_SYNC flag set, all events from the diff are
+ * with the @ref LIBEVDEV_READ_FLAG_SYNC flag set, all events from the diff are
  * dropped after libevdev updates its internal state and event processing
  * continues as normal.
  *
