@@ -377,6 +377,11 @@ extern "C" {
  * device is not treated as multitouch device. No slot information is
  * available and the ABS_MT axis range for these devices is treated as all
  * other EV_ABS axes.
+ *
+ * Note that because of limitations in the kernel API, such fake multitouch
+ * devices can not be reliably synched after a SYN_DROPPED event.
+ * Affected are all axes from ABS_MT_SLOT + 1 through to ABS_MAX. The value
+ * returned for those axes is always 0.
  */
 
 /**

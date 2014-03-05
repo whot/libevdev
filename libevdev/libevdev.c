@@ -525,7 +525,8 @@ sync_abs_state(struct libevdev *dev)
 	for (i = ABS_X; i < ABS_CNT; i++) {
 		struct input_absinfo abs_info;
 
-		if (i >= ABS_MT_MIN && i <= ABS_MT_MAX)
+		if (dev->num_slots > -1 &&
+		    i >= ABS_MT_MIN && i <= ABS_MT_MAX)
 			continue;
 
 		if (!bit_is_set(dev->abs_bits, i))
@@ -662,8 +663,9 @@ sync_state(struct libevdev *dev)
 		rc = sync_sw_state(dev);
 	if (rc == 0 && libevdev_has_event_type(dev, EV_ABS))
 		rc = sync_abs_state(dev);
-	if (rc == 0 && libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT))
-		rc = sync_mt_state(dev, 1);
+	if (rc == 0 && dev->num_slots > -1 &&
+	    libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT))
+			rc = sync_mt_state(dev, 1);
 
 	dev->queue_nsync = queue_num_elements(dev);
 
