@@ -264,6 +264,7 @@ START_TEST(test_event_type_filtered)
 
 }
 END_TEST
+
 START_TEST(test_event_code_filtered)
 {
 	struct uinput_device* uidev;
@@ -345,6 +346,7 @@ START_TEST(test_has_event_pending)
 
 }
 END_TEST
+
 START_TEST(test_syn_delta_button)
 {
 	struct uinput_device* uidev;
@@ -874,7 +876,6 @@ START_TEST(test_event_values)
 
 }
 END_TEST
-
 
 START_TEST(test_event_values_invalid)
 {

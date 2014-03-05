@@ -66,7 +66,6 @@ is_debugger_attached(void)
 	return rc;
 }
 
-
 int main(int argc, char **argv)
 {
 	int failed;

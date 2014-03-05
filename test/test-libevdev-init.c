@@ -105,7 +105,6 @@ START_TEST(test_init_and_change_fd)
 }
 END_TEST
 
-
 static int log_fn_called = 0;
 static char *logdata = "test";
 static void logfunc(enum libevdev_log_priority priority,
@@ -447,7 +446,6 @@ START_TEST(test_clock_id_events)
 	close(fd);
 }
 END_TEST
-
 
 Suite *
 libevdev_init_test(void)

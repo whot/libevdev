@@ -456,8 +456,8 @@ START_TEST(test_invalid_mt_device)
 
 	uinput_device_free(uidev);
 	libevdev_free(dev);
-} END_TEST
-
+}
+END_TEST
 
 START_TEST(test_device_name)
 {
@@ -747,7 +747,6 @@ START_TEST(test_device_set_abs)
 	libevdev_free(dev);
 }
 END_TEST
-
 
 START_TEST(test_device_enable_bit)
 {
@@ -1133,6 +1132,7 @@ START_TEST(test_led_same)
 	uinput_device_free(uidev);
 }
 END_TEST
+
 Suite *
 libevdev_has_event_test(void)
 {
