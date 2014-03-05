@@ -1111,6 +1111,10 @@ int libevdev_get_event_value(const struct libevdev *dev, unsigned int type, unsi
  * event code is the value of the currently active slot. You should use
  * libevdev_set_slot_value() instead.
  *
+ * If the device supports ABS_MT_SLOT and the type is EV_ABS and the code is
+ * ABS_MT_SLOT, the value must be a positive number less then the number of
+ * slots on the device. Otherwise, libevdev_set_event_value() returns -1.
+ *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type for the code to query (EV_SYN, EV_REL, etc.)
  * @param code The event code to set the value for, one of ABS_X, LED_NUML, etc.
@@ -1118,7 +1122,8 @@ int libevdev_get_event_value(const struct libevdev *dev, unsigned int type, unsi
  *
  * @return 0 on success, or -1 on failure.
  * @retval -1 the device does not have the event type or code enabled, or the code is outside the
- * allowed limits for the given type, or the type cannot be set.
+ * allowed limits for the given type, or the type cannot be set, or the
+ * value is not permitted for the given code.
  *
  * @see libevdev_set_slot_value
  * @see libevdev_get_event_value
