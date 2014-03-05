@@ -809,6 +809,26 @@ read_more_events(struct libevdev *dev)
 	return 0;
 }
 
+/**
+ * Sanitize/modify events where needed.
+ * @return 0 if untouched, 1 if modified.
+ */
+static int
+sanitize_event(const struct libevdev *dev, struct input_event *ev)
+{
+	if (unlikely(dev->num_slots > -1 &&
+		     libevdev_event_is_code(ev, EV_ABS, ABS_MT_SLOT) &&
+		     ev->value >= dev->num_slots)) {
+		log_bug("Device %s received an invalid slot index %d."
+				"Capping to announced max slot number %d.\n",
+				dev->name, ev->value, dev->num_slots - 1);
+		ev->value = dev->num_slots - 1;
+		return 1;
+	}
+
+	return 0;
+}
+
 LIBEVDEV_EXPORT int
 libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event *ev)
 {
@@ -875,6 +895,7 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 		if (queue_shift(dev, ev) != 0)
 			return -EAGAIN;
 
+		sanitize_event(dev, ev);
 		update_state(dev, ev);
 
 	/* if we disabled a code, get the next event instead */
@@ -1066,6 +1087,9 @@ libevdev_set_event_value(struct libevdev *dev, unsigned int type, unsigned int c
 	struct input_event e;
 
 	if (!libevdev_has_event_type(dev, type) || !libevdev_has_event_code(dev, type, code))
+		return -1;
+
+	if (type == EV_ABS && code == ABS_MT_SLOT && value >= dev->num_slots && dev->num_slots > -1)
 		return -1;
 
 	e.type = type;
