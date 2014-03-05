@@ -551,9 +551,12 @@ out:
 static int
 sync_mt_state(struct libevdev *dev, int create_events)
 {
+	struct input_event *ev;
+	struct input_absinfo abs_info;
 	int rc;
 	int axis, slot;
 	int ioctl_success = 0;
+	int last_reported_slot = 0;
 	struct mt_state {
 		int code;
 		int val[MAX_SLOTS];
@@ -599,14 +602,18 @@ sync_mt_state(struct libevdev *dev, int create_events)
 		}
 	}
 
-	for (slot = 0; create_events && slot < min(dev->num_slots, MAX_SLOTS); slot++) {
-		struct input_event *ev;
+	if (!create_events) {
+		rc = 0;
+		goto out;
+	}
 
+	for (slot = 0; slot < min(dev->num_slots, MAX_SLOTS); slot++) {
 		if (!bit_is_set(slot_update, AXISBIT(slot, ABS_MT_SLOT)))
 			continue;
 
 		ev = queue_push(dev);
 		init_event(dev, ev, EV_ABS, ABS_MT_SLOT, slot);
+		last_reported_slot = slot;
 
 		for (axis = ABS_MT_MIN; axis <= ABS_MT_MAX; axis++) {
 			if (axis == ABS_MT_SLOT ||
@@ -618,6 +625,20 @@ sync_mt_state(struct libevdev *dev, int create_events)
 				init_event(dev, ev, EV_ABS, axis, *slot_value(dev, slot, axis));
 			}
 		}
+	}
+
+	/* add one last slot event to make sure the client is on the same
+	   slot as the kernel */
+
+	rc = ioctl(dev->fd, EVIOCGABS(ABS_MT_SLOT), &abs_info);
+	if (rc < 0)
+		goto out;
+
+	dev->current_slot = abs_info.value;
+
+	if (dev->current_slot != last_reported_slot) {
+		ev = queue_push(dev);
+		init_event(dev, ev, EV_ABS, ABS_MT_SLOT, dev->current_slot);
 	}
 
 #undef AXISBIT
