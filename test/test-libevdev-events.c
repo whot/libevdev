@@ -585,6 +585,93 @@ START_TEST(test_syn_delta_mt)
 }
 END_TEST
 
+START_TEST(test_syn_delta_mt_reset_slot)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev,
+			   last_slot_event = { .type = 0};
+	struct input_absinfo abs[6];
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+	abs[1].value = ABS_MT_POSITION_X;
+	abs[1].maximum = 1000;
+
+	abs[2].value = ABS_Y;
+	abs[2].maximum = 1000;
+	abs[3].value = ABS_MT_POSITION_Y;
+	abs[3].maximum = 1000;
+
+
+	abs[4].value = ABS_MT_SLOT;
+	abs[4].maximum = 1;
+	abs[5].value = ABS_MT_TRACKING_ID;
+	abs[5].minimum = -1;
+	abs[5].maximum = 2;
+
+	rc = test_create_abs_device(&uidev, &dev,
+				    6, abs,
+				    EV_SYN, SYN_REPORT,
+				    -1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 100);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 500);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 0);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 5);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 2);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_FORCE_SYNC, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+
+	do {
+		rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+		if (libevdev_event_is_code(&ev, EV_ABS, ABS_MT_SLOT))
+			last_slot_event = ev;
+	} while (rc != -EAGAIN);
+
+	ck_assert(libevdev_event_is_code(&last_slot_event, EV_ABS, ABS_MT_SLOT));
+	ck_assert_int_eq(last_slot_event.value, 0);
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 0);
+
+	last_slot_event.type = 0;
+
+	/* same thing again, this time swap the numbers */
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 0);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 100);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 500);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 5);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 2);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_FORCE_SYNC, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+
+	do {
+		rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+		if (libevdev_event_is_code(&ev, EV_ABS, ABS_MT_SLOT))
+			last_slot_event = ev;
+	} while (rc != -EAGAIN);
+
+	ck_assert(libevdev_event_is_code(&last_slot_event, EV_ABS, ABS_MT_SLOT));
+	ck_assert_int_eq(last_slot_event.value, 1);
+	ck_assert_int_eq(libevdev_get_current_slot(dev), 1);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_syn_delta_mt_too_many)
 {
 	struct uinput_device* uidev;
@@ -656,6 +743,11 @@ START_TEST(test_syn_delta_mt_too_many)
 		ck_assert_int_lt(slot, MAX_SLOTS);
 
 		rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev);
+
+		/* last MT_SLOT event is on its own */
+		if (libevdev_event_is_code(&ev, EV_SYN, SYN_REPORT))
+			break;
+
 		ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
 		ck_assert_int_eq(ev.type, EV_ABS);
 		ck_assert_int_eq(ev.code, ABS_MT_POSITION_X);
@@ -1593,6 +1685,7 @@ libevdev_events(void)
 	tcase_add_test(tc, test_syn_delta_abs);
 	tcase_add_test(tc, test_syn_delta_mt);
 	tcase_add_test(tc, test_syn_delta_mt_too_many);
+	tcase_add_test(tc, test_syn_delta_mt_reset_slot);
 	tcase_add_test(tc, test_syn_delta_led);
 	tcase_add_test(tc, test_syn_delta_sw);
 	tcase_add_test(tc, test_syn_delta_fake_mt);
