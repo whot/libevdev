@@ -377,6 +377,12 @@ extern "C" {
  * device is not treated as multitouch device. No slot information is
  * available and the ABS_MT axis range for these devices is treated as all
  * other EV_ABS axes.
+ *
+ * Note that because of limitations in the kernel API, such fake multitouch
+ * devices can not be reliably synched after a SYN_DROPPED event. libevdev
+ * ignores all ABS_MT axis values during the sync process and instead
+ * relies on the device to send the current axis value with the first event
+ * after SYN_DROPPED.
  */
 
 /**

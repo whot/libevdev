@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <libevdev-util.h>
 
 #include "test-common.h"
 
@@ -791,6 +792,86 @@ START_TEST(test_syn_delta_sw)
 }
 END_TEST
 
+START_TEST(test_syn_delta_fake_mt)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+	struct input_absinfo abs[] = {  { ABS_X, 0, 1000 },
+		{ ABS_Y, 0, 1000 },
+		{ ABS_MT_POSITION_X, 0, 1000 },
+		{ ABS_MT_POSITION_Y, 0, 1000 },
+		{ ABS_MT_SLOT - 1, 0, 2 }};
+		/* don't set ABS_MT_SLOT here, otherwise uinput will init
+		 * slots and the behavior is different to real devices with
+		 * such events */
+	unsigned long received[NLONGS(ABS_CNT)] = {0};
+
+	rc = test_create_abs_device(&uidev, &dev, 5, abs,
+			-1);
+	ck_assert_msg(rc == 0, "Failed to uinput device: %s", strerror(-rc));
+
+	/* first set of events */
+	uinput_device_event(uidev, EV_ABS, ABS_X, 200);
+	uinput_device_event(uidev, EV_ABS, ABS_Y, 400);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 100);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 500);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT - 1, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	/* second set of events */
+	uinput_device_event(uidev, EV_ABS, ABS_X, 201);
+	uinput_device_event(uidev, EV_ABS, ABS_Y, 401);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 101);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 501);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT - 1, 2);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_FORCE_SYNC, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+
+	while ((rc = libevdev_next_event(dev, LIBEVDEV_READ_STATUS_SYNC, &ev)) != -EAGAIN) {
+		if (ev.type != EV_ABS)
+			continue;
+
+		ck_assert(!bit_is_set(received, ev.code));
+
+		switch(ev.code) {
+			/* see comment below for ABS_MT_POSITION_X
+			 * and ABS_MT_POSITION_Y */
+			case ABS_MT_POSITION_X:
+			case ABS_MT_POSITION_Y:
+				ck_abort();
+				break;
+
+			case ABS_MT_SLOT - 1: ck_assert_int_eq(ev.value, 2); break;
+			case ABS_X: ck_assert_int_eq(ev.value, 201); break;
+			case ABS_Y: ck_assert_int_eq(ev.value, 401); break;
+			default:
+				ck_abort();
+		}
+
+		set_bit(received, ev.code);
+	}
+
+	/* Dont' expect ABS_MT values, they are ignored during the sync
+	 * process */
+	ck_assert(!bit_is_set(received, ABS_MT_POSITION_X));
+	ck_assert(!bit_is_set(received, ABS_MT_POSITION_Y));
+	ck_assert(bit_is_set(received, ABS_MT_SLOT - 1));
+	ck_assert(bit_is_set(received, ABS_X));
+	ck_assert(bit_is_set(received, ABS_Y));
+
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_ABS, ABS_X), 201);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_ABS, ABS_Y), 401);
+	ck_assert_int_eq(libevdev_get_event_value(dev, EV_ABS, ABS_MT_SLOT - 1), 2);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_skipped_sync)
 {
 	struct uinput_device* uidev;
@@ -1511,6 +1592,7 @@ libevdev_events(void)
 	tcase_add_test(tc, test_syn_delta_mt_too_many);
 	tcase_add_test(tc, test_syn_delta_led);
 	tcase_add_test(tc, test_syn_delta_sw);
+	tcase_add_test(tc, test_syn_delta_fake_mt);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("skipped syncs");
