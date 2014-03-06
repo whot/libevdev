@@ -884,6 +884,168 @@ START_TEST(test_syn_delta_sw)
 }
 END_TEST
 
+START_TEST(test_syn_delta_tracking_ids)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+	struct input_absinfo abs[6];
+	int i;
+	const int num_slots = 15;
+	int slot = -1;
+	unsigned long terminated[NLONGS(num_slots)];
+	unsigned long restarted[NLONGS(num_slots)];
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+	abs[1].value = ABS_MT_POSITION_X;
+	abs[1].maximum = 1000;
+
+	abs[2].value = ABS_Y;
+	abs[2].maximum = 1000;
+	abs[3].value = ABS_MT_POSITION_Y;
+	abs[3].maximum = 1000;
+
+	abs[4].value = ABS_MT_SLOT;
+	abs[4].maximum = num_slots - 1;
+
+	abs[5].minimum = -1;
+	abs[5].maximum = 255;
+	abs[5].value = ABS_MT_TRACKING_ID;
+
+	rc = test_create_abs_device(&uidev, &dev,
+				    6, abs,
+				    EV_SYN, SYN_REPORT,
+				    -1);
+	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+
+	/* Test the sync process to make sure we get touches terminated when
+	 * the tracking id changes:
+	 * 1) start a bunch of touch points
+	 * 2) read data into libevdev, make sure state is up-to-date
+	 * 3) change touchpoints
+	 * 3.1) change the tracking ID on some (indicating terminated and
+	 * re-started touchpoint)
+	 * 3.2) change the tracking ID to -1 on some (indicating termianted
+	 * touchpoint)
+	 * 3.3) just update the data on others
+	 * 4) force a sync on the device
+	 * 5) make sure we get the right tracking ID changes in the caller
+	 */
+
+	/* Start a bunch of touch points  */
+	for (i = num_slots; i >= 0; i--) {
+		uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, i);
+		uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, i);
+		uinput_device_event(uidev, EV_ABS, ABS_X, 100 + i);
+		uinput_device_event(uidev, EV_ABS, ABS_Y, 500 + i);
+		uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 100 + i);
+		uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 500 + i);
+		uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+		do {
+			rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+			ck_assert_int_ne(rc, LIBEVDEV_READ_STATUS_SYNC);
+		} while (rc >= 0);
+	}
+
+	/* we have a bunch of touches now, and libevdev knows it. Change all
+	 * touches */
+	for (i = num_slots; i >= 0; i--) {
+		uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, i);
+		if (i % 3 == 0) {
+			/* change some slots with a new tracking id */
+			uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, num_slots + i);
+			uinput_device_event(uidev, EV_ABS, ABS_X, 200 + i);
+			uinput_device_event(uidev, EV_ABS, ABS_Y, 700 + i);
+			uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 200 + i);
+			uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 700 + i);
+		} else if (i % 3 == 1) {
+			/* stop others */
+			uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, -1);
+		} else {
+			/* just update */
+			uinput_device_event(uidev, EV_ABS, ABS_X, 200 + i);
+			uinput_device_event(uidev, EV_ABS, ABS_Y, 700 + i);
+			uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 200 + i);
+			uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 700 + i);
+		}
+		uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	}
+
+	/* Force sync */
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_FORCE_SYNC, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+
+	/* now check for the right tracking IDs */
+	memset(terminated, 0, sizeof(terminated));
+	memset(restarted, 0, sizeof(restarted));
+	slot = -1;
+	while ((rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev)) != -EAGAIN) {
+		if (libevdev_event_is_code(&ev, EV_SYN, SYN_REPORT))
+			continue;
+
+		if (libevdev_event_is_code(&ev, EV_ABS, ABS_MT_SLOT)) {
+			slot = ev.value;
+			continue;
+		}
+
+		if (libevdev_event_is_code(&ev, EV_ABS, ABS_X) ||
+		    libevdev_event_is_code(&ev, EV_ABS, ABS_Y))
+			continue;
+
+		ck_assert_int_ne(slot, -1);
+
+		if (libevdev_event_is_code(&ev, EV_ABS, ABS_MT_TRACKING_ID)) {
+			if (slot % 3 == 0) {
+				if (!bit_is_set(terminated, slot)) {
+					ck_assert_int_eq(ev.value, -1);
+					set_bit(terminated, slot);
+				} else {
+					ck_assert_int_eq(ev.value, num_slots + slot);
+					set_bit(restarted, slot);
+				}
+			} else if (slot % 3 == 1) {
+				ck_assert(!bit_is_set(terminated, slot));
+				ck_assert_int_eq(ev.value, -1);
+				set_bit(terminated, slot);
+			} else
+				ck_abort();
+
+			continue;
+		}
+
+		switch(ev.code) {
+			case ABS_MT_POSITION_X:
+				ck_assert_int_eq(ev.value, 200 + slot);
+				break;
+			case ABS_MT_POSITION_Y:
+				ck_assert_int_eq(ev.value, 700 + slot);
+				break;
+			default:
+				ck_abort();
+		}
+	}
+
+	for (i = 0; i < num_slots; i++) {
+		if (i % 3 == 0) {
+			ck_assert(bit_is_set(terminated, i));
+			ck_assert(bit_is_set(restarted, i));
+		} else if (i % 3 == 1) {
+			ck_assert(bit_is_set(terminated, i));
+			ck_assert(!bit_is_set(restarted, i));
+		} else {
+			ck_assert(!bit_is_set(terminated, i));
+			ck_assert(!bit_is_set(restarted, i));
+		}
+	}
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_syn_delta_fake_mt)
 {
 	struct uinput_device* uidev;
@@ -1686,6 +1848,7 @@ libevdev_events(void)
 	tcase_add_test(tc, test_syn_delta_led);
 	tcase_add_test(tc, test_syn_delta_sw);
 	tcase_add_test(tc, test_syn_delta_fake_mt);
+	tcase_add_test(tc, test_syn_delta_tracking_ids);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("skipped syncs");
