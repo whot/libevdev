@@ -29,10 +29,8 @@
 #include <stdbool.h>
 #include <errno.h>
 #include "libevdev.h"
+#include "libevdev-util.h"
 
-#define LONG_BITS (sizeof(long) * 8)
-#define NLONGS(x) (((x) + LONG_BITS - 1) / LONG_BITS)
-#define ARRAY_LENGTH(a) (sizeof(a) / (sizeof((a)[0])))
 #define MAX_NAME 256
 #define MAX_SLOTS 60
 #define ABS_MT_MIN ABS_MT_SLOT
@@ -41,19 +39,6 @@
 #define LIBEVDEV_EXPORT __attribute__((visibility("default")))
 #define LIBEVDEV_PRINTF(_format, _args) __attribute__ ((format (printf, _format, _args)))
 #define ALIAS(_to) __attribute__((alias(#_to)))
-
-#undef min
-#undef max
-#define min(a,b) \
-		({ __typeof__ (a) _a = (a); \
-	          __typeof__ (b) _b = (b); \
-		_a > _b ? _b : _a; \
-		})
-#define max(a,b) \
-		({ __typeof__ (a) _a = (a); \
-	          __typeof__ (b) _b = (b); \
-		_a > _b ? _a : _b; \
-		})
 
 /**
  * Sync state machine:
@@ -279,5 +264,60 @@ queue_set_num_elements(struct libevdev *dev, size_t nelem)
 
 	return 0;
 }
+
+#define max_mask(uc, lc) \
+	case EV_##uc: \
+			*mask = dev->lc##_bits; \
+			max = libevdev_event_type_get_max(type); \
+		break;
+
+
+static inline int
+type_to_mask_const(const struct libevdev *dev, unsigned int type, const unsigned long **mask)
+{
+	int max;
+
+	switch(type) {
+		max_mask(ABS, abs);
+		max_mask(REL, rel);
+		max_mask(KEY, key);
+		max_mask(LED, led);
+		max_mask(MSC, msc);
+		max_mask(SW, sw);
+		max_mask(FF, ff);
+		max_mask(REP, rep);
+		max_mask(SND, snd);
+		default:
+		     max = -1;
+		     break;
+	}
+
+	return max;
+}
+
+static inline int
+type_to_mask(struct libevdev *dev, unsigned int type, unsigned long **mask)
+{
+	int max;
+
+	switch(type) {
+		max_mask(ABS, abs);
+		max_mask(REL, rel);
+		max_mask(KEY, key);
+		max_mask(LED, led);
+		max_mask(MSC, msc);
+		max_mask(SW, sw);
+		max_mask(FF, ff);
+		max_mask(REP, rep);
+		max_mask(SND, snd);
+		default:
+		     max = -1;
+		     break;
+	}
+
+	return max;
+}
+
+#undef max_mask
 #endif
 
