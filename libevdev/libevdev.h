@@ -707,7 +707,11 @@ enum libevdev_read_status {
  * If a device needs to be synced by the caller but the caller does not call
  * with the @ref LIBEVDEV_READ_FLAG_SYNC flag set, all events from the diff are
  * dropped after libevdev updates its internal state and event processing
- * continues as normal.
+ * continues as normal. Note that the current slot and the state of touch
+ * points may have updated during the SYN_DROPPED event, it is strongly
+ * recommended that a caller ignoring all sync events calls
+ * libevdev_get_current_slot() and checks the ABS_MT_TRACKING_ID values for
+ * all slots.
  *
  * If a device has changed state without events being enqueued in libevdev,
  * e.g. after changing the file descriptor, use the @ref
