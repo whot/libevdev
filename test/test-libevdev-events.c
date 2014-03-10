@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <libevdev-util.h>
+#include <libevdev/libevdev-util.h>
 
 #include "test-common.h"
 
