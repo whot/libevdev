@@ -24,7 +24,7 @@ AC_INIT([libevdev],
         [1.0.99.1],
         [https://bugs.freedesktop.org/enter_bug.cgi?product=libevdev],
         [libevdev],
-        [])
+        [http://freedesktop.org/wiki/Software/libevdev/])
 
 AC_CONFIG_SRCDIR([libevdev/libevdev.c])
 AC_CONFIG_HEADERS([config.h])
