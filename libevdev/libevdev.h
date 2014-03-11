@@ -471,6 +471,15 @@ extern "C" {
  */
 
 /**
+ * @page kernel_header Kernel header
+ *
+ * libevdev provides its own copy of the Linux kernel header file and
+ * compiles against the definitions define here. Event type and event code
+ * names, etc. are taken from the file below:
+ * @include linux/input.h
+ */
+
+/**
  * @defgroup init Initialization and setup
  *
  * Initialization, initial setup and file descriptor handling.
