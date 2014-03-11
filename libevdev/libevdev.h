@@ -52,7 +52,8 @@ extern "C" {
  * has been received and that the state of the device is different to what is
  * to be expected. It then provides the delta between the previous state and
  * the actual state of the device as a set of events. See
- * libevdev_next_event() for more information.
+ * libevdev_next_event() and @ref syn_dropped for more information on how
+ * SYN_DROPPED is handled.
  *
  * Signal safety
  * =============
@@ -154,6 +155,159 @@ extern "C" {
  * ==============
  * Please report bugs in the freedesktop.org bugzilla under the libevdev product:
  * https://bugs.freedesktop.org/enter_bug.cgi?product=libevdev
+ */
+
+/**
+ * @page syn_dropped SYN_DROPPED handling
+ *
+ * This page describes how libevdev handles SYN_DROPPED events.
+ *
+ * The kernel sends evdev events separated by an event of type EV_SYN and
+ * code SYN_REPORT. Such an event marks the end of a frame of hardware
+ * events. The number of events between SYN_REPORT events is arbitrary and
+ * depends on the hardware. And example event sequence may look like this:
+ * @code
+   EV_ABS   ABS_X        9
+   EV_ABS   ABS_Y        8
+   EV_SYN   SYN_REPORT   0
+   ------------------------
+   EV_ABS   ABS_X        10
+   EV_ABS   ABS_Y        10
+   EV_KEY   BTN_TOUCH    1
+   EV_SYN   SYN_REPORT   0
+   ------------------------
+   EV_ABS   ABS_X        11
+   EV_SYN   SYN_REPORT   0
+ * @endcode
+ *
+ * Events are handed to the client buffer as they appear, the kernel adjusts
+ * the buffer size to handle at least one full event. In the normal case,
+ * the client reads the event and the kernel can place the next event in the
+ * buffer. If the client is not fast enough, the kernel places an event of
+ * type EV_SYN and code SYN_DROPPED into the buffer, effectively notifying
+ * the client that some events were lost. The above example event sequence
+ * may look like this (note the missing/repeated events):
+ * @code
+   EV_ABS   ABS_X        9
+   EV_ABS   ABS_Y        8
+   EV_SYN   SYN_REPORT   0
+   ------------------------
+   EV_ABS   ABS_X        10
+   EV_ABS   ABS_Y        10
+   EV_SYN   SYN_DROPPED  0
+   EV_ABS   ABS_Y        15
+   EV_SYN   SYN_REPORT   0
+   ------------------------
+   EV_ABS   ABS_X        11
+   EV_KEY   BTN_TOUCH    0
+   EV_SYN   SYN_REPORT   0
+ * @endcode
+ *
+ * A SYN_DROPPED event may be recieved at any time in the event sequence.
+ * When a SYN_DROPPED event is received, the client must:
+ * * discard all events since the last SYN_REPORT
+ * * discard all events until including the next SYN_REPORT
+ * These event are part of incomplete event frames.
+ *
+ * The handling of the device after a SYN_DROPPED depends on the available
+ * event codes. For all event codes of type EV_REL, no handling is
+ * necessary, there is no state attached. For all event codes of type
+ * EV_KEY, EV_SW, EV_LED and EV_SND, the matching @ref ioctls retrieve the
+ * current state. The caller must then compare the last-known state to the
+ * retrieved state and handle the deltas accordingly.
+ * libevdev simplifies this approach: if the state of the device has
+ * changed, libevdev generates an event for each code with the new value and
+ * passes it to the caller during libevdev_next_event() if
+ * LIBEVDEV_READ_FLAG_SYNC is set.
+ *
+ * For events of type EV_ABS and an event code less than ABS_MT_SLOT, the
+ * handling of state changes is as described above. For events between
+ * ABS_MT_SLOT and ABS_MAX, the event handling differs.
+ * Slots are the vehicles to transport information for multiple simultaneous
+ * touchpoints on a device. Slots are re-used once a touchpoint has ended.
+ * The kernel sends an ABS_MT_SLOT event whenever the current slot
+ * changes; any event in the above axis range applies only to the currently
+ * active slot.
+ * Thus, an event sequence from a slot-capable device may look like this:
+ * @code
+   EV_ABS   ABS_MT_POSITION_Y   10
+   EV_ABS   ABS_MT_SLOT         1
+   EV_ABS   ABS_MT_POSITION_X   100
+   EV_ABS   ABS_MT_POSITION_Y   80
+   EV_SYN   SYN_REPORT          0
+ * @endcode
+ * Note the lack of ABS_MT_SLOT: the first ABS_MT_POSITION_Y applies to
+ * a slot opened previously, and is the only axis that changed for that
+ * slot. The touchpoint in slot 1 now has position 100/80.
+ * The kernel does not provide events if a value does not change, and does
+ * not send ABS_MT_SLOT events if the slot does not change, or none of the
+ * values within a slot changes. A client must thus keep the state for each
+ * slot.
+ *
+ * If a SYN_DROPPED is received,  the client must sync all slots
+ * individually and update its internal state. libevdev simplifies this by
+ * generating multiple events:
+ * * for each slot on the device, libevdev generates an
+ *   ABS_MT_SLOT event with the value set to the slot number
+ * * for each event code between ABS_MT_SLOT + 1 and ABS_MAX that changed
+ *   state for this slot, libevdev generates an event for the new state
+ * * libevdev sends a final ABS_MT_SLOT event for the current slot as
+ *   seen by the kernel
+ * * libevdev terminates this sequence with an EV_SYN SYN_REPORT event
+ *
+ * An example event sequence for such a sync may look like this:
+ * @code
+   EV_ABS   ABS_MT_SLOT         0
+   EV_ABS   ABS_MT_POSITION_Y   10
+   EV_ABS   ABS_MT_SLOT         1
+   EV_ABS   ABS_MT_POSITION_X   100
+   EV_ABS   ABS_MT_POSITION_Y   80
+   EV_ABS   ABS_MT_SLOT         2
+   EV_ABS   ABS_MT_POSITION_Y   8
+   EV_ABS   ABS_MT_PRESSURE     12
+   EV_ABS   ABS_MT_SLOT         1
+   EV_SYN   SYN_REPORT          0
+ * @endcode
+ * Note the terminating ABS_MT_SLOT event, this indicates that the kernel
+ * currently has slot 1 active.
+ *
+ * The event code ABS_MT_TRACKING_ID is used to denote the start and end of
+ * a touch point within a slot. An ABS_MT_TRACKING_ID of zero or greater
+ * denotes the start of a touchpoint, an ABS_MT_TRACKING_ID of -1 denotes
+ * the end of a touchpoint within this slot. During SYN_DROPPED, a touch
+ * point may have ended and re-started within a slot - a client must check
+ * the ABS_MT_TRACKING_ID. libevdev simplifies this by emulating extra
+ * events if the ABS_MT_TRACKING_ID has changed:
+ * * if the ABS_MT_TRACKING_ID was valid and is -1, libevdev enqueues an
+ *   ABS_MT_TRACKING_ID event with value -1.
+ * * if the ABS_MT_TRACKING_ID was -1 and is now a valid ID, libevdev
+ *   enqueues an ABS_MT_TRACKING_ID event with the current value.
+ * * if the ABS_MT_TRACKING_ID was a valid ID and is now a different valid
+ *   ID, libevev enqueues an ABS_MT_TRACKING_ID event with value -1 and
+ *   another ABS_MT_TRACKING_ID event with the new value.
+ * An example event sequence for such a sync may look like this:
+ * @code
+   EV_ABS   ABS_MT_SLOT         0
+   EV_ABS   ABS_MT_TRACKING_ID  -1
+   EV_ABS   ABS_MT_SLOT         2
+   EV_ABS   ABS_MT_TRACKING_ID  -1
+   EV_SYN   SYN_REPORT          0
+   ------------------------
+   EV_ABS   ABS_MT_SLOT         1
+   EV_ABS   ABS_MT_POSITION_X   100
+   EV_ABS   ABS_MT_POSITION_Y   80
+   EV_ABS   ABS_MT_SLOT         2
+   EV_ABS   ABS_MT_TRACKING_ID  45
+   EV_ABS   ABS_MT_POSITION_Y   8
+   EV_ABS   ABS_MT_PRESSURE     12
+   EV_ABS   ABS_MT_SLOT         1
+   EV_SYN   SYN_REPORT          0
+ * @endcode
+ * Note how the touchpoint in slot 0 was terminated, the touchpoint in slot
+ * 2 was terminated and then started with a new ABS_MT_TRACKING_ID. The touchpoint
+ * in slot 1 maintained the same ABS_MT_TRACKING_ID and only updated the
+ * coordinates. Slot 1 is the currently active slot.
+ *
  */
 
 /**
@@ -698,7 +852,9 @@ enum libevdev_read_status {
  * @ref LIBEVDEV_READ_FLAG_SYNC flag set, to get the set of events that make up the
  * device state delta. This function returns @ref LIBEVDEV_READ_STATUS_SYNC for
  * each event part of that delta, until it returns -EAGAIN once all events
- * have been synced.
+ * have been synced. For more details on what libevdev does to sync after a
+ * SYN_DROPPED event, see @ref syn_dropped.
+ *
  * @note The implementation of libevdev limits the maximum number of slots
  * that can be synched. If your device exceeds the number of slots
  * (currently 60), slot indices equal and above this maximum are ignored and
