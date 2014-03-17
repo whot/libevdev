@@ -913,6 +913,7 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 		   of the device too */
 		while (queue_shift(dev, &e) == 0) {
 			dev->queue_nsync--;
+			sanitize_event(dev, &e);
 			update_state(dev, &e);
 		}
 
