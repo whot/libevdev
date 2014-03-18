@@ -184,7 +184,7 @@ START_TEST(test_double_syn_dropped_event)
 	/* sneak in a button change event while we're not looking, this way
 	 * the sync queue contains 2 events: BTN_LEFT and SYN_REPORT. */
 	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 0);
-	read(pipefd[0], &ev, sizeof(ev));
+	ck_assert_int_eq(read(pipefd[0], &ev, sizeof(ev)), -1);
 
 	libevdev_change_fd(dev, uinput_device_get_fd(uidev));
 
