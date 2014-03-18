@@ -179,7 +179,8 @@ fetch_device_node(const char *path)
 	/* ndev should only ever be 1 */
 
 	for (i = 0; i < ndev; i++) {
-		asprintf(&devnode, "/dev/input/%s", namelist[i]->d_name);
+		if (!devnode && asprintf(&devnode, "/dev/input/%s", namelist[i]->d_name) == -1)
+			devnode = NULL;
 		free(namelist[i]);
 	}
 
