@@ -1078,7 +1078,7 @@ libevdev_has_event_type(const struct libevdev *dev, unsigned int type)
 LIBEVDEV_EXPORT int
 libevdev_has_event_code(const struct libevdev *dev, unsigned int type, unsigned int code)
 {
-	const unsigned long *mask;
+	const unsigned long *mask = NULL;
 	int max;
 
 	if (!libevdev_has_event_type(dev, type))
