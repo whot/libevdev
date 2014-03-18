@@ -1098,7 +1098,7 @@ libevdev_has_event_code(const struct libevdev *dev, unsigned int type, unsigned 
 LIBEVDEV_EXPORT int
 libevdev_get_event_value(const struct libevdev *dev, unsigned int type, unsigned int code)
 {
-	int value;
+	int value = 0;
 
 	if (!libevdev_has_event_type(dev, type) || !libevdev_has_event_code(dev, type, code))
 		return 0;
