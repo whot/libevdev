@@ -285,6 +285,7 @@ extern "C" {
  * * if the ABS_MT_TRACKING_ID was a valid ID and is now a different valid
  *   ID, libevev enqueues an ABS_MT_TRACKING_ID event with value -1 and
  *   another ABS_MT_TRACKING_ID event with the new value.
+ *
  * An example event sequence for such a sync may look like this:
  * @code
    EV_ABS   ABS_MT_SLOT         0
