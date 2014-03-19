@@ -309,6 +309,55 @@ extern "C" {
  * in slot 1 maintained the same ABS_MT_TRACKING_ID and only updated the
  * coordinates. Slot 1 is the currently active slot.
  *
+ * In the case of a SYN_DROPPED event, a touch point may be invisible to a
+ * client if it started after SYN_DROPPED and finished before the client
+ * handles events again. The below example shows an example event sequence
+ * and what libevdev sees in the case of a SYN_DROPPED event:
+ * @code
+
+             kernel                  |              userspace
+                                     |
+   EV_ABS   ABS_MT_SLOT         0    |    EV_ABS   ABS_MT_SLOT         0
+   EV_ABS   ABS_MT_TRACKING_ID  -1   |    EV_ABS   ABS_MT_TRACKING_ID  -1
+   EV_SYN   SYN_REPORT          0    |    EV_SYN   SYN_REPORT          0
+   ------------------------          |    ------------------------
+   EV_ABS   ABS_MT_TRACKING_ID  30   |
+   EV_ABS   ABS_MT_POSITION_X   100  |
+   EV_ABS   ABS_MT_POSITION_Y   80   |
+   EV_SYN   SYN_REPORT          0    |           SYN_DROPPED
+   ------------------------          |
+   EV_ABS   ABS_MT_TRACKING_ID  -1   |
+   EV_SYN   SYN_REPORT          0    |
+   ------------------------          |    ------------------------
+   EV_ABS   ABS_MT_SLOT         1    |    EV_ABS   ABS_MT_SLOT         1
+   EV_ABS   ABS_MT_POSITION_X   90   |    EV_ABS   ABS_MT_POSITION_X   90
+   EV_ABS   ABS_MT_POSITION_Y   10   |    EV_ABS   ABS_MT_POSITION_Y   10
+   EV_SYN   SYN_REPORT          0    |    EV_SYN   SYN_REPORT          0
+ * @endcode
+ * If such an event sequence occurs, libevdev will send all updated axes
+ * during the sync process. Axis events may thus be generated for devices
+ * without a currently valid ABS_MT_TRACKING_ID. Specifically for the above
+ * example, the client would receive the following event sequence:
+ * @code
+   EV_ABS   ABS_MT_SLOT         0       ← LIBEVDEV_READ_FLAG_NORMAL
+   EV_ABS   ABS_MT_TRACKING_ID  -1
+   EV_SYN   SYN_REPORT          0
+   ------------------------
+   EV_SYN   SYN_DROPPED         0       → LIBEVDEV_READ_STATUS_SYNC
+   ------------------------
+   EV_ABS   ABS_MT_POSITION_X   100     ← LIBEVDEV_READ_FLAG_SYNC
+   EV_ABS   ABS_MT_POSITION_Y   80
+   EV_SYN   SYN_REPORT          0
+   -----------------------------        → -EGAIN
+   EV_ABS   ABS_MT_SLOT         1       ← LIBEVDEV_READ_FLAG_NORMAL
+   EV_ABS   ABS_MT_POSITION_X   90
+   EV_ABS   ABS_MT_POSITION_Y   10
+   EV_SYN   SYN_REPORT          0
+   -------------------
+ * @endcode
+ * The axis events do not reflect the position of a current touch point, a
+ * client must take care not to generate a new touch point based on those
+ * updates.
  */
 
 /**
