@@ -909,7 +909,7 @@ START_TEST(test_syn_delta_tracking_ids)
 	abs[3].maximum = 1000;
 
 	abs[4].value = ABS_MT_SLOT;
-	abs[4].maximum = num_slots - 1;
+	abs[4].maximum = num_slots;
 
 	abs[5].minimum = -1;
 	abs[5].maximum = 255;
