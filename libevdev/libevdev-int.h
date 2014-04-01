@@ -32,7 +32,6 @@
 #include "libevdev-util.h"
 
 #define MAX_NAME 256
-#define MAX_SLOTS 60
 #define ABS_MT_MIN ABS_MT_SLOT
 #define ABS_MT_MAX ABS_MT_TOOL_Y
 #define ABS_MT_CNT (ABS_MT_MAX - ABS_MT_MIN + 1)
@@ -55,6 +54,11 @@ enum SyncState {
 	SYNC_NONE,
 	SYNC_NEEDED,
 	SYNC_IN_PROGRESS,
+};
+
+struct mt_sync_state {
+	int code;
+	int val[];
 };
 
 struct libevdev {
@@ -94,6 +98,15 @@ struct libevdev {
 	size_t queue_nsync; /**< number of sync events */
 
 	struct timeval last_event_time;
+
+	struct {
+		struct mt_sync_state *mt_state;
+		size_t mt_state_sz;		 /* in bytes */
+		unsigned long *slot_update;
+		size_t slot_update_sz;		 /* in bytes */
+		unsigned long *tracking_id_changes;
+		size_t tracking_id_changes_sz;	 /* in bytes */
+	} mt_sync;
 };
 
 struct logdata {

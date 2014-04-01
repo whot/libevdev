@@ -152,6 +152,9 @@ libevdev_reset(struct libevdev *dev)
 	free(dev->phys);
 	free(dev->uniq);
 	free(dev->mt_slot_vals);
+	free(dev->mt_sync.mt_state);
+	free(dev->mt_sync.tracking_id_changes);
+	free(dev->mt_sync.slot_update);
 	memset(dev, 0, sizeof(*dev));
 	dev->fd = -1;
 	dev->initialized = false;
@@ -389,8 +392,24 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 					goto out;
 				}
 				dev->current_slot = abs_info.value;
-			}
 
+				dev->mt_sync.mt_state_sz = sizeof(*dev->mt_sync.mt_state) +
+							   (dev->num_slots) * sizeof(int);
+				dev->mt_sync.mt_state = calloc(1, dev->mt_sync.mt_state_sz);
+
+				dev->mt_sync.tracking_id_changes_sz = NLONGS(dev->num_slots) * sizeof(long);
+				dev->mt_sync.tracking_id_changes = malloc(dev->mt_sync.tracking_id_changes_sz);
+
+				dev->mt_sync.slot_update_sz = NLONGS(dev->num_slots * ABS_MT_CNT) * sizeof(long);
+				dev->mt_sync.slot_update = malloc(dev->mt_sync.slot_update_sz);
+
+				if (!dev->mt_sync.tracking_id_changes ||
+				    !dev->mt_sync.slot_update ||
+				    !dev->mt_sync.mt_state) {
+					rc = -ENOMEM;
+					goto out;
+				}
+			}
 		}
 	}
 
@@ -556,13 +575,14 @@ sync_mt_state(struct libevdev *dev, int create_events)
 	int axis, slot;
 	int ioctl_success = 0;
 	int last_reported_slot = 0;
-	struct mt_state {
-		int code;
-		int val[MAX_SLOTS];
-	} mt_state;
-	unsigned long slot_update[NLONGS(MAX_SLOTS * ABS_MT_CNT)] = {0};
-	unsigned long tracking_id_changes[NLONGS(MAX_SLOTS)] = {0};
+	struct mt_sync_state *mt_state = dev->mt_sync.mt_state;
+	unsigned long *slot_update = dev->mt_sync.slot_update;
+	unsigned long *tracking_id_changes = dev->mt_sync.tracking_id_changes;
 	int need_tracking_id_changes = 0;
+
+	memset(dev->mt_sync.slot_update, 0, dev->mt_sync.slot_update_sz);
+	memset(dev->mt_sync.tracking_id_changes, 0,
+	       dev->mt_sync.tracking_id_changes_sz);
 
 #define AXISBIT(_slot, _axis) (_slot * ABS_MT_CNT + _axis - ABS_MT_MIN)
 
@@ -573,8 +593,8 @@ sync_mt_state(struct libevdev *dev, int create_events)
 		if (!libevdev_has_event_code(dev, EV_ABS, axis))
 			continue;
 
-		mt_state.code = axis;
-		rc = ioctl(dev->fd, EVIOCGMTSLOTS(sizeof(struct mt_state)), &mt_state);
+		mt_state->code = axis;
+		rc = ioctl(dev->fd, EVIOCGMTSLOTS(dev->mt_sync.mt_state_sz), mt_state);
 		if (rc < 0) {
 			/* if the first ioctl fails with -EINVAL, chances are the kernel
 			   doesn't support the ioctl. Simply continue */
@@ -586,19 +606,19 @@ sync_mt_state(struct libevdev *dev, int create_events)
 			if (ioctl_success == 0)
 				ioctl_success = 1;
 
-			for (slot = 0; slot < min(dev->num_slots, MAX_SLOTS); slot++) {
+			for (slot = 0; slot < dev->num_slots; slot++) {
 
-				if (*slot_value(dev, slot, axis) == mt_state.val[slot])
+				if (*slot_value(dev, slot, axis) == mt_state->val[slot])
 					continue;
 
 				if (axis == ABS_MT_TRACKING_ID &&
 				    *slot_value(dev, slot, axis) != -1 &&
-				    mt_state.val[slot] != -1) {
+				    mt_state->val[slot] != -1) {
 					set_bit(tracking_id_changes, slot);
 					need_tracking_id_changes = 1;
 				}
 
-				*slot_value(dev, slot, axis) = mt_state.val[slot];
+				*slot_value(dev, slot, axis) = mt_state->val[slot];
 
 				set_bit(slot_update, AXISBIT(slot, axis));
 				/* note that this slot has updates */
@@ -615,7 +635,7 @@ sync_mt_state(struct libevdev *dev, int create_events)
 	}
 
 	if (need_tracking_id_changes) {
-		for (slot = 0; slot < min(dev->num_slots, MAX_SLOTS); slot++) {
+		for (slot = 0; slot < dev->num_slots;  slot++) {
 			if (!bit_is_set(tracking_id_changes, slot))
 				continue;
 
@@ -631,7 +651,7 @@ sync_mt_state(struct libevdev *dev, int create_events)
 		init_event(dev, ev, EV_SYN, SYN_REPORT, 0);
 	}
 
-	for (slot = 0; slot < min(dev->num_slots, MAX_SLOTS); slot++) {
+	for (slot = 0; slot < dev->num_slots;  slot++) {
 		if (!bit_is_set(slot_update, AXISBIT(slot, ABS_MT_SLOT)))
 			continue;
 

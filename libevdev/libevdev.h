@@ -914,11 +914,6 @@ enum libevdev_read_status {
  * have been synced. For more details on what libevdev does to sync after a
  * SYN_DROPPED event, see @ref syn_dropped.
  *
- * @note The implementation of libevdev limits the maximum number of slots
- * that can be synched. If your device exceeds the number of slots
- * (currently 60), slot indices equal and above this maximum are ignored and
- * their value will not update until the next event in that slot.
- *
  * If a device needs to be synced by the caller but the caller does not call
  * with the @ref LIBEVDEV_READ_FLAG_SYNC flag set, all events from the diff are
  * dropped after libevdev updates its internal state and event processing
