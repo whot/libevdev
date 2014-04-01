@@ -395,7 +395,9 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	}
 
 	dev->fd = fd;
-	sync_mt_state(dev, 0);
+	if (!libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT - 1) &&
+	    libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT))
+	    sync_mt_state(dev, 0);
 
 	rc = init_event_queue(dev);
 	if (rc < 0) {
