@@ -36,6 +36,12 @@
 
 #define MAXEVENTS 64
 
+enum event_filter_status {
+	EVENT_FILTER_NONE,	/**< Event untouched by filters */
+	EVENT_FILTER_MODIFIED,	/**< Event was modified */
+	EVENT_FILTER_DISCARD,	/**< Discard current event */
+};
+
 static int sync_mt_state(struct libevdev *dev, int create_events);
 
 static inline int*
@@ -880,10 +886,11 @@ read_more_events(struct libevdev *dev)
 
 /**
  * Sanitize/modify events where needed.
- * @return 0 if untouched, 1 if modified.
  */
-static inline int
-sanitize_event(const struct libevdev *dev, struct input_event *ev)
+static inline enum event_filter_status
+sanitize_event(const struct libevdev *dev,
+	       struct input_event *ev,
+	       enum SyncState sync_state)
 {
 	if (unlikely(dev->num_slots > -1 &&
 		     libevdev_event_is_code(ev, EV_ABS, ABS_MT_SLOT) &&
@@ -892,16 +899,32 @@ sanitize_event(const struct libevdev *dev, struct input_event *ev)
 				"Capping to announced max slot number %d.\n",
 				dev->name, ev->value, dev->num_slots - 1);
 		ev->value = dev->num_slots - 1;
-		return 1;
+		return EVENT_FILTER_MODIFIED;
+
+	/* Drop any invalid tracking IDs, they are only supposed to go from
+	   N to -1 or from -1 to N. Never from -1 to -1, or N to M. Very
+	   unlikely to ever happen from a real device.
+	   */
+	} else if (unlikely(sync_state == SYNC_NONE &&
+			    dev->num_slots > -1 &&
+			    libevdev_event_is_code(ev, EV_ABS, ABS_MT_TRACKING_ID) &&
+			    ((ev->value == -1 &&
+			     *slot_value(dev, dev->current_slot, ABS_MT_TRACKING_ID) == -1) ||
+			     (ev->value != -1 &&
+			     *slot_value(dev, dev->current_slot, ABS_MT_TRACKING_ID) != -1)))) {
+		log_bug("Device \"%s\" received a double tracking ID %d in slot %d.\n",
+			dev->name, ev->value, dev->current_slot);
+		return EVENT_FILTER_DISCARD;
 	}
 
-	return 0;
+	return EVENT_FILTER_NONE;
 }
 
 LIBEVDEV_EXPORT int
 libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event *ev)
 {
 	int rc = LIBEVDEV_READ_STATUS_SUCCESS;
+	enum event_filter_status filter_status;
 
 	if (!dev->initialized) {
 		log_bug("device not initialized. call libevdev_set_fd() first\n");
@@ -934,8 +957,8 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 		   of the device too */
 		while (queue_shift(dev, &e) == 0) {
 			dev->queue_nsync--;
-			sanitize_event(dev, &e);
-			update_state(dev, &e);
+			if (sanitize_event(dev, &e, dev->sync_state) != EVENT_FILTER_DISCARD)
+				update_state(dev, &e);
 		}
 
 		dev->sync_state = SYNC_NONE;
@@ -965,11 +988,13 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 		if (queue_shift(dev, ev) != 0)
 			return -EAGAIN;
 
-		sanitize_event(dev, ev);
-		update_state(dev, ev);
+		filter_status = sanitize_event(dev, ev, dev->sync_state);
+		if (filter_status != EVENT_FILTER_DISCARD)
+			update_state(dev, ev);
 
 	/* if we disabled a code, get the next event instead */
-	} while(!libevdev_has_event_code(dev, ev->type, ev->code));
+	} while(filter_status == EVENT_FILTER_DISCARD ||
+		!libevdev_has_event_code(dev, ev->type, ev->code));
 
 	rc = LIBEVDEV_READ_STATUS_SUCCESS;
 	if (ev->type == EV_SYN && ev->code == SYN_DROPPED) {
@@ -1163,7 +1188,7 @@ libevdev_set_event_value(struct libevdev *dev, unsigned int type, unsigned int c
 	e.code = code;
 	e.value = value;
 
-	if (sanitize_event(dev, &e))
+	if (sanitize_event(dev, &e, SYNC_NONE) != EVENT_FILTER_NONE)
 		return -1;
 
 	switch(type) {

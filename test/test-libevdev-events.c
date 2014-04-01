@@ -1424,6 +1424,164 @@ START_TEST(test_mt_slot_ranges_invalid)
 }
 END_TEST
 
+START_TEST(test_mt_tracking_id_discard)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+	struct input_absinfo abs[6];
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+	abs[1].value = ABS_MT_POSITION_X;
+	abs[1].maximum = 1000;
+
+	abs[2].value = ABS_Y;
+	abs[2].maximum = 1000;
+	abs[3].value = ABS_MT_POSITION_Y;
+	abs[3].maximum = 1000;
+
+	abs[4].value = ABS_MT_SLOT;
+	abs[4].maximum = 10;
+	abs[5].value = ABS_MT_TRACKING_ID;
+	abs[5].maximum = 500;
+
+	rc = test_create_abs_device(&uidev, &dev,
+				    6, abs,
+				    EV_SYN, SYN_REPORT,
+				    -1);
+
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	/* second tracking ID on same slot */
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 2);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	libevdev_set_log_function(test_logfunc_ignore_error, NULL);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	ck_assert_int_eq(ev.type, EV_ABS);
+	ck_assert_int_eq(ev.code, ABS_MT_SLOT);
+	ck_assert_int_eq(ev.value, 1);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	ck_assert_int_eq(ev.type, EV_ABS);
+	ck_assert_int_eq(ev.code, ABS_MT_TRACKING_ID);
+	ck_assert_int_eq(ev.value, 1);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	ck_assert_int_eq(ev.type, EV_SYN);
+	ck_assert_int_eq(ev.code, SYN_REPORT);
+	ck_assert_int_eq(ev.value, 0);
+
+	/* expect tracking ID discarded */
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	ck_assert_int_eq(ev.type, EV_SYN);
+	ck_assert_int_eq(ev.code, SYN_REPORT);
+	ck_assert_int_eq(ev.value, 0);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
+START_TEST(test_mt_tracking_id_discard_neg_1)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+	struct input_absinfo abs[6];
+	int pipefd[2];
+	struct input_event events[] = {
+		{ .type = EV_ABS, .code = ABS_MT_TRACKING_ID, .value = -1 },
+		{ .type = EV_SYN, .code = SYN_REPORT, .value = 0 },
+	};
+
+	rc = pipe2(pipefd, O_NONBLOCK);
+	ck_assert_int_eq(rc, 0);
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+	abs[1].value = ABS_MT_POSITION_X;
+	abs[1].maximum = 1000;
+
+	abs[2].value = ABS_Y;
+	abs[2].maximum = 1000;
+	abs[3].value = ABS_MT_POSITION_Y;
+	abs[3].maximum = 1000;
+
+	abs[4].value = ABS_MT_SLOT;
+	abs[4].maximum = 10;
+	abs[5].value = ABS_MT_TRACKING_ID;
+	abs[5].maximum = 500;
+
+	rc = test_create_abs_device(&uidev, &dev,
+				    6, abs,
+				    EV_SYN, SYN_REPORT,
+				    -1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	while (libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev) != -EAGAIN)
+		;
+
+	libevdev_set_log_function(test_logfunc_ignore_error, NULL);
+
+	/* two -1 tracking ids, need to use the pipe here, the kernel will
+	   filter it otherwise */
+	libevdev_change_fd(dev, pipefd[0]);
+
+	rc = write(pipefd[1], events, sizeof(events));
+	ck_assert_int_eq(rc, sizeof(events));
+	rc = write(pipefd[1], events, sizeof(events));
+	ck_assert_int_eq(rc, sizeof(events));
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	ck_assert_int_eq(ev.type, EV_ABS);
+	ck_assert_int_eq(ev.code, ABS_MT_TRACKING_ID);
+	ck_assert_int_eq(ev.value, -1);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	ck_assert_int_eq(ev.type, EV_SYN);
+	ck_assert_int_eq(ev.code, SYN_REPORT);
+	ck_assert_int_eq(ev.value, 0);
+
+	/* expect second tracking ID discarded */
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	ck_assert_int_eq(ev.type, EV_SYN);
+	ck_assert_int_eq(ev.code, SYN_REPORT);
+	ck_assert_int_eq(ev.value, 0);
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_ev_rep_values)
 {
 	struct uinput_device* uidev;
@@ -1719,6 +1877,8 @@ libevdev_events(void)
 	tcase_add_test(tc, test_mt_event_values);
 	tcase_add_test(tc, test_mt_event_values_invalid);
 	tcase_add_test(tc, test_mt_slot_ranges_invalid);
+	tcase_add_test(tc, test_mt_tracking_id_discard);
+	tcase_add_test(tc, test_mt_tracking_id_discard_neg_1);
 	tcase_add_test(tc, test_ev_rep_values);
 	suite_add_tcase(s, tc);
 
