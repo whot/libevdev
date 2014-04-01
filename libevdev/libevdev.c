@@ -867,7 +867,7 @@ sanitize_event(const struct libevdev *dev, struct input_event *ev)
 	if (unlikely(dev->num_slots > -1 &&
 		     libevdev_event_is_code(ev, EV_ABS, ABS_MT_SLOT) &&
 		     (ev->value < 0 || ev->value >= dev->num_slots))) {
-		log_bug("Device %s received an invalid slot index %d."
+		log_bug("Device \"%s\" received an invalid slot index %d."
 				"Capping to announced max slot number %d.\n",
 				dev->name, ev->value, dev->num_slots - 1);
 		ev->value = dev->num_slots - 1;
