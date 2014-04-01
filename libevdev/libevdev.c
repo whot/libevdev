@@ -379,44 +379,47 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 				goto out;
 
 			dev->abs_info[i] = abs_info;
-
-			/* devices with ABS_MT_SLOT - 1 aren't MT devices,
-			   see the documentation for multitouch-related
-			   functions for more details */
-			if (i == ABS_MT_SLOT &&
-			    !libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT - 1)) {
-				dev->num_slots = abs_info.maximum + 1;
-				dev->mt_slot_vals = calloc(dev->num_slots * ABS_MT_CNT, sizeof(int));
-				if (!dev->mt_slot_vals) {
-					rc = -ENOMEM;
-					goto out;
-				}
-				dev->current_slot = abs_info.value;
-
-				dev->mt_sync.mt_state_sz = sizeof(*dev->mt_sync.mt_state) +
-							   (dev->num_slots) * sizeof(int);
-				dev->mt_sync.mt_state = calloc(1, dev->mt_sync.mt_state_sz);
-
-				dev->mt_sync.tracking_id_changes_sz = NLONGS(dev->num_slots) * sizeof(long);
-				dev->mt_sync.tracking_id_changes = malloc(dev->mt_sync.tracking_id_changes_sz);
-
-				dev->mt_sync.slot_update_sz = NLONGS(dev->num_slots * ABS_MT_CNT) * sizeof(long);
-				dev->mt_sync.slot_update = malloc(dev->mt_sync.slot_update_sz);
-
-				if (!dev->mt_sync.tracking_id_changes ||
-				    !dev->mt_sync.slot_update ||
-				    !dev->mt_sync.mt_state) {
-					rc = -ENOMEM;
-					goto out;
-				}
-			}
 		}
 	}
 
 	dev->fd = fd;
+
+	/* devices with ABS_MT_SLOT - 1 aren't MT devices,
+	   see the documentation for multitouch-related
+	   functions for more details */
 	if (!libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT - 1) &&
-	    libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT))
+	    libevdev_has_event_code(dev, EV_ABS, ABS_MT_SLOT)) {
+		const struct input_absinfo *abs_info;
+
+		abs_info = libevdev_get_abs_info(dev, ABS_MT_SLOT);
+
+		dev->num_slots = abs_info->maximum + 1;
+		dev->mt_slot_vals = calloc(dev->num_slots * ABS_MT_CNT, sizeof(int));
+		if (!dev->mt_slot_vals) {
+			rc = -ENOMEM;
+			goto out;
+		}
+		dev->current_slot = abs_info->value;
+
+		dev->mt_sync.mt_state_sz = sizeof(*dev->mt_sync.mt_state) +
+					   (dev->num_slots) * sizeof(int);
+		dev->mt_sync.mt_state = calloc(1, dev->mt_sync.mt_state_sz);
+
+		dev->mt_sync.tracking_id_changes_sz = NLONGS(dev->num_slots) * sizeof(long);
+		dev->mt_sync.tracking_id_changes = malloc(dev->mt_sync.tracking_id_changes_sz);
+
+		dev->mt_sync.slot_update_sz = NLONGS(dev->num_slots * ABS_MT_CNT) * sizeof(long);
+		dev->mt_sync.slot_update = malloc(dev->mt_sync.slot_update_sz);
+
+		if (!dev->mt_sync.tracking_id_changes ||
+		    !dev->mt_sync.slot_update ||
+		    !dev->mt_sync.mt_state) {
+			rc = -ENOMEM;
+			goto out;
+		}
+
 	    sync_mt_state(dev, 0);
+	}
 
 	rc = init_event_queue(dev);
 	if (rc < 0) {
