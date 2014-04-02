@@ -44,20 +44,17 @@ START_TEST(test_has_ev_bit)
 	while(*evbit != -1) {
 		struct uinput_device* uidev;
 		struct libevdev *dev;
-		int i, rc;
+		int i;
 
 		if (*evbit == EV_ABS) {
 			struct input_absinfo abs = { ABS_X, 0, 2, 0, 0, 0};
-			rc = test_create_abs_device(&uidev, &dev,
-						    1, &abs,
-						    -1);
+			test_create_abs_device(&uidev, &dev,
+					       1, &abs,
+					       -1);
 		} else
-			rc = test_create_device(&uidev, &dev,
-					*evbit, 0,
-					-1);
-		ck_assert_msg(rc == 0, "%s: Failed to create device with: %s",
-				libevdev_event_type_get_name(*evbit),
-				strerror(-rc));
+			test_create_device(&uidev, &dev,
+					   *evbit, 0,
+					   -1);
 
 		ck_assert_msg(libevdev_has_event_type(dev, EV_SYN), "for event type %d\n", *evbit);
 		ck_assert_msg(libevdev_has_event_type(dev, *evbit), "for event type %d\n", *evbit);
@@ -84,18 +81,16 @@ START_TEST(test_ev_bit_limits)
 	while(*evbit != -1) {
 		struct uinput_device* uidev;
 		struct libevdev *dev;
-		int rc;
 
 		if (*evbit == EV_ABS) {
 			struct input_absinfo abs = { ABS_X, 0, 2, 0, 0, 0};
-			rc = test_create_abs_device(&uidev, &dev,
-						    1, &abs,
-						    -1);
+			test_create_abs_device(&uidev, &dev,
+					       1, &abs,
+					       -1);
 		} else
-			rc = test_create_device(&uidev, &dev,
-						*evbit, 0,
-						-1);
-		ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+			test_create_device(&uidev, &dev,
+					   *evbit, 0,
+					   -1);
 
 		ck_assert_int_eq(libevdev_has_event_type(dev, EV_MAX + 1), 0);
 		ck_assert_int_eq(libevdev_has_event_type(dev, INT_MAX), 0);
@@ -116,7 +111,6 @@ START_TEST(test_event_codes)
 	while(*evbit != -1) {
 		struct uinput_device* uidev;
 		struct libevdev *dev;
-		int rc;
 		int code, max;
 		if (*evbit == EV_SYN) {
 			evbit++;
@@ -128,14 +122,13 @@ START_TEST(test_event_codes)
 		for (code = 1; code < max; code += 10) {
 			if (*evbit == EV_ABS) {
 				struct input_absinfo abs = { code, 0, 2, 0, 0, 0};
-				rc = test_create_abs_device(&uidev, &dev,
-							    1, &abs,
-							    -1);
+				test_create_abs_device(&uidev, &dev,
+						       1, &abs,
+						       -1);
 			} else
-				rc = test_create_device(&uidev, &dev,
-							*evbit, code,
-							-1);
-			ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+				test_create_device(&uidev, &dev,
+						   *evbit, code,
+						   -1);
 
 			ck_assert_msg(libevdev_has_event_type(dev, *evbit), "for event type %d\n", *evbit);
 			ck_assert_msg(libevdev_has_event_code(dev, *evbit, code), "for type %d code %d", *evbit, code);
@@ -159,7 +152,6 @@ START_TEST(test_event_code_limits)
 	while(*evbit != -1) {
 		struct uinput_device* uidev;
 		struct libevdev *dev;
-		int rc;
 		int max;
 
 		if (*evbit == EV_SYN) {
@@ -172,14 +164,13 @@ START_TEST(test_event_code_limits)
 
 		if (*evbit == EV_ABS) {
 			struct input_absinfo abs = { ABS_X, 0, 2, 0, 0, 0};
-			rc = test_create_abs_device(&uidev, &dev,
-						    1, &abs,
-						    -1);
+			test_create_abs_device(&uidev, &dev,
+					       1, &abs,
+					       -1);
 		} else
-			rc = test_create_device(&uidev, &dev,
-						*evbit, 1,
-						-1);
-		ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+			test_create_device(&uidev, &dev,
+					   *evbit, 1,
+					   -1);
 
 		ck_assert_msg(!libevdev_has_event_code(dev, *evbit, max), "for type %d code %d", *evbit, max);
 		ck_assert_msg(!libevdev_has_event_code(dev, *evbit, INT_MAX), "for type %d code %d", *evbit, INT_MAX);
@@ -234,13 +225,11 @@ START_TEST(test_ev_rep_values)
 {
 	struct uinput_device* uidev;
 	struct libevdev *dev;
-	int rc;
 	int delay = 0xab, period = 0xbc;
 
 	/* EV_REP is special, it's always fully set if set at all, can't set
 	   it through uinput though. */
-	rc = test_create_device(&uidev, &dev, -1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_device(&uidev, &dev, -1);
 
 	ck_assert_int_eq(libevdev_get_repeat(dev, NULL, NULL), -1);
 	ck_assert_int_eq(libevdev_get_repeat(dev, &delay, NULL), -1);
@@ -383,15 +372,13 @@ START_TEST(test_no_slots)
 {
 	struct uinput_device* uidev;
 	struct libevdev *dev;
-	int rc;
 	struct input_absinfo abs[] = {  { ABS_X, 0, 2 },
 					{ ABS_Y, 0, 2 },
 					{ ABS_MT_POSITION_X, 0, 2 },
 					{ ABS_MT_POSITION_Y, 0, 2 }};
 
-	rc = test_create_abs_device(&uidev, &dev, 4, abs,
-				    -1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_abs_device(&uidev, &dev, 4, abs,
+			       -1);
 
 	ck_assert_int_eq(libevdev_get_num_slots(dev), -1);
 	ck_assert_int_eq(libevdev_get_current_slot(dev), -1);
@@ -405,7 +392,6 @@ START_TEST(test_slot_number)
 {
 	struct uinput_device* uidev;
 	struct libevdev *dev;
-	int rc;
 	const int nslots = 4;
 	struct input_absinfo abs[] = {  { ABS_X, 0, 2 },
 					{ ABS_Y, 0, 2 },
@@ -413,9 +399,8 @@ START_TEST(test_slot_number)
 					{ ABS_MT_POSITION_Y, 0, 2 },
 					{ ABS_MT_SLOT, 0, nslots - 1 }};
 
-	rc = test_create_abs_device(&uidev, &dev, 5, abs,
-				    -1);
-	ck_assert_msg(rc == 0, "Failed to uinput device: %s", strerror(-rc));
+	test_create_abs_device(&uidev, &dev, 5, abs,
+			       -1);
 
 	ck_assert_int_eq(libevdev_get_num_slots(dev), nslots);
 	ck_assert_int_eq(libevdev_get_current_slot(dev), 0);
@@ -429,7 +414,6 @@ START_TEST(test_invalid_mt_device)
 {
 	struct uinput_device* uidev;
 	struct libevdev *dev;
-	int rc;
 	const int nslots = 4;
 	int value;
 	struct input_absinfo abs[] = {  { ABS_X, 0, 2 },
@@ -439,9 +423,8 @@ START_TEST(test_invalid_mt_device)
 		{ ABS_MT_SLOT - 1, 0, 2 },
 		{ ABS_MT_SLOT, 0, nslots - 1 }};
 
-	rc = test_create_abs_device(&uidev, &dev, 6, abs,
-			-1);
-	ck_assert_msg(rc == 0, "Failed to uinput device: %s", strerror(-rc));
+	test_create_abs_device(&uidev, &dev, 6, abs,
+			       -1);
 
 	ck_assert_int_eq(libevdev_get_num_slots(dev), -1);
 	ck_assert_int_eq(libevdev_get_current_slot(dev), -1);
@@ -691,7 +674,6 @@ START_TEST(test_device_set_abs)
 	struct libevdev *dev;
 	struct input_absinfo abs[2];
 	struct input_absinfo a;
-	int rc;
 
 	memset(abs, 0, sizeof(abs));
 	abs[0].value = ABS_X;
@@ -700,11 +682,10 @@ START_TEST(test_device_set_abs)
 	abs[1].value = ABS_Y;
 	abs[1].maximum = 1000;
 
-	rc = test_create_abs_device(&uidev, &dev,
-				    2, abs,
-				    EV_SYN,
-				    -1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_abs_device(&uidev, &dev,
+			       2, abs,
+			       EV_SYN,
+			       -1);
 
 	libevdev_set_abs_minimum(dev, ABS_X, 1);
 	libevdev_set_abs_minimum(dev, ABS_Y, 5);
@@ -755,9 +736,8 @@ START_TEST(test_device_enable_bit)
 	struct input_absinfo abs = {ABS_X, 0, 2};
 	int rc;
 
-	rc = test_create_abs_device(&uidev, &dev, 1, &abs,
-				    -1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_abs_device(&uidev, &dev, 1, &abs,
+			       -1);
 
 	ck_assert(!libevdev_has_event_code(dev, EV_ABS, ABS_Y));
 	ck_assert(!libevdev_has_event_type(dev, EV_REL));
@@ -798,11 +778,9 @@ START_TEST(test_device_enable_bit_invalid)
 	struct uinput_device* uidev;
 	struct libevdev *dev;
 	struct input_absinfo abs = {ABS_X, 0, 1};
-	int rc;
 
-	rc = test_create_abs_device(&uidev, &dev, 1, &abs,
-				    -1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_abs_device(&uidev, &dev, 1, &abs,
+			       -1);
 
 	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_ABS, ABS_MAX + 1, &abs), -1);
 	ck_assert_int_eq(libevdev_enable_event_code(dev, EV_MAX + 1, ABS_MAX + 1, &abs), -1);
@@ -827,12 +805,11 @@ START_TEST(test_device_disable_bit)
 	int rc;
 	struct input_absinfo abs[2] = {{ABS_X, 0, 1}, {ABS_Y, 0, 1}};
 
-	rc = test_create_abs_device(&uidev, &dev,
-				    2, abs,
-				    EV_REL, REL_X,
-				    EV_REL, REL_Y,
-				    -1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_abs_device(&uidev, &dev,
+			       2, abs,
+			       EV_REL, REL_X,
+			       EV_REL, REL_Y,
+			       -1);
 
 	ck_assert(libevdev_has_event_code(dev, EV_ABS, ABS_X));
 	ck_assert(libevdev_has_event_code(dev, EV_ABS, ABS_Y));
@@ -872,11 +849,9 @@ START_TEST(test_device_disable_bit_invalid)
 {
 	struct uinput_device* uidev;
 	struct libevdev *dev;
-	int rc;
 	struct input_absinfo abs = {ABS_X, 0, 1};
 
-	rc = test_create_abs_device(&uidev, &dev, 1, &abs, -1);
-	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+	test_create_abs_device(&uidev, &dev, 1, &abs, -1);
 
 	/* there's a gap between EV_SW and EV_LED */
 	ck_assert_int_eq(libevdev_disable_event_type(dev, EV_LED - 1), -1);
@@ -991,12 +966,11 @@ START_TEST(test_led_valid)
 	struct libevdev *dev;
 	int rc;
 
-	rc = test_create_device(&uidev, &dev,
-				EV_LED, LED_NUML,
-				EV_LED, LED_CAPSL,
-				EV_LED, LED_COMPOSE,
-				-1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_device(&uidev, &dev,
+			   EV_LED, LED_NUML,
+			   EV_LED, LED_CAPSL,
+			   EV_LED, LED_COMPOSE,
+			   -1);
 
 	rc = libevdev_kernel_set_led_value(dev, LED_NUML, LIBEVDEV_LED_ON);
 	ck_assert_int_eq(rc, 0);
@@ -1046,12 +1020,11 @@ START_TEST(test_led_invalid)
 	struct libevdev *dev;
 	int rc;
 
-	rc = test_create_device(&uidev, &dev,
-				EV_LED, LED_NUML,
-				EV_LED, LED_CAPSL,
-				EV_LED, LED_COMPOSE,
-				-1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_device(&uidev, &dev,
+			   EV_LED, LED_NUML,
+			   EV_LED, LED_CAPSL,
+			   EV_LED, LED_COMPOSE,
+			   -1);
 
 	rc = libevdev_kernel_set_led_value(dev, LED_MAX + 1, LIBEVDEV_LED_ON);
 	ck_assert_int_eq(rc, -EINVAL);
@@ -1089,12 +1062,11 @@ START_TEST(test_led_same)
 	struct libevdev *dev;
 	int rc;
 
-	rc = test_create_device(&uidev, &dev,
-				EV_LED, LED_NUML,
-				EV_LED, LED_CAPSL,
-				EV_LED, LED_COMPOSE,
-				-1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_device(&uidev, &dev,
+			   EV_LED, LED_NUML,
+			   EV_LED, LED_CAPSL,
+			   EV_LED, LED_COMPOSE,
+			   -1);
 
 	rc = libevdev_kernel_set_led_values(dev,
 					    LED_NUML, LIBEVDEV_LED_OFF,

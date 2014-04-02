@@ -43,16 +43,15 @@ START_TEST(test_revoke)
 	struct input_event ev1, ev2;
 	int dev_fd;
 
-	rc = test_create_device(&uidev, &dev,
-				EV_SYN, SYN_REPORT,
-				EV_REL, REL_X,
-				EV_REL, REL_Y,
-				EV_REL, REL_WHEEL,
-				EV_KEY, BTN_LEFT,
-				EV_KEY, BTN_MIDDLE,
-				EV_KEY, BTN_RIGHT,
-				-1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_device(&uidev, &dev,
+			   EV_SYN, SYN_REPORT,
+			   EV_REL, REL_X,
+			   EV_REL, REL_Y,
+			   EV_REL, REL_WHEEL,
+			   EV_KEY, BTN_LEFT,
+			   EV_KEY, BTN_MIDDLE,
+			   EV_KEY, BTN_RIGHT,
+			   -1);
 
 	fd = open(uinput_device_get_devnode(uidev), O_RDONLY|O_NONBLOCK);
 	ck_assert_int_gt(fd, -1);
@@ -103,16 +102,15 @@ START_TEST(test_revoke_invalid)
 	int rc;
 	int dev_fd;
 
-	rc = test_create_device(&uidev, &dev,
-				EV_SYN, SYN_REPORT,
-				EV_REL, REL_X,
-				EV_REL, REL_Y,
-				EV_REL, REL_WHEEL,
-				EV_KEY, BTN_LEFT,
-				EV_KEY, BTN_MIDDLE,
-				EV_KEY, BTN_RIGHT,
-				-1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_device(&uidev, &dev,
+			   EV_SYN, SYN_REPORT,
+			   EV_REL, REL_X,
+			   EV_REL, REL_Y,
+			   EV_REL, REL_WHEEL,
+			   EV_KEY, BTN_LEFT,
+			   EV_KEY, BTN_MIDDLE,
+			   EV_KEY, BTN_RIGHT,
+			   -1);
 
 	dev_fd = libevdev_get_fd(dev);
 	ck_assert_int_ge(dev_fd, 0);
@@ -132,16 +130,15 @@ START_TEST(test_revoke_fail_after)
 	struct libevdev *dev, *dev2 = NULL;
 	int rc, fd;
 
-	rc = test_create_device(&uidev, &dev,
-				EV_SYN, SYN_REPORT,
-				EV_REL, REL_X,
-				EV_REL, REL_Y,
-				EV_REL, REL_WHEEL,
-				EV_KEY, BTN_LEFT,
-				EV_KEY, BTN_MIDDLE,
-				EV_KEY, BTN_RIGHT,
-				-1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_device(&uidev, &dev,
+			   EV_SYN, SYN_REPORT,
+			   EV_REL, REL_X,
+			   EV_REL, REL_Y,
+			   EV_REL, REL_WHEEL,
+			   EV_KEY, BTN_LEFT,
+			   EV_KEY, BTN_MIDDLE,
+			   EV_KEY, BTN_RIGHT,
+			   -1);
 
 	fd = open(uinput_device_get_devnode(uidev), O_RDONLY|O_NONBLOCK);
 	ck_assert_int_gt(fd, -1);

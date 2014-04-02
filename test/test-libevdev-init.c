@@ -316,16 +316,15 @@ START_TEST(test_device_grab)
 	struct libevdev *dev;
 	int rc;
 
-	rc = test_create_device(&uidev, &dev,
-				EV_SYN, SYN_REPORT,
-				EV_REL, REL_X,
-				EV_REL, REL_Y,
-				EV_REL, REL_WHEEL,
-				EV_KEY, BTN_LEFT,
-				EV_KEY, BTN_MIDDLE,
-				EV_KEY, BTN_RIGHT,
-				-1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_device(&uidev, &dev,
+			   EV_SYN, SYN_REPORT,
+			   EV_REL, REL_X,
+			   EV_REL, REL_Y,
+			   EV_REL, REL_WHEEL,
+			   EV_KEY, BTN_LEFT,
+			   EV_KEY, BTN_MIDDLE,
+			   EV_KEY, BTN_RIGHT,
+			   -1);
 
 	libevdev_set_log_function(test_logfunc_ignore_error, NULL);
 	rc = libevdev_grab(dev, 0);
@@ -354,16 +353,15 @@ START_TEST(test_set_clock_id)
 	struct libevdev *dev;
 	int rc;
 
-	rc = test_create_device(&uidev, &dev,
-				EV_SYN, SYN_REPORT,
-				EV_REL, REL_X,
-				EV_REL, REL_Y,
-				EV_REL, REL_WHEEL,
-				EV_KEY, BTN_LEFT,
-				EV_KEY, BTN_MIDDLE,
-				EV_KEY, BTN_RIGHT,
-				-1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_device(&uidev, &dev,
+			   EV_SYN, SYN_REPORT,
+			   EV_REL, REL_X,
+			   EV_REL, REL_Y,
+			   EV_REL, REL_WHEEL,
+			   EV_KEY, BTN_LEFT,
+			   EV_KEY, BTN_MIDDLE,
+			   EV_KEY, BTN_RIGHT,
+			   -1);
 
 	rc = libevdev_set_clock_id(dev, CLOCK_REALTIME);
 	ck_assert_int_eq(rc, 0);
@@ -389,16 +387,15 @@ START_TEST(test_clock_id_events)
 	struct timespec t1_mono, t2_mono;
 	int64_t t1, t2;
 
-	rc = test_create_device(&uidev, &dev,
-				EV_SYN, SYN_REPORT,
-				EV_REL, REL_X,
-				EV_REL, REL_Y,
-				EV_REL, REL_WHEEL,
-				EV_KEY, BTN_LEFT,
-				EV_KEY, BTN_MIDDLE,
-				EV_KEY, BTN_RIGHT,
-				-1);
-	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
+	test_create_device(&uidev, &dev,
+			   EV_SYN, SYN_REPORT,
+			   EV_REL, REL_X,
+			   EV_REL, REL_Y,
+			   EV_REL, REL_WHEEL,
+			   EV_KEY, BTN_LEFT,
+			   EV_KEY, BTN_MIDDLE,
+			   EV_KEY, BTN_RIGHT,
+			   -1);
 
 	fd = open(uinput_device_get_devnode(uidev), O_RDONLY);
 	ck_assert_int_gt(fd, -1);
