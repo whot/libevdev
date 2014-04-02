@@ -129,7 +129,7 @@ END_TEST
 START_TEST(test_revoke_fail_after)
 {
 	struct uinput_device* uidev;
-	struct libevdev *dev, *dev2;
+	struct libevdev *dev, *dev2 = NULL;
 	int rc, fd;
 
 	rc = test_create_device(&uidev, &dev,
@@ -159,7 +159,6 @@ START_TEST(test_revoke_fail_after)
 out:
 	uinput_device_free(uidev);
 	libevdev_free(dev);
-	libevdev_free(dev2);
 	close(fd);
 }
 END_TEST
