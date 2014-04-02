@@ -571,7 +571,6 @@ sync_mt_state(struct libevdev *dev, int create_events)
 		if (!libevdev_has_event_code(dev, EV_ABS, axis))
 			continue;
 
-		memset(&mt_state, 0, sizeof(mt_state));
 		mt_state.code = axis;
 		rc = ioctl(dev->fd, EVIOCGMTSLOTS(sizeof(struct mt_state)), &mt_state);
 		if (rc < 0) {
