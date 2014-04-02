@@ -47,9 +47,7 @@ test_kernel_SOURCES = \
 		      test-kernel.c \
 		      $(common_sources)
 test_kernel_CFLAGS = -I$(top_srcdir)
-test_kernel_LDADD = \
-		    $(CHECK_LIBS) \
-		    $(top_builddir)/libevdev/libevdev.la
+test_kernel_LDADD = $(CHECK_LIBS)
 
 if GCOV_ENABLED
 
