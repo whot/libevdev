@@ -200,11 +200,8 @@ libevdev_free(struct libevdev *dev)
 	if (!dev)
 		return;
 
-	free(dev->name);
-	free(dev->phys);
-	free(dev->uniq);
-	free(dev->mt_slot_vals);
 	queue_free(dev);
+	libevdev_reset(dev);
 	free(dev);
 }
 
