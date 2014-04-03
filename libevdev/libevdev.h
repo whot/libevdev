@@ -151,6 +151,29 @@ extern "C" {
  * libevdev is licensed under the
  * [X11 license](http://cgit.freedesktop.org/libevdev/tree/COPYING).
  *
+ * Debugging events
+ * ================
+ * libevdev checks the LIBEVDEV_LOG_EVENTS environment variable during
+ * libevdev_set_fd() and libevdev_change_fd(). If set to "error", "info", or
+ * "debug", all events are logged with the respective priority before they
+ * are passed to the client. This is useful to check event sequences that
+ * happen before a specific bug in the higher layers of the stack
+ *
+ * To debug specific devices only, the event node may be provided as a
+ * comma-separated list after the priority:
+ * LIBEVDEV_LOG_EVENTS="error:event0,event5,event3" logs all events from the
+ * devices with the given /dev/input/event nodes. This requires that the
+ * libevdev process is able to iterate and stat each file in the /dev/input
+ * directory. An invalid value of the variable or unsuccessful attempt to
+ * initialize logging for a device will be logged as error. Debugging is
+ * disabled (for this device, if appropriate), otherwise libevdev continues
+ * normally.
+ *
+ * Events logged by libevdev are likely to end up in public bug reports. For
+ * this reason key event codes obfuscated to protect accidental leakage of
+ * private information. Key codes between KEY_ESC up to including
+ * KEY_COMPOSE are always logged as "OBFUSCATED".
+ *
  * Reporting bugs
  * ==============
  * Please report bugs in the freedesktop.org bugzilla under the libevdev product:

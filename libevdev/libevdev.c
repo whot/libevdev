@@ -21,13 +21,16 @@
  */
 
 #include <config.h>
+#include <dirent.h>
 #include <errno.h>
+#include <limits.h>
 #include <poll.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <sys/stat.h>
 
 #include "libevdev.h"
 #include "libevdev-int.h"
@@ -43,6 +46,32 @@ enum event_filter_status {
 };
 
 static int sync_mt_state(struct libevdev *dev, int create_events);
+
+static inline void
+log_event(struct libevdev *dev, int flags, const struct input_event *ev)
+{
+	const char *mode;
+	const char *type, *code;
+
+	if (dev->debug.priority == 0)
+		return;
+
+	if (flags & LIBEVDEV_READ_FLAG_SYNC)
+		mode = "S";
+	else if (flags & LIBEVDEV_READ_FLAG_NORMAL)
+		mode = "N";
+	else
+		mode = "I";
+
+	type = libevdev_event_type_get_name(ev->type);
+	if (ev->type == EV_KEY && ev->code < KEY_STOP)
+		code = "OBFUSCATED";
+	else
+		code = libevdev_event_code_get_name(ev->type, ev->code);
+
+	log_msg_cond(dev->debug.priority, "%s: EVENT(%s): %s %s %d\n",
+		     dev->debug.device_node, mode, type, code, ev->value);
+}
 
 static inline int*
 slot_value(const struct libevdev *dev, int slot, int axis)
@@ -161,6 +190,7 @@ libevdev_reset(struct libevdev *dev)
 	free(dev->mt_sync.mt_state);
 	free(dev->mt_sync.tracking_id_changes);
 	free(dev->mt_sync.slot_update);
+	free(dev->debug.device_node);
 	memset(dev, 0, sizeof(*dev));
 	dev->fd = -1;
 	dev->initialized = false;
@@ -235,6 +265,105 @@ libevdev_get_log_priority(void)
 	return log_data.priority;
 }
 
+static char*
+get_event_node(struct libevdev *dev)
+{
+	const int EVDEV_MINOR_BASE = 64;
+	char *node;
+	struct stat st;
+	int minor;
+
+	if (fstat(dev->fd, &st) == -1)
+		return NULL;
+
+	minor = minor(st.st_rdev) - EVDEV_MINOR_BASE;
+
+	if (asprintf(&node, "event%d", minor) < 6)
+		return NULL;
+
+	return node;
+}
+
+/* Enable event logging for this device if LIBEVDEV_LOG_EVENTS is set */
+static void
+enable_event_logging(struct libevdev *dev)
+{
+	enum libevdev_log_priority pri = 0;
+	const char *env;
+	char *tmp = NULL,
+	     *tok = NULL, *saveptr;
+	char *node;
+
+	env = getenv("LIBEVDEV_LOG_EVENTS");
+	if (!env || strlen(env) == 0)
+		return;
+
+	if (dev->debug.device_node) {
+		free(dev->debug.device_node);
+		dev->debug.device_node = NULL;
+	}
+
+	node = get_event_node(dev);
+	if (!node) {
+		log_error("Failed to get device node for debugging\n");
+		return;
+	}
+
+	if (strncmp(env, "error", 5) == 0) {
+		pri = LIBEVDEV_LOG_ERROR;
+		tok = (char*)&env[5];
+	} else if (strncmp(env, "info", 4) == 0) {
+		pri = LIBEVDEV_LOG_INFO;
+		tok = (char*)&env[4];
+	} else if (strncmp(env, "debug", 5) == 0) {
+		pri = LIBEVDEV_LOG_DEBUG;
+		tok = (char*)&env[5];
+	}
+
+	if (tok && *tok == '\0') {
+		dev->debug.device_node = node;
+		dev->debug.priority = pri;
+		return;
+	}
+
+	if (!tok || *tok != ':') {
+		log_error("Invalid value '%s' for $LIBEVDEV_LOG_EVENTS\n", env);
+		free(node);
+		return;
+	}
+
+	tmp = strdup(tok + 1);
+	if (!tmp) {
+		log_error("Allocation failure, debugging disabled\n");
+		free(node);
+		return;
+	}
+
+	tok = strtok_r(tmp, ",", &saveptr);
+
+	while (tok) {
+		if (strncmp(tok, "event", 5) != 0) {
+			log_error("Invalid value '%s' for $LIBEVDEV_LOG_EVENTS\n", env);
+			break;
+		}
+
+		if (strcmp(tok, node) == 0) {
+			dev->debug.device_node = node;
+			dev->debug.priority = pri;
+			break;
+		}
+
+		tok = strtok_r(NULL, ",", &saveptr);
+	}
+
+	free(tmp);
+
+	if (!dev->debug.device_node)
+		free(node);
+
+	return;
+}
+
 LIBEVDEV_EXPORT int
 libevdev_change_fd(struct libevdev *dev, int fd)
 {
@@ -242,7 +371,11 @@ libevdev_change_fd(struct libevdev *dev, int fd)
 		log_bug("device not initialized. call libevdev_set_fd() first\n");
 		return -1;
 	}
+
 	dev->fd = fd;
+
+	enable_event_logging(dev);
+
 	return 0;
 }
 
@@ -389,6 +522,8 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	}
 
 	dev->fd = fd;
+
+	enable_event_logging(dev);
 
 	/* devices with ABS_MT_SLOT - 1 aren't MT devices,
 	   see the documentation for multitouch-related
@@ -975,6 +1110,9 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 		   of the device too */
 		while (queue_shift(dev, &e) == 0) {
 			dev->queue_nsync--;
+
+			log_event(dev, 0, ev);
+
 			if (sanitize_event(dev, &e, dev->sync_state) != EVENT_FILTER_DISCARD)
 				update_state(dev, &e);
 		}
@@ -1005,6 +1143,8 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 
 		if (queue_shift(dev, ev) != 0)
 			return -EAGAIN;
+
+		log_event(dev, flags, ev);
 
 		filter_status = sanitize_event(dev, ev, dev->sync_state);
 		if (filter_status != EVENT_FILTER_DISCARD)

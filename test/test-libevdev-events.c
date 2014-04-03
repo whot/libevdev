@@ -25,7 +25,9 @@
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <libevdev/libevdev-util.h>
 
 #include "test-common.h"
@@ -1973,6 +1975,273 @@ START_TEST(test_event_mt_value_setters_current_slot)
 }
 END_TEST
 
+struct debug_log_data {
+	enum libevdev_log_priority priority;
+	char *expect_token;
+	char *dont_expect_token;
+	int logged;
+};
+
+void debug_log_func(enum libevdev_log_priority priority,
+		    void *data,
+		    const char *file, int line,
+		    const char *func,
+		    const char *format, va_list args)
+{
+	struct debug_log_data *debug_data = data;
+	char msg[1024];
+
+	ck_assert_int_eq(debug_data->priority, priority);
+
+	vsnprintf(msg, sizeof(msg), format, args);
+
+	if (debug_data->expect_token)
+		ck_assert(strstr(msg, debug_data->expect_token) != NULL);
+
+	if (debug_data->dont_expect_token)
+		ck_assert(strstr(msg, debug_data->dont_expect_token) == NULL);
+
+	debug_data->logged++;
+}
+
+START_TEST(test_event_log)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	const char *oldenv;
+	struct input_event ev;
+
+	struct debug_log_data debug_log_data;
+
+	oldenv = getenv("LIBEVDEV_LOG_EVENTS");
+	setenv("LIBEVDEV_LOG_EVENTS", "error", 1);
+
+	debug_log_data.priority = LIBEVDEV_LOG_ERROR;
+	debug_log_data.dont_expect_token = NULL;
+	debug_log_data.logged = 0;
+	libevdev_set_log_function(debug_log_func, &debug_log_data);
+
+	test_create_device(&uidev, &dev,
+			   EV_REL, REL_X,
+			   EV_REL, REL_Y,
+			   EV_KEY, BTN_LEFT,
+			   EV_KEY, KEY_A,
+			   EV_KEY, KEY_STOP,
+			   -1);
+
+	uinput_device_event(uidev, EV_REL, REL_X, 1);
+	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	debug_log_data.expect_token = "EV_REL";
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+
+	debug_log_data.expect_token = "EV_KEY";
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+
+	debug_log_data.expect_token = "EV_SYN";
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+
+	uinput_device_event(uidev, EV_KEY, KEY_A, 1);
+	uinput_device_event(uidev, EV_KEY, KEY_STOP, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	debug_log_data.expect_token = "OBFUSCATED";
+	debug_log_data.dont_expect_token = "KEY_A";
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+
+	debug_log_data.expect_token = "KEY_STOP";
+	debug_log_data.dont_expect_token = "OBFUSCATED";
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+
+	debug_log_data.expect_token = "EV_SYN";
+	debug_log_data.dont_expect_token = NULL;
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+
+	ck_assert_int_eq(debug_log_data.logged, 6);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+
+	if (oldenv)
+		setenv("LIBEVDEV_LOG_EVENTS", oldenv, 1);
+	else
+		unsetenv("LIBEVDEV_LOG_EVENTS");
+}
+END_TEST
+
+START_TEST(test_event_log_per_device)
+{
+	struct uinput_device *uidev1, *uidev2;
+	struct libevdev *dev1, *dev2;
+	const char *oldenv;
+	char env[1024];
+	struct input_event ev;
+	int rc;
+	int fd;
+	const char *node1, *node2;
+
+	struct debug_log_data debug_log_data;
+
+	oldenv = getenv("LIBEVDEV_LOG_EVENTS");
+
+	rc = uinput_device_new_with_events(&uidev1,
+					   TEST_DEVICE_NAME, DEFAULT_IDS,
+					   EV_SYN, SYN_REPORT,
+					   EV_REL, REL_X,
+					   EV_REL, REL_Y,
+					   EV_REL, REL_WHEEL,
+					   EV_KEY, BTN_LEFT,
+					   EV_KEY, BTN_MIDDLE,
+					   EV_KEY, BTN_RIGHT,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+	rc = uinput_device_new_with_events(&uidev2,
+					   TEST_DEVICE_NAME " 2", DEFAULT_IDS,
+					   EV_SYN, SYN_REPORT,
+					   EV_REL, REL_X,
+					   EV_REL, REL_Y,
+					   EV_REL, REL_WHEEL,
+					   EV_KEY, BTN_LEFT,
+					   EV_KEY, BTN_MIDDLE,
+					   EV_KEY, BTN_RIGHT,
+					   -1);
+	ck_assert_msg(rc == 0, "Failed to create uinput device: %s", strerror(-rc));
+
+	node1 = strrchr(uinput_device_get_devnode(uidev1), '/') + 1;
+	node2 = strrchr(uinput_device_get_devnode(uidev2), '/') + 1;
+
+	sprintf(env, "error:%s", node2);
+	setenv("LIBEVDEV_LOG_EVENTS", env, 1);
+
+	fd = uinput_device_get_fd(uidev1);
+	fcntl(fd, F_SETFL, O_NONBLOCK);
+	rc = libevdev_new_from_fd(fd, &dev1);
+	ck_assert_int_eq(rc, 0);
+
+	fd = uinput_device_get_fd(uidev2);
+	fcntl(fd, F_SETFL, O_NONBLOCK);
+	rc = libevdev_new_from_fd(fd, &dev2);
+	ck_assert_int_eq(rc, 0);
+
+	/* check with the trailing : otherwise we may find event1 in
+	 * event13, etc. */
+	debug_log_data.dont_expect_token = alloca(strlen(node1) + 2);
+	ck_assert(debug_log_data.dont_expect_token != NULL);
+	sprintf(debug_log_data.dont_expect_token, "%s:", node1);
+
+	debug_log_data.expect_token = alloca(strlen(node2) + 2);
+	ck_assert(debug_log_data.dont_expect_token != NULL);
+	sprintf(debug_log_data.expect_token, "%s:", node2);
+
+	debug_log_data.priority = LIBEVDEV_LOG_ERROR;
+	debug_log_data.logged = 0;
+	libevdev_set_log_function(debug_log_func, &debug_log_data);
+
+	uinput_device_event(uidev1, EV_REL, REL_X, 1);
+	uinput_device_event(uidev1, EV_KEY, BTN_LEFT, 1);
+	uinput_device_event(uidev1, EV_SYN, SYN_REPORT, 0);
+
+	uinput_device_event(uidev2, EV_REL, REL_X, 1);
+	uinput_device_event(uidev2, EV_KEY, BTN_LEFT, 1);
+	uinput_device_event(uidev2, EV_SYN, SYN_REPORT, 0);
+
+	while (libevdev_next_event(dev1, LIBEVDEV_READ_FLAG_NORMAL, &ev) != -EAGAIN &&
+	       libevdev_next_event(dev2, LIBEVDEV_READ_FLAG_NORMAL, &ev) != -EAGAIN)
+		;
+
+	ck_assert_int_eq(debug_log_data.logged, 3);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+	uinput_device_free(uidev1);
+	uinput_device_free(uidev2);
+	libevdev_free(dev1);
+	libevdev_free(dev2);
+
+	if (oldenv)
+		setenv("LIBEVDEV_LOG_EVENTS", oldenv, 1);
+	else
+		unsetenv("LIBEVDEV_LOG_EVENTS");
+}
+END_TEST
+
+void event_debug_log_error_func(enum libevdev_log_priority priority,
+				void *data,
+				const char *file, int line,
+				const char *func,
+				const char *format, va_list args)
+{
+	int *called = data;
+	(*called)++;
+}
+
+static void
+test_log_env_setting(const char *env, int is_error)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	struct input_event ev;
+	int error_func_called = 0;
+
+	setenv("LIBEVDEV_LOG_EVENTS", env, 1);
+
+	libevdev_set_log_function(event_debug_log_error_func, &error_func_called);
+
+	test_create_device(&uidev, &dev,
+			   EV_REL, REL_X,
+			   EV_REL, REL_Y,
+			   EV_KEY, BTN_LEFT,
+			   EV_KEY, KEY_A,
+			   EV_KEY, KEY_STOP,
+			   -1);
+
+	uinput_device_event(uidev, EV_REL, REL_X, 1);
+	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+
+	ck_assert_int_eq(error_func_called, is_error);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+
+START_TEST(test_event_log_invalid_setting)
+{
+	const char *oldenv = getenv("LIBEVDEV_LOG_EVENTS");
+	enum libevdev_log_priority old = libevdev_get_log_priority();
+
+	libevdev_set_log_priority(LIBEVDEV_LOG_ERROR);
+
+	test_log_env_setting("", 0);
+	test_log_env_setting("foo", 1);
+	test_log_env_setting("debug:foo", 1);
+	test_log_env_setting("debug:event0", 0);
+	test_log_env_setting("debug:eventbanana", 0);
+	test_log_env_setting("debug:event0,event1", 0);
+	test_log_env_setting("debug:event0,", 0);
+	test_log_env_setting("debug:,event0,", 0);
+	test_log_env_setting("debug:/event0,", 1);
+	test_log_env_setting("debug:,,", 0);
+	test_log_env_setting("debug,", 1);
+
+	if (oldenv)
+		setenv("LIBEVDEV_LOG_EVENTS", oldenv, 1);
+	else
+		unsetenv("LIBEVDEV_LOG_EVENTS");
+
+	libevdev_set_log_priority(old);
+}
+END_TEST
+
 Suite *
 libevdev_events(void)
 {
@@ -2022,6 +2291,12 @@ libevdev_events(void)
 	tcase_add_test(tc, test_event_mt_value_setters);
 	tcase_add_test(tc, test_event_mt_value_setters_invalid);
 	tcase_add_test(tc, test_event_mt_value_setters_current_slot);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("event debug logging");
+	tcase_add_test(tc, test_event_log);
+	tcase_add_test(tc, test_event_log_per_device);
+	tcase_add_test(tc, test_event_log_invalid_setting);
 	suite_add_tcase(s, tc);
 
 	return s;

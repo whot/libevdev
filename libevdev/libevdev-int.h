@@ -107,6 +107,11 @@ struct libevdev {
 		unsigned long *tracking_id_changes;
 		size_t tracking_id_changes_sz;	 /* in bytes */
 	} mt_sync;
+
+	struct {
+		char *device_node;
+		enum libevdev_log_priority priority;
+	} debug;
 };
 
 struct logdata {
