@@ -118,6 +118,9 @@ static void logfunc(enum libevdev_log_priority priority,
 START_TEST(test_log_init)
 {
 	struct libevdev *dev = NULL;
+	enum libevdev_log_priority old;
+
+	old = libevdev_get_log_priority();
 
 	libevdev_set_log_priority(LIBEVDEV_LOG_DEBUG);
 
@@ -147,6 +150,8 @@ START_TEST(test_log_init)
 	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
 
 	log_fn_called = 0;
+
+	libevdev_set_log_priority(old);
 }
 END_TEST
 
@@ -159,6 +164,9 @@ END_TEST
 START_TEST(test_log_set_get_priority)
 {
 	enum libevdev_log_priority pri;
+	enum libevdev_log_priority old;
+
+	old = libevdev_get_log_priority();
 
 	pri = LIBEVDEV_LOG_DEBUG;
 	libevdev_set_log_priority(pri);
@@ -181,12 +189,17 @@ START_TEST(test_log_set_get_priority)
 	pri = LIBEVDEV_LOG_ERROR - 1;
 	libevdev_set_log_priority(pri);
 	ck_assert_int_eq(libevdev_get_log_priority(), pri);
+
+	libevdev_set_log_priority(old);
 }
 END_TEST
 
 START_TEST(test_log_priority)
 {
 	struct libevdev *dev = NULL;
+	enum libevdev_log_priority old;
+
+	old = libevdev_get_log_priority();
 
 	libevdev_set_log_function(logfunc, logdata);
 
@@ -216,6 +229,8 @@ START_TEST(test_log_priority)
 	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
 
 	log_fn_called = 0;
+
+	libevdev_set_log_priority(old);
 }
 END_TEST
 
