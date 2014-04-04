@@ -1639,6 +1639,10 @@ int libevdev_disable_event_type(struct libevdev *dev, unsigned int type);
  * This is a local modification only affecting only this representation of
  * this device.
  *
+ * If this function is called with a type of EV_ABS and EV_REP on a device
+ * that already has the given event code enabled, the values in data
+ * overwrite the previous values.
+ *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type to enable (EV_ABS, EV_KEY, ...)
  * @param code The event code to enable (ABS_X, REL_X, etc.)
