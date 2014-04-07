@@ -165,7 +165,7 @@ extern "C" {
  * The kernel sends evdev events separated by an event of type EV_SYN and
  * code SYN_REPORT. Such an event marks the end of a frame of hardware
  * events. The number of events between SYN_REPORT events is arbitrary and
- * depends on the hardware. And example event sequence may look like this:
+ * depends on the hardware. An example event sequence may look like this:
  * @code
    EV_ABS   ABS_X        9
    EV_ABS   ABS_Y        8
@@ -218,7 +218,7 @@ extern "C" {
  * libevdev simplifies this approach: if the state of the device has
  * changed, libevdev generates an event for each code with the new value and
  * passes it to the caller during libevdev_next_event() if
- * LIBEVDEV_READ_FLAG_SYNC is set.
+ * @ref LIBEVDEV_READ_FLAG_SYNC is set.
  *
  * For events of type EV_ABS and an event code less than ABS_MT_SLOT, the
  * handling of state changes is as described above. For events between
