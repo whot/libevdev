@@ -927,6 +927,139 @@ START_TEST(test_syn_delta_tracking_ids)
 }
 END_TEST
 
+START_TEST(test_syn_delta_late_sync)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+	struct input_absinfo abs[6];
+	int i, slot;
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+	abs[1].value = ABS_MT_POSITION_X;
+	abs[1].maximum = 1000;
+
+	abs[2].value = ABS_Y;
+	abs[2].maximum = 1000;
+	abs[3].value = ABS_MT_POSITION_Y;
+	abs[3].maximum = 1000;
+
+	abs[4].value = ABS_MT_SLOT;
+	abs[4].maximum = 1;
+
+	abs[5].minimum = -1;
+	abs[5].maximum = 255;
+	abs[5].value = ABS_MT_TRACKING_ID;
+
+	test_create_abs_device(&uidev, &dev,
+			       6, abs,
+			       EV_SYN, SYN_REPORT,
+			       -1);
+
+	/* emulate a touch down */
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 0);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 1);
+	uinput_device_event(uidev, EV_ABS, ABS_X, 100);
+	uinput_device_event(uidev, EV_ABS, ABS_Y, 500);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 100);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 500);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	do {
+		rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+		ck_assert_int_ne(rc, LIBEVDEV_READ_STATUS_SYNC);
+	} while (rc >= 0);
+
+	/* force enough events to trigger a SYN_DROPPED */
+	for (i = 0; i < 100; i++) {
+		uinput_device_event(uidev, EV_ABS, ABS_X, 100 + i);
+		uinput_device_event(uidev, EV_ABS, ABS_Y, 500 + i);
+		uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 100 + i);
+		uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 500 + i);
+		uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	}
+
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SYNC);
+
+	/* trigger the tracking ID change after getting the SYN_DROPPED */
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 0);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, -1);
+	uinput_device_event(uidev, EV_ABS, ABS_X, 200);
+	uinput_device_event(uidev, EV_ABS, ABS_Y, 600);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 200);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 600);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	slot = 0;
+
+	/* Now sync the device, expect the data to be equal to the last event*/
+	while ((rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev)) != -EAGAIN) {
+		if (ev.type == EV_SYN)
+			continue;
+
+		ck_assert_int_eq(ev.type, EV_ABS);
+		switch(ev.code) {
+			case ABS_MT_SLOT:
+				slot = 0;
+				break;
+			case ABS_MT_TRACKING_ID:
+				if (slot == 0)
+					ck_assert_int_eq(ev.value, -1);
+				break;
+			case ABS_X:
+			case ABS_MT_POSITION_X:
+				ck_assert_int_eq(ev.value, 200);
+				break;
+			case ABS_Y:
+			case ABS_MT_POSITION_Y:
+				ck_assert_int_eq(ev.value, 600);
+				break;
+		}
+	}
+
+	/* And a new tracking ID */
+	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 0);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 2);
+	uinput_device_event(uidev, EV_ABS, ABS_X, 201);
+	uinput_device_event(uidev, EV_ABS, ABS_Y, 601);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_X, 201);
+	uinput_device_event(uidev, EV_ABS, ABS_MT_POSITION_Y, 601);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+
+	while ((rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev)) != -EAGAIN) {
+		ck_assert_int_ne(rc, LIBEVDEV_READ_STATUS_SYNC);
+
+		if (ev.type == EV_SYN)
+			continue;
+
+		ck_assert_int_eq(ev.type, EV_ABS);
+
+		switch(ev.code) {
+			case ABS_MT_SLOT:
+				ck_assert_int_eq(ev.value, 0);
+				break;
+			case ABS_MT_TRACKING_ID:
+				ck_assert_int_eq(ev.value, 2);
+				break;
+			case ABS_X:
+			case ABS_MT_POSITION_X:
+				ck_assert_int_eq(ev.value, 201);
+				break;
+			case ABS_Y:
+			case ABS_MT_POSITION_Y:
+				ck_assert_int_eq(ev.value, 601);
+				break;
+		}
+	}
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_syn_delta_fake_mt)
 {
 	struct uinput_device* uidev;
@@ -1863,6 +1996,7 @@ libevdev_events(void)
 	tcase_add_test(tc, test_syn_delta_sw);
 	tcase_add_test(tc, test_syn_delta_fake_mt);
 	tcase_add_test(tc, test_syn_delta_tracking_ids);
+	tcase_add_test(tc, test_syn_delta_late_sync);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("skipped syncs");

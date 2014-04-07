@@ -367,6 +367,51 @@ extern "C" {
  * The axis events do not reflect the position of a current touch point, a
  * client must take care not to generate a new touch point based on those
  * updates.
+ *
+ * Discarding events before synchronizing
+ * =====================================
+ *
+ * The kernel implements the client buffer as a ring buffer. SYN_DROPPED
+ * events are handled when the buffer is full and a new event is received
+ * from a device. All existing events are discarded, a SYN_DROPPED is added
+ * to the buffer followed by the actual device event. Further events will be
+ * appended to the buffer until it is either read by the client, or filled
+ * again, at which point the sequence repeats.
+ *
+ * When the client reads the buffer, the buffer will thus always consist of
+ * exactly one SYN_DROPPED event followed by an unspecified number of real
+ * events. The data the ioctls return is the current state of the device,
+ * i.e. the state after all these events have been processed. For example,
+ * assume the buffer contains the following sequence:
+ *
+ * @code
+   EV_SYN   SYN_DROPPED
+   EV_ABS   ABS_X               1
+   EV_SYN   SYN_REPORT          0
+   EV_ABS   ABS_X               2
+   EV_SYN   SYN_REPORT          0
+   EV_ABS   ABS_X               3
+   EV_SYN   SYN_REPORT          0
+   EV_ABS   ABS_X               4
+   EV_SYN   SYN_REPORT          0
+   EV_ABS   ABS_X               5
+   EV_SYN   SYN_REPORT          0
+   EV_ABS   ABS_X               6
+   EV_SYN   SYN_REPORT          0
+ * @endcode
+ * An ioctl at any time in this sequence will return a value of 6 for ABS_X.
+ *
+ * libevdev discards all events after a SYN_DROPPED to ensure the events
+ * during @ref LIBEVDEV_READ_FLAG_SYNC represent the last known state of the
+ * device. This loses some granularity of the events especially as the time
+ * between the SYN_DROPPED and the sync process increases. It does however
+ * avoid spurious cursor movements. In the above example, the event sequence
+ * by libevdev is:
+ * @code
+   EV_SYN   SYN_DROPPED
+   EV_ABS   ABS_X               6
+   EV_SYN   SYN_REPORT          0
+   @endcode
  */
 
 /**
