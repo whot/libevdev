@@ -162,6 +162,9 @@ extern "C" {
  *
  * This page describes how libevdev handles SYN_DROPPED events.
  *
+ * Receiving SYN_DROPPED events
+ * ============================
+ *
  * The kernel sends evdev events separated by an event of type EV_SYN and
  * code SYN_REPORT. Such an event marks the end of a frame of hardware
  * events. The number of events between SYN_REPORT events is arbitrary and
@@ -208,6 +211,9 @@ extern "C" {
  * * discard all events since the last SYN_REPORT
  * * discard all events until including the next SYN_REPORT
  * These event are part of incomplete event frames.
+ *
+ * Synchronizing the state of the device
+ * =====================================
  *
  * The handling of the device after a SYN_DROPPED depends on the available
  * event codes. For all event codes of type EV_REL, no handling is
@@ -270,6 +276,9 @@ extern "C" {
  * @endcode
  * Note the terminating ABS_MT_SLOT event, this indicates that the kernel
  * currently has slot 1 active.
+ *
+ * Synchronizing ABS_MT_TRACKING_ID
+ * ================================
  *
  * The event code ABS_MT_TRACKING_ID is used to denote the start and end of
  * a touch point within a slot. An ABS_MT_TRACKING_ID of zero or greater
