@@ -726,32 +726,50 @@ read_more_events(struct libevdev *dev)
 	return 0;
 }
 
+static inline void
+drain_events(struct libevdev *dev)
+{
+	int rc;
+	size_t nelem;
+	int iterations = 0;
+	const int max_iterations = 8; /* EVDEV_BUF_PACKETS in
+					 kernel/drivers/input/evedev.c */
+
+	queue_shift_multiple(dev, queue_num_elements(dev), NULL);
+
+	do {
+		rc = read_more_events(dev);
+		if (rc == -EAGAIN)
+			return;
+
+		if (rc < 0) {
+			log_error("Failed to drain events before sync.\n");
+			return;
+		}
+
+		nelem = queue_num_elements(dev);
+		queue_shift_multiple(dev, nelem, NULL);
+	} while (iterations++ < max_iterations && nelem >= queue_size(dev));
+
+	/* Our buffer should be roughly the same or bigger than the kernel
+	   buffer in most cases, so we usually don't expect to recurse. If
+	   we do, make sure we stop after max_iterations and proceed with
+	   what we have.  This could happen if events queue up faster than
+	   we can drain them.
+	 */
+	if (iterations >= max_iterations)
+		log_info("Unable to drain events, buffer size mismatch.\n");
+}
+
 static int
 sync_state(struct libevdev *dev)
 {
-	int i;
 	int rc = 0;
 	struct input_event *ev;
 
-	/* FIXME: if we have events in the queue after the SYN_DROPPED (which was
-	   queue[0]) we need to shift this backwards. Except that chances are that the
-	   queue may be either full or too full to prepend all the events needed for
-	   SYNC_IN_PROGRESS.
-
-	   so we search for the last sync event in the queue and drop everything before
-	   including that event and rely on the kernel to tell us the right value for that
-	   bitfield during the sync process.
-	 */
-
-	for (i = queue_num_elements(dev) - 1; i >= 0; i--) {
-		struct input_event e = {{0,0}, 0, 0, 0};
-		queue_peek(dev, i, &e);
-		if (e.type == EV_SYN)
-			break;
-	}
-
-	if (i > 0)
-		queue_shift_multiple(dev, i + 1, NULL);
+	 /* see section "Discarding events before synchronizing" in
+	  * libevdev/libevdev.h */
+	drain_events(dev);
 
 	if (libevdev_has_event_type(dev, EV_KEY))
 		rc = sync_key_state(dev);
