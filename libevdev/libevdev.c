@@ -93,7 +93,7 @@ init_event_queue(struct libevdev *dev)
 		nevents += num_mt_axes * (nslots - 1);
 	}
 
-	return queue_alloc(dev, min(MIN_QUEUE_SIZE, nevents * 2));
+	return queue_alloc(dev, max(MIN_QUEUE_SIZE, nevents * 2));
 }
 
 static void
