@@ -702,6 +702,31 @@ out:
 }
 
 static int
+read_more_events(struct libevdev *dev)
+{
+	int free_elem;
+	int len;
+	struct input_event *next;
+
+	free_elem = queue_num_free_elements(dev);
+	if (free_elem <= 0)
+		return 0;
+
+	next = queue_next_element(dev);
+	len = read(dev->fd, next, free_elem * sizeof(struct input_event));
+	if (len < 0) {
+		return -errno;
+	} else if (len > 0 && len % sizeof(struct input_event) != 0)
+		return -EINVAL;
+	else if (len > 0) {
+		int nev = len/sizeof(struct input_event);
+		queue_set_num_elements(dev, queue_num_elements(dev) + nev);
+	}
+
+	return 0;
+}
+
+static int
 sync_state(struct libevdev *dev)
 {
 	int i;
@@ -857,31 +882,6 @@ update_state(struct libevdev *dev, const struct input_event *e)
 	dev->last_event_time = e->time;
 
 	return rc;
-}
-
-static int
-read_more_events(struct libevdev *dev)
-{
-	int free_elem;
-	int len;
-	struct input_event *next;
-
-	free_elem = queue_num_free_elements(dev);
-	if (free_elem <= 0)
-		return 0;
-
-	next = queue_next_element(dev);
-	len = read(dev->fd, next, free_elem * sizeof(struct input_event));
-	if (len < 0) {
-		return -errno;
-	} else if (len > 0 && len % sizeof(struct input_event) != 0)
-		return -EINVAL;
-	else if (len > 0) {
-		int nev = len/sizeof(struct input_event);
-		queue_set_num_elements(dev, queue_num_elements(dev) + nev);
-	}
-
-	return 0;
 }
 
 /**
