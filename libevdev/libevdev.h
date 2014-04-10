@@ -58,9 +58,10 @@ extern "C" {
  * Signal safety
  * =============
  *
- * libevdev is signal-safe for the majority of its operations. Check the API
- * documentation to make sure, unless explicitly stated a call is <b>not</b>
- * signal safe.
+ * libevdev is signal-safe for the majority of its operations, i.e. many of
+ * its functions are safe to be called from within a signal handler.
+ * Check the API documentation to make sure, unless explicitly stated a call
+ * is <b>not</b> signal safe.
  *
  * Device handling
  * ===============
