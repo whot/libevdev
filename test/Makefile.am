@@ -2,6 +2,8 @@ if BUILD_TESTS
 run_tests = test-libevdev test-kernel
 build_tests = test-compile-pedantic test-link
 
+.NOTPARALLEL:
+
 noinst_PROGRAMS = $(run_tests) $(build_tests)
 
 TESTS = $(run_tests)
