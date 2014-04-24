@@ -2,6 +2,8 @@ if BUILD_TESTS
 run_tests = test-libevdev test-kernel
 build_tests = test-compile-pedantic test-link
 
+EXTRA_DIST =
+
 .NOTPARALLEL:
 
 noinst_PROGRAMS = $(run_tests) $(build_tests)
@@ -50,6 +52,21 @@ test_kernel_SOURCES = \
 		      $(common_sources)
 test_kernel_CFLAGS = -I$(top_srcdir)
 test_kernel_LDADD = $(CHECK_LIBS)
+
+if HAVE_VALGRIND
+VALGRIND_FLAGS=--leak-check=full \
+		--quiet \
+		--error-exitcode=3 \
+		--suppressions=$(srcdir)/valgrind.suppressions
+
+valgrind:
+	        $(MAKE) check-TESTS LOG_COMPILER="$(VALGRIND)" LOG_FLAGS="$(VALGRIND_FLAGS)"
+
+check: valgrind
+
+EXTRA_DIST += valgrind.suppressions
+endif
+
 
 if GCOV_ENABLED
 

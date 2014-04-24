@@ -68,9 +68,12 @@ AC_SUBST([GNU_LD_FLAGS], $with_ldflags)
 
 PKG_PROG_PKG_CONFIG()
 PKG_CHECK_MODULES(CHECK, [check >= 0.9.9], [HAVE_CHECK="yes"], [HAVE_CHECK="no"])
-if test "x$HAVE_CHECK" != "xyes"; then
-       AC_MSG_WARN([check not found - skipping building unit tests])
+if test "x$HAVE_CHECK" = "xyes"; then
+	AC_PATH_PROG(VALGRIND, [valgrind])
+else
+	AC_MSG_WARN([check not found - skipping building unit tests])
 fi
+AM_CONDITIONAL(HAVE_VALGRIND, [test "x$VALGRIND" != "x"])
 AM_CONDITIONAL(BUILD_TESTS, [test "x$HAVE_CHECK" = "xyes"])
 
 with_cflags=""
