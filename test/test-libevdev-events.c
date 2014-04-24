@@ -1599,6 +1599,7 @@ START_TEST(test_mt_slot_ranges_invalid)
 	ck_assert_int_eq(rc, 0);
 	libevdev_change_fd(dev, pipefd[0]);
 
+	memset(ev, 0, sizeof(ev));
 	ev[0].type = EV_ABS;
 	ev[0].code = ABS_MT_SLOT;
 	ev[0].value = num_slots;

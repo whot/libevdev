@@ -712,6 +712,7 @@ START_TEST(test_device_set_abs)
 	ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_X),  80);
 	ck_assert_int_eq(libevdev_get_abs_resolution(dev, ABS_Y),  150);
 
+	a.value = 0;
 	a.minimum = 10;
 	a.maximum = 100;
 	a.fuzz = 13;
@@ -941,7 +942,7 @@ START_TEST(test_device_kernel_change_axis_invalid)
 	abs.maximum = 1000;
 	abs.fuzz = 1;
 	abs.flat = 2;
-	/* abs.resolution = 3;  FIXME: can't test resolution */
+	abs.resolution = 3; /* FIXME: value is unused, we can't test resolution */
 	abs.value = 0;
 
 	uinput_device_set_abs_bit(uidev, ABS_X, &abs);
