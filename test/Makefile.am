@@ -2,8 +2,6 @@ if BUILD_TESTS
 run_tests = test-libevdev test-kernel
 build_tests = test-compile-pedantic test-link
 
-EXTRA_DIST =
-
 .NOTPARALLEL:
 
 noinst_PROGRAMS = $(run_tests) $(build_tests)
@@ -64,9 +62,9 @@ valgrind:
 
 check: valgrind
 
-EXTRA_DIST += valgrind.suppressions
 endif
 
+EXTRA_DIST = valgrind.suppressions
 
 if GCOV_ENABLED
 
