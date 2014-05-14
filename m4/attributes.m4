@@ -109,13 +109,14 @@ dnl
 dnl Other compilers don't support -Werror per se, but they support
 dnl an equivalent flag:
 dnl  - Sun Studio compiler supports -errwarn=%all
+dnl we don't test for that, it gives us false positives when gcc doesn't
+dnl actually complain about it. If someone wants to compile this on sun, let
+dnl them fix it.
 AC_DEFUN([CC_CHECK_WERROR], [
   AC_CACHE_CHECK(
     [for $CC way to treat warnings as errors],
     [cc_cv_werror],
-    [CC_CHECK_CFLAGS_SILENT([-Werror], [cc_cv_werror=-Werror],
-      [CC_CHECK_CFLAGS_SILENT([-errwarn=%all], [cc_cv_werror=-errwarn=%all])])
-    ])
+    [CC_CHECK_FLAG_APPEND([cc_cv_werror], [CFLAGS], [-Werror])])
 ])
 
 AC_DEFUN([CC_CHECK_ATTRIBUTE], [
@@ -225,17 +226,11 @@ AC_DEFUN([CC_ATTRIBUTE_CONST], [
 ])
 
 AC_DEFUN([CC_FLAG_VISIBILITY], [
-  AC_REQUIRE([CC_CHECK_WERROR])
   AC_CACHE_CHECK([if $CC supports -fvisibility=hidden],
     [cc_cv_flag_visibility],
-    [cc_flag_visibility_save_CFLAGS="$CFLAGS"
-     CFLAGS="$CFLAGS $cc_cv_werror"
-     CC_CHECK_CFLAGS_SILENT([-fvisibility=hidden],
-     cc_cv_flag_visibility='yes',
-     cc_cv_flag_visibility='no')
-     CFLAGS="$cc_flag_visibility_save_CFLAGS"])
+    [CC_CHECK_FLAG_APPEND([cc_cv_flag_visibility], [CFLAGS], [-fvisibility=hidden])])
 
-  AS_IF([test "x$cc_cv_flag_visibility" = "xyes"],
+  AS_IF([test "x$cc_cv_flag_visibility" != "x"],
     [AC_DEFINE([SUPPORT_FLAG_VISIBILITY], 1,
        [Define this if the compiler supports the -fvisibility flag])
      $1],
