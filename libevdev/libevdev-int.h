@@ -60,6 +60,20 @@ struct mt_sync_state {
 	int val[];
 };
 
+/**
+ * Internal only: log data used to send messages to the respective log
+ * handler. We re-use the same struct for a global and inside
+ * struct libevdev.
+ * For the global, device_handler is NULL, for per-device instance
+ * global_handler is NULL.
+ */
+struct logdata {
+	enum libevdev_log_priority priority;		/** minimum logging priority */
+	libevdev_log_func_t global_handler;		/** global handler function */
+	libevdev_device_log_func_t device_handler;	/** per-device handler function */
+	void *userdata;					/** user-defined data pointer */
+};
+
 struct libevdev {
 	int fd;
 	bool initialized;
@@ -106,31 +120,28 @@ struct libevdev {
 		unsigned long *tracking_id_changes;
 		size_t tracking_id_changes_sz;	 /* in bytes */
 	} mt_sync;
+
+	struct logdata log;
 };
 
-struct logdata {
-	enum libevdev_log_priority priority;	/** minimum logging priority */
-	libevdev_log_func_t handler;		/** handler function */
-	void *userdata;				/** user-defined data pointer */
-};
-extern struct logdata log_data;
-
-#define log_msg_cond(priority, ...) \
+#define log_msg_cond(dev, priority, ...) \
 	do { \
-		if (libevdev_get_log_priority() >= priority) \
-			log_msg(priority, log_data.userdata, __FILE__, __LINE__, __func__, __VA_ARGS__); \
+		if (log_priority(dev) >= priority) \
+			log_msg(dev, priority, __FILE__, __LINE__, __func__, __VA_ARGS__); \
 	} while(0)
 
-#define log_error(...) log_msg_cond(LIBEVDEV_LOG_ERROR, __VA_ARGS__)
-#define log_info(...) log_msg_cond(LIBEVDEV_LOG_INFO, __VA_ARGS__)
-#define log_dbg(...) log_msg_cond(LIBEVDEV_LOG_DEBUG, __VA_ARGS__)
-#define log_bug(...) log_msg_cond(LIBEVDEV_LOG_ERROR, "BUG: "__VA_ARGS__)
+#define log_error(dev, ...) log_msg_cond(dev, LIBEVDEV_LOG_ERROR, __VA_ARGS__)
+#define log_info(dev, ...) log_msg_cond(dev, LIBEVDEV_LOG_INFO, __VA_ARGS__)
+#define log_dbg(dev, ...) log_msg_cond(dev, LIBEVDEV_LOG_DEBUG, __VA_ARGS__)
+#define log_bug(dev, ...) log_msg_cond(dev, LIBEVDEV_LOG_ERROR, "BUG: "__VA_ARGS__)
 
 extern void
-log_msg(enum libevdev_log_priority priority,
-	void *data,
+log_msg(const struct libevdev *dev,
+	enum libevdev_log_priority priority,
 	const char *file, int line, const char *func,
 	const char *format, ...) LIBEVDEV_ATTRIBUTE_PRINTF(6, 7);
+extern enum libevdev_log_priority
+log_priority(const struct libevdev *dev);
 
 /**
  * @return a pointer to the next element in the queue, or NULL if the queue

@@ -271,6 +271,79 @@ START_TEST(test_log_data)
 }
 END_TEST
 
+struct libevdev *devlogdata;
+static int dev_log_fn_called = 0;
+static void devlogfunc(const struct libevdev *dev,
+		    enum libevdev_log_priority priority,
+		    void *data,
+		    const char *file, int line, const char *func,
+		    const char *f, va_list args)
+{
+	ck_assert(dev == data);
+	dev_log_fn_called++;
+}
+
+START_TEST(test_device_log_init)
+{
+	struct libevdev *dev = NULL;
+	enum libevdev_log_priority old;
+
+	old = libevdev_get_log_priority();
+	libevdev_set_log_priority(LIBEVDEV_LOG_DEBUG);
+	libevdev_set_log_function(logfunc, logdata);
+
+	/* error for NULL device */
+	libevdev_set_device_log_function(NULL, NULL,
+					 LIBEVDEV_LOG_ERROR, NULL);
+	ck_assert_int_eq(log_fn_called, 1);
+
+	/* error for NULL device */
+	libevdev_set_device_log_function(NULL, devlogfunc,
+					 LIBEVDEV_LOG_ERROR, NULL);
+	ck_assert_int_eq(log_fn_called, 2);
+
+	log_fn_called = 0;
+
+	dev = libevdev_new();
+	ck_assert(dev != NULL);
+
+	libevdev_set_device_log_function(dev, NULL,
+					 LIBEVDEV_LOG_ERROR, NULL);
+
+	/* libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL) should
+	   trigger a log message. */
+
+	/* expect global handler triggered */
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
+	ck_assert_int_eq(log_fn_called, 1);
+	ck_assert_int_eq(dev_log_fn_called, 0);
+
+	/* expect device handler triggered */
+	libevdev_set_device_log_function(dev, devlogfunc,
+					 LIBEVDEV_LOG_ERROR, dev);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
+	ck_assert_int_eq(log_fn_called, 1);
+	ck_assert_int_eq(dev_log_fn_called, 1);
+
+	/* device handler set, but priority filters. don't expect any log
+	   handler to be called.
+	   we don't have any log msgs > ERROR at the moment, so test it by
+	   setting an invalid priority. */
+	libevdev_set_device_log_function(dev, devlogfunc,
+					 LIBEVDEV_LOG_ERROR - 1, dev);
+	libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, NULL);
+	ck_assert_int_eq(log_fn_called, 1);
+	ck_assert_int_eq(dev_log_fn_called, 1);
+
+	libevdev_free(dev);
+
+	log_fn_called = 0;
+	libevdev_set_log_priority(old);
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+}
+END_TEST
+
 START_TEST(test_device_init)
 {
 	struct uinput_device* uidev;
@@ -477,6 +550,7 @@ libevdev_init_test(void)
 	tcase_add_test(tc, test_log_set_get_priority);
 	tcase_add_test(tc, test_log_default_priority);
 	tcase_add_test(tc, test_log_data);
+	tcase_add_test(tc, test_device_log_init);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("device fd init");

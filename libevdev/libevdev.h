@@ -615,6 +615,29 @@ extern "C" {
  */
 
 /**
+ * @defgroup logging Library logging facilities
+ *
+ * libevdev provides two methods of logging library-internal messages. The
+ * old method is to provide a global log handler in
+ * libevdev_set_log_function(). The new method is to provide a per-context
+ * log handler in libevdev_set_device_log_function(). Developers are encouraged
+ * to use the per-context logging facilities over the global log handler as
+ * it provides access to the libevdev instance that caused a message, and is
+ * more flexible when libevdev is used from within a shared library.
+ *
+ * If a caller sets both the global log handler and a per-context log
+ * handler, each device with a per-context log handler will only invoke that
+ * log handler.
+ *
+ * @note To set a context-specific log handler, a context is needed.
+ * Thus developers are discouraged from using libevdev_new_from_fd() as
+ * important messages from the device initialization process may get lost.
+ *
+ * @note A context-specific handler cannot be used for libevdev's uinput
+ * devices. @ref uinput must use the global log handler.
+ */
+
+/**
  * @defgroup bits Querying device capabilities
  *
  * Abstraction functions to handle device capabilities, specificially
@@ -764,7 +787,7 @@ int libevdev_new_from_fd(int fd, struct libevdev **dev);
 void libevdev_free(struct libevdev *dev);
 
 /**
- * @ingroup init
+ * @ingroup logging
  */
 enum libevdev_log_priority {
 	LIBEVDEV_LOG_ERROR = 10,	/**< critical errors and application bugs */
@@ -773,7 +796,7 @@ enum libevdev_log_priority {
 };
 
 /**
- * @ingroup init
+ * @ingroup logging
  *
  * Logging function called by library-internal logging.
  * This function is expected to treat its input like printf would.
@@ -796,21 +819,27 @@ typedef void (*libevdev_log_func_t)(enum libevdev_log_priority priority,
 	LIBEVDEV_ATTRIBUTE_PRINTF(6, 0);
 
 /**
- * @ingroup init
+ * @ingroup logging
  *
  * Set a printf-style logging handler for library-internal logging. The default
  * logging function is to stdout.
+ *
+ * @note The global log handler is only called if no context-specific log
+ * handler has been set with libevdev_set_device_log_function().
  *
  * @param logfunc The logging function for this device. If NULL, the current
  * logging function is unset and no logging is performed.
  * @param data User-specific data passed to the log handler.
  *
  * @note This function may be called before libevdev_set_fd().
+ *
+ * @deprecated Use per-context logging instead, see
+ * libevdev_set_device_log_function().
  */
 void libevdev_set_log_function(libevdev_log_func_t logfunc, void *data);
 
 /**
- * @ingroup init
+ * @ingroup logging
  *
  * Define the minimum level to be printed to the log handler.
  * Messages higher than this level are printed, others are discarded. This
@@ -818,18 +847,76 @@ void libevdev_set_log_function(libevdev_log_func_t logfunc, void *data);
  *
  * @param priority Minimum priority to be printed to the log.
  *
+ * @deprecated Use per-context logging instead, see
+ * libevdev_set_device_log_function().
  */
 void libevdev_set_log_priority(enum libevdev_log_priority priority);
 
 /**
- * @ingroup init
+ * @ingroup logging
  *
  * Return the current log priority level. Messages higher than this level
  * are printed, others are discarded. This is a global setting.
  *
  * @return the current log level
+ *
+ * @deprecated Use per-context logging instead, see
+ * libevdev_set_device_log_function().
  */
 enum libevdev_log_priority libevdev_get_log_priority(void);
+
+/**
+ * @ingroup logging
+ *
+ * Logging function called by library-internal logging for a specific
+ * libevdev context. This function is expected to treat its input like
+ * printf would.
+ *
+ * @param dev The evdev device
+ * @param priority Log priority of this message
+ * @param data User-supplied data pointer (see libevdev_set_log_function())
+ * @param file libevdev source code file generating this message
+ * @param line libevdev source code line generating this message
+ * @param func libevdev source code function generating this message
+ * @param format printf-style format string
+ * @param args List of arguments
+ *
+ * @see libevdev_set_log_function
+ * @since 1.3
+ */
+typedef void (*libevdev_device_log_func_t)(const struct libevdev *dev,
+					   enum libevdev_log_priority priority,
+					   void *data,
+					   const char *file, int line,
+					   const char *func,
+					   const char *format, va_list args)
+	LIBEVDEV_ATTRIBUTE_PRINTF(7, 0);
+
+/**
+ * @ingroup logging
+ *
+ * Set a printf-style logging handler for library-internal logging for this
+ * device context. The default logging function is NULL, i.e. the global log
+ * handler is invoked. If a context-specific log handler is set, the global
+ * log handler is not invoked for this device.
+ *
+ * @note This log function applies for this device context only, even if
+ * another context exists for the same fd.
+ *
+ * @param dev The evdev device
+ * @param logfunc The logging function for this device. If NULL, the current
+ * logging function is unset and logging falls back to the global log
+ * handler, if any.
+ * @param priority Minimum priority to be printed to the log.
+ * @param data User-specific data passed to the log handler.
+ *
+ * @note This function may be called before libevdev_set_fd().
+ * @since 1.3
+ */
+void libevdev_set_device_log_function(struct libevdev *dev,
+				      libevdev_device_log_func_t logfunc,
+				      enum libevdev_log_priority priority,
+				      void *data);
 
 /**
  * @ingroup init

@@ -48,11 +48,11 @@ static inline int*
 slot_value(const struct libevdev *dev, int slot, int axis)
 {
 	if (unlikely(slot > dev->num_slots)) {
-		log_bug("Slot %d exceeds number of slots (%d)\n", slot, dev->num_slots);
+		log_bug(dev, "Slot %d exceeds number of slots (%d)\n", slot, dev->num_slots);
 		slot = 0;
 	}
 	if (unlikely(axis < ABS_MT_MIN || axis > ABS_MT_MAX)) {
-		log_bug("MT axis %d is outside the valid range [%d,%d]\n",
+		log_bug(dev, "MT axis %d is outside the valid range [%d,%d]\n",
 			axis, ABS_MT_MIN, ABS_MT_MAX);
 		axis = ABS_MT_MIN;
 	}
@@ -129,31 +129,52 @@ libevdev_dflt_log_func(enum libevdev_log_priority priority,
 /*
  * Global logging settings.
  */
-struct logdata log_data = {
-	LIBEVDEV_LOG_INFO,
-	libevdev_dflt_log_func,
-	NULL,
+static struct logdata log_data = {
+	.priority = LIBEVDEV_LOG_INFO,
+	.global_handler = libevdev_dflt_log_func,
+	.userdata = NULL,
 };
 
 void
-log_msg(enum libevdev_log_priority priority,
-	void *data,
+log_msg(const struct libevdev *dev,
+	enum libevdev_log_priority priority,
 	const char *file, int line, const char *func,
 	const char *format, ...)
 {
 	va_list args;
 
-	if (!log_data.handler || priority > log_data.priority)
+	if (dev && dev->log.device_handler) {
+		/**
+		 * if a global handler is set for a device does
+		 * we've set up the handlers wrong.  And that means we'll
+		 * likely get the printf args wrong and cause all sorts of
+		 * mayhem. Seppuku is called for.
+		 */
+		if (unlikely(dev->log.global_handler))
+			abort();
+
+		if (priority > dev->log.priority)
+			return;
+	} else if (!log_data.global_handler || priority > log_data.priority)
 		return;
+	else if (unlikely(log_data.device_handler))
+		abort(); /* Seppuku, see above */
+
 
 	va_start(args, format);
-	log_data.handler(priority, data, file, line, func, format, args);
+	if (dev && dev->log.device_handler)
+		dev->log.device_handler(dev, priority, dev->log.userdata, file, line, func, format, args);
+	else
+		log_data.global_handler(priority, log_data.userdata, file, line, func, format, args);
 	va_end(args);
 }
 
 static void
 libevdev_reset(struct libevdev *dev)
 {
+	enum libevdev_log_priority pri = dev->log.priority;
+	libevdev_device_log_func_t handler = dev->log.device_handler;
+
 	free(dev->name);
 	free(dev->phys);
 	free(dev->uniq);
@@ -168,6 +189,8 @@ libevdev_reset(struct libevdev *dev)
 	dev->current_slot = -1;
 	dev->grabbed = LIBEVDEV_UNGRAB;
 	dev->sync_state = SYNC_NONE;
+	dev->log.priority = pri;
+	dev->log.device_handler = handler;
 	libevdev_enable_event_type(dev, EV_SYN);
 }
 
@@ -217,7 +240,7 @@ libevdev_free(struct libevdev *dev)
 LIBEVDEV_EXPORT void
 libevdev_set_log_function(libevdev_log_func_t logfunc, void *data)
 {
-	log_data.handler = logfunc;
+	log_data.global_handler = logfunc;
 	log_data.userdata = data;
 }
 
@@ -235,11 +258,36 @@ libevdev_get_log_priority(void)
 	return log_data.priority;
 }
 
+LIBEVDEV_EXPORT void
+libevdev_set_device_log_function(struct libevdev *dev,
+				 libevdev_device_log_func_t logfunc,
+				 enum libevdev_log_priority priority,
+				 void *data)
+{
+	if (!dev) {
+		log_bug(NULL, "device must not be NULL\n");
+		return;
+	}
+
+	dev->log.priority = priority;
+	dev->log.device_handler = logfunc;
+	dev->log.userdata = data;
+}
+
+enum libevdev_log_priority
+log_priority(const struct libevdev *dev)
+{
+	if (dev && dev->log.device_handler)
+		return dev->log.priority;
+	else
+		return libevdev_get_log_priority();
+}
+
 LIBEVDEV_EXPORT int
 libevdev_change_fd(struct libevdev *dev, int fd)
 {
 	if (!dev->initialized) {
-		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		log_bug(dev, "device not initialized. call libevdev_set_fd() first\n");
 		return -1;
 	}
 	dev->fd = fd;
@@ -254,7 +302,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 	char buf[256];
 
 	if (dev->initialized) {
-		log_bug("device already initialized.\n");
+		log_bug(dev, "device already initialized.\n");
 		return -EBADF;
 	} else if (fd < 0)
 		return -EBADF;
@@ -743,7 +791,7 @@ drain_events(struct libevdev *dev)
 			return;
 
 		if (rc < 0) {
-			log_error("Failed to drain events before sync.\n");
+			log_error(dev, "Failed to drain events before sync.\n");
 			return;
 		}
 
@@ -758,7 +806,7 @@ drain_events(struct libevdev *dev)
 	   we can drain them.
 	 */
 	if (iterations >= max_iterations)
-		log_info("Unable to drain events, buffer size mismatch.\n");
+		log_info(dev, "Unable to drain events, buffer size mismatch.\n");
 }
 
 static int
@@ -913,7 +961,7 @@ sanitize_event(const struct libevdev *dev,
 	if (unlikely(dev->num_slots > -1 &&
 		     libevdev_event_is_code(ev, EV_ABS, ABS_MT_SLOT) &&
 		     (ev->value < 0 || ev->value >= dev->num_slots))) {
-		log_bug("Device \"%s\" received an invalid slot index %d."
+		log_bug(dev, "Device \"%s\" received an invalid slot index %d."
 				"Capping to announced max slot number %d.\n",
 				dev->name, ev->value, dev->num_slots - 1);
 		ev->value = dev->num_slots - 1;
@@ -930,7 +978,7 @@ sanitize_event(const struct libevdev *dev,
 			     *slot_value(dev, dev->current_slot, ABS_MT_TRACKING_ID) == -1) ||
 			     (ev->value != -1 &&
 			     *slot_value(dev, dev->current_slot, ABS_MT_TRACKING_ID) != -1)))) {
-		log_bug("Device \"%s\" received a double tracking ID %d in slot %d.\n",
+		log_bug(dev, "Device \"%s\" received a double tracking ID %d in slot %d.\n",
 			dev->name, ev->value, dev->current_slot);
 		return EVENT_FILTER_DISCARD;
 	}
@@ -945,13 +993,13 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 	enum event_filter_status filter_status;
 
 	if (!dev->initialized) {
-		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		log_bug(dev, "device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
 	} else if (dev->fd < 0)
 		return -EBADF;
 
 	if (!(flags & (LIBEVDEV_READ_FLAG_NORMAL|LIBEVDEV_READ_FLAG_SYNC|LIBEVDEV_READ_FLAG_FORCE_SYNC))) {
-		log_bug("invalid flags %#x\n.\n", flags);
+		log_bug(dev, "invalid flags %#x\n.\n", flags);
 		return -EINVAL;
 	}
 
@@ -1029,7 +1077,7 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 
 			if (queue_peek(dev, 0, &next) == 0 &&
 			    next.type == EV_SYN && next.code == SYN_DROPPED)
-				log_info("SYN_DROPPED received after finished "
+				log_info(dev, "SYN_DROPPED received after finished "
 					 "sync - you're not keeping up\n");
 		}
 	}
@@ -1045,7 +1093,7 @@ libevdev_has_event_pending(struct libevdev *dev)
 	int rc;
 
 	if (!dev->initialized) {
-		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		log_bug(dev, "device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
 	} else if (dev->fd < 0)
 		return -EBADF;
@@ -1451,7 +1499,7 @@ libevdev_kernel_set_abs_info(struct libevdev *dev, unsigned int code, const stru
 	int rc;
 
 	if (!dev->initialized) {
-		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		log_bug(dev, "device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
 	} else if (dev->fd < 0)
 		return -EBADF;
@@ -1474,13 +1522,13 @@ libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab)
 	int rc = 0;
 
 	if (!dev->initialized) {
-		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		log_bug(dev, "device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
 	} else if (dev->fd < 0)
 		return -EBADF;
 
 	if (grab != LIBEVDEV_GRAB && grab != LIBEVDEV_UNGRAB) {
-		log_bug("invalid grab parameter %#x\n", grab);
+		log_bug(dev, "invalid grab parameter %#x\n", grab);
 		return -EINVAL;
 	}
 
@@ -1585,7 +1633,7 @@ libevdev_kernel_set_led_values(struct libevdev *dev, ...)
 	size_t nleds = 0;
 
 	if (!dev->initialized) {
-		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		log_bug(dev, "device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
 	} else if (dev->fd < 0)
 		return -EBADF;
@@ -1641,7 +1689,7 @@ LIBEVDEV_EXPORT int
 libevdev_set_clock_id(struct libevdev *dev, int clockid)
 {
 	if (!dev->initialized) {
-		log_bug("device not initialized. call libevdev_set_fd() first\n");
+		log_bug(dev, "device not initialized. call libevdev_set_fd() first\n");
 		return -EBADF;
 	} else if (dev->fd < 0)
 		return -EBADF;
