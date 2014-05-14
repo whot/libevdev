@@ -36,7 +36,6 @@
 #define ABS_MT_MAX ABS_MT_TOOL_Y
 #define ABS_MT_CNT (ABS_MT_MAX - ABS_MT_MIN + 1)
 #define LIBEVDEV_EXPORT __attribute__((visibility("default")))
-#define LIBEVDEV_PRINTF(_format, _args) __attribute__ ((format (printf, _format, _args)))
 #define ALIAS(_to) __attribute__((alias(#_to)))
 
 /**
@@ -131,7 +130,7 @@ extern void
 log_msg(enum libevdev_log_priority priority,
 	void *data,
 	const char *file, int line, const char *func,
-	const char *format, ...) LIBEVDEV_PRINTF(6, 7);
+	const char *format, ...) LIBEVDEV_ATTRIBUTE_PRINTF(6, 7);
 
 /**
  * @return a pointer to the next element in the queue, or NULL if the queue

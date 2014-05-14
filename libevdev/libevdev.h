@@ -30,6 +30,8 @@ extern "C" {
 #include <linux/input.h>
 #include <stdarg.h>
 
+#define LIBEVDEV_ATTRIBUTE_PRINTF(_format, _args) __attribute__ ((format (printf, _format, _args)))
+
 /**
  * @mainpage
  *
@@ -790,7 +792,8 @@ typedef void (*libevdev_log_func_t)(enum libevdev_log_priority priority,
 				    void *data,
 				    const char *file, int line,
 				    const char *func,
-				    const char *format, va_list args);
+				    const char *format, va_list args)
+	LIBEVDEV_ATTRIBUTE_PRINTF(6, 0);
 
 /**
  * @ingroup init
