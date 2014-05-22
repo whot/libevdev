@@ -544,7 +544,8 @@ extern "C" {
  * libevdev's internal test suite uses the
  * [Check unit testing framework](http://check.sourceforge.net/). Tests are
  * divided into test suites and test cases. Most tests create a uinput device,
- * so you'll need to run as root.
+ * so you'll need to run as root, and your kernel must have
+ * CONFIG_INPUT_UINPUT enabled.
  *
  * To run a specific suite only:
  *
