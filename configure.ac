@@ -21,7 +21,7 @@
 AC_PREREQ([2.62])
 
 AC_INIT([libevdev],
-        [1.2.1],
+        [1.2.2],
         [https://bugs.freedesktop.org/enter_bug.cgi?product=libevdev],
         [libevdev],
         [http://freedesktop.org/wiki/Software/libevdev/])
