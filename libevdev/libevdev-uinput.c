@@ -218,8 +218,12 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 		int fd, len;
 		struct stat st;
 
-		strcpy(buf, SYS_INPUT_DIR);
-		strcat(buf, namelist[i]->d_name);
+		rc = snprintf(buf, sizeof(buf), "%s%s/name",
+			      SYS_INPUT_DIR,
+			      namelist[i]->d_name);
+		if (rc < 0 || (size_t)rc >= sizeof(buf)) {
+			continue;
+		}
 
 		if (stat(buf, &st) == -1)
 			continue;
@@ -230,7 +234,6 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 			continue;
 
 		/* created within time frame */
-		strcat(buf, "/name");
 		fd = open(buf, O_RDONLY);
 		if (fd < 0)
 			continue;
@@ -247,8 +250,14 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 				log_info(NULL, "multiple identical devices found. syspath is unreliable\n");
 				break;
 			} else {
-				strcpy(buf, SYS_INPUT_DIR);
-				strcat(buf, namelist[i]->d_name);
+				rc = snprintf(buf, sizeof(buf), "%s%s",
+					      SYS_INPUT_DIR,
+					      namelist[i]->d_name);
+				if (rc < 0 || (size_t)rc >= sizeof(buf)) {
+					log_error(NULL, "Invalid syspath, syspath is unreliable\n");
+					break;
+				}
+
 				uinput_dev->syspath = strdup(buf);
 				uinput_dev->devnode = fetch_device_node(buf);
 			}
