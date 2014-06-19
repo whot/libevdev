@@ -192,7 +192,7 @@ int libevdev_uinput_get_fd(const struct libevdev_uinput *uinput_dev);
  *
  * @see libevdev_uinput_get_devnode
  */
-const char*libevdev_uinput_get_syspath(struct libevdev_uinput *uinput_dev);
+const char* libevdev_uinput_get_syspath(struct libevdev_uinput *uinput_dev);
 
 /**
  * @ingroup uinput
