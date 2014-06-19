@@ -176,17 +176,14 @@ int libevdev_uinput_get_fd(const struct libevdev_uinput *uinput_dev);
 /**
  * @ingroup uinput
  *
- * Return the syspath representing this uinput device.
- * At the time of writing, the uinput kernel device does not
- * provide a way to get the syspath directly through uinput so libevdev must guess.
- * In some cases libevdev is unable to derive the syspath. If the running kernel
- * supports the UI_GET_SYSNAME ioctl, the syspath is retrieved through that and will
- * be reliable and not be NULL. The UI_GET_SYSNAME ioctl is currently
- * scheduled for 3.15.
+ * Return the syspath representing this uinput device. If the UI_GET_SYSNAME
+ * ioctl not available, libevdev makes an educated guess.
+ * The UI_GET_SYSNAME ioctl is available since Linux 3.15.
  *
- * @note This function may return NULL. libevdev currently uses ctime and
- * the device name to guess devices. To avoid false positives, wait at least
- * wait at least 1.5s between creating devices that have the same name.
+ * @note This function may return NULL if UI_GET_SYSNAME is not available.
+ * In that case, libevdev uses ctime and the device name to guess devices.
+ * To avoid false positives, wait at least wait at least 1.5s between
+ * creating devices that have the same name.
  * @param uinput_dev A previously created uinput device.
  * @return The syspath for this device, including the preceding /sys
  *
@@ -202,7 +199,7 @@ const char* libevdev_uinput_get_syspath(struct libevdev_uinput *uinput_dev);
  * This relies on libevdev_uinput_get_syspath() to provide a valid syspath.
  * See libevdev_uinput_get_syspath() for more details.
  *
- * @note This function may return NULL. libevdev currently has to guess the
+ * @note This function may return NULL. libevdev may have to guess the
  * syspath and the device node. See libevdev_uinput_get_syspath() for details.
  * @param uinput_dev A previously created uinput device.
  * @return The device node for this device, in the form of /dev/input/eventN

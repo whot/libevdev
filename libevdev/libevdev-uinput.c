@@ -198,8 +198,17 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 {
 	struct dirent **namelist;
 	int ndev, i;
+	int rc;
+	char buf[sizeof(SYS_INPUT_DIR) + 64] = SYS_INPUT_DIR;
 
-	/* FIXME: use new ioctl() here once kernel supports it */
+	rc = ioctl(uinput_dev->fd,
+		   UI_GET_SYSNAME(sizeof(buf) - strlen(SYS_INPUT_DIR)),
+		   &buf[strlen(SYS_INPUT_DIR)]);
+	if (rc != -1) {
+		uinput_dev->syspath = strdup(buf);
+		uinput_dev->devnode = fetch_device_node(buf);
+		return 0;
+	}
 
 	ndev = scandir(SYS_INPUT_DIR, &namelist, is_input_device, alphasort);
 	if (ndev <= 0)
@@ -207,7 +216,6 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 
 	for (i = 0; i < ndev; i++) {
 		int fd, len;
-		char buf[sizeof(SYS_INPUT_DIR) + 64];
 		struct stat st;
 
 		strcpy(buf, SYS_INPUT_DIR);
