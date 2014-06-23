@@ -11,7 +11,8 @@ libevdev_la_SOURCES = \
                    libevdev-uinput-int.h \
                    libevdev.c \
                    libevdev-names.c \
-		   ../include/linux/input.h
+		   ../include/linux/input.h \
+		   ../include/linux/uinput.h
 
 libevdev_la_LDFLAGS = \
 	-version-info $(LIBEVDEV_LT_VERSION) \
