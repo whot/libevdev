@@ -147,7 +147,7 @@ set_props(const struct libevdev *dev, int fd, struct uinput_user_dev *uidev)
 			 * ioctl is called on an already created device. The
 			 * last two can't happen here.
 			 */
-			if (errno == -EINVAL)
+			if (errno == EINVAL)
 				rc = 0;
 			break;
 		}
