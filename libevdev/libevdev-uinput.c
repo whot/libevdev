@@ -344,8 +344,9 @@ libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct li
 	return 0;
 
 error:
+	rc = -errno;
 	libevdev_uinput_destroy(new_device);
-	return -errno;
+	return rc;
 }
 
 LIBEVDEV_EXPORT void
