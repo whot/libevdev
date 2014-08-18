@@ -21,7 +21,6 @@
  */
 
 #include <config.h>
-#include <libevdev/libevdev-int.h>
 #include "test-common.h"
 
 START_TEST(test_type_codes)
