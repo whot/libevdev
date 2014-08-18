@@ -136,10 +136,10 @@ static struct logdata log_data = {
 };
 
 void
-log_msg(const struct libevdev *dev,
-	enum libevdev_log_priority priority,
-	const char *file, int line, const char *func,
-	const char *format, ...)
+_libevdev_log_msg(const struct libevdev *dev,
+		  enum libevdev_log_priority priority,
+		  const char *file, int line, const char *func,
+		  const char *format, ...)
 {
 	va_list args;
 
@@ -275,7 +275,7 @@ libevdev_set_device_log_function(struct libevdev *dev,
 }
 
 enum libevdev_log_priority
-log_priority(const struct libevdev *dev)
+_libevdev_log_priority(const struct libevdev *dev)
 {
 	if (dev && dev->log.device_handler)
 		return dev->log.priority;

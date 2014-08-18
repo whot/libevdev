@@ -126,8 +126,8 @@ struct libevdev {
 
 #define log_msg_cond(dev, priority, ...) \
 	do { \
-		if (log_priority(dev) >= priority) \
-			log_msg(dev, priority, __FILE__, __LINE__, __func__, __VA_ARGS__); \
+		if (_libevdev_log_priority(dev) >= priority) \
+			_libevdev_log_msg(dev, priority, __FILE__, __LINE__, __func__, __VA_ARGS__); \
 	} while(0)
 
 #define log_error(dev, ...) log_msg_cond(dev, LIBEVDEV_LOG_ERROR, __VA_ARGS__)
@@ -136,12 +136,12 @@ struct libevdev {
 #define log_bug(dev, ...) log_msg_cond(dev, LIBEVDEV_LOG_ERROR, "BUG: "__VA_ARGS__)
 
 extern void
-log_msg(const struct libevdev *dev,
-	enum libevdev_log_priority priority,
-	const char *file, int line, const char *func,
-	const char *format, ...) LIBEVDEV_ATTRIBUTE_PRINTF(6, 7);
+_libevdev_log_msg(const struct libevdev *dev,
+		  enum libevdev_log_priority priority,
+		  const char *file, int line, const char *func,
+		  const char *format, ...) LIBEVDEV_ATTRIBUTE_PRINTF(6, 7);
 extern enum libevdev_log_priority
-log_priority(const struct libevdev *dev);
+_libevdev_log_priority(const struct libevdev *dev);
 
 /**
  * @return a pointer to the next element in the queue, or NULL if the queue
