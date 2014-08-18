@@ -56,6 +56,8 @@ test_kernel_SOURCES = \
 test_kernel_CFLAGS = -I$(top_srcdir)
 test_kernel_LDADD = $(CHECK_LIBS)
 
+check_local_deps =
+
 if HAVE_VALGRIND
 VALGRIND_FLAGS=--leak-check=full \
 		--quiet \
@@ -65,7 +67,7 @@ VALGRIND_FLAGS=--leak-check=full \
 valgrind:
 	        $(MAKE) check-TESTS LOG_COMPILER="$(VALGRIND)" LOG_FLAGS="$(VALGRIND_FLAGS)"
 
-check: valgrind
+check_local_deps += valgrind
 
 endif
 
@@ -96,7 +98,7 @@ gcov-report.txt: gcov-clean check-TESTS
 gcov: gcov-report.txt
 	@cat gcov-report.txt
 
-check-local: gcov
+check_local_deps += gcov
 
 else
 
@@ -115,5 +117,7 @@ endif
 
 clean-local: gcov-clean
 	rm -f *.gcno *.gcda
+
+check-local: $(check_local_deps)
 
 endif
