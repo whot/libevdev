@@ -118,13 +118,12 @@ AS_IF([test "x$enable_gcov" != "xno"],
        enable_gcov=yes
        ],
 )
-
-AM_PATH_PYTHON([2.6])
-
 AM_CONDITIONAL([GCOV_ENABLED], [test "x$enable_gcov" != "xno"])
 AC_SUBST([GCOV_CFLAGS])
 AC_SUBST([GCOV_LDFLAGS])
 AC_MSG_RESULT([$enable_gcov])
+
+AM_PATH_PYTHON([2.6])
 
 AC_CONFIG_FILES([Makefile
 		 libevdev/Makefile
