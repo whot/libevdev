@@ -24,6 +24,7 @@ common_sources = $(libevdev_sources) \
 
 # include builddir for event-names.h
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/include -I$(top_builddir)/libevdev $(CHECK_CFLAGS) $(GCOV_CFLAGS)
+AM_LDFLAGS = $(GCOV_LDFLAGS)
 
 test_libevdev_SOURCES = \
 			test-main.c \
@@ -36,7 +37,7 @@ test_libevdev_SOURCES = \
 			test-uinput.c \
 			$(common_sources)
 
-test_libevdev_LDADD =  $(CHECK_LIBS) $(GCOV_LDFLAGS)
+test_libevdev_LDADD =  $(CHECK_LIBS)
 
 test_compile_pedantic_SOURCES = test-compile-pedantic.c
 test_compile_pedantic_CFLAGS = $(AM_CPPFLAGS) -pedantic -Werror -std=c90
@@ -48,7 +49,7 @@ test_link_LDADD = $(top_builddir)/libevdev/libevdev.la
 test_static_link_SOURCES = test-link.c
 test_static_link_CFLAGS = -I$(top_srcdir)
 test_static_link_LDADD = $(top_builddir)/libevdev/libevdev.la
-test_static_link_LDFLAGS = -static
+test_static_link_LDFLAGS = $(AM_LDFLAGS) -static
 
 test_kernel_SOURCES = \
 		      test-kernel.c \
