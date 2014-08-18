@@ -2085,6 +2085,36 @@ int libevdev_event_code_from_name_n(unsigned int type, const char *name,
 				    size_t len);
 
 /**
+ * @ingroup misc
+ *
+ * Look up an input property by its name. Properties start with the fixed
+ * prefix "INPUT_PROP_" followed by their name (eg., "INPUT_PROP_POINTER").
+ * The prefix must be included in the name. It returns the constant assigned
+ * to the property or -1 if not found.
+ *
+ * @param name A non-NULL string describing an input property
+ *
+ * @return The given code constant for the name or -1 if not found.
+ */
+int libevdev_property_from_name(const char *name);
+
+/**
+ * @ingroup misc
+ *
+ * Look up an input property by its name. Properties start with the fixed
+ * prefix "INPUT_PROP_" followed by their name (eg., "INPUT_PROP_POINTER").
+ * The prefix must be included in the name. It returns the constant assigned
+ * to the property or -1 if not found.
+ *
+ * @param name A non-NULL string describing an input property
+ * @param len The length of the string in @p name excluding any terminating 0
+ * character.
+ *
+ * @return The given code constant for the name or -1 if not found.
+ */
+int libevdev_property_from_name_n(const char *name, size_t len);
+
+/**
  * @ingroup bits
  *
  * Get the repeat delay and repeat period values for this device. This

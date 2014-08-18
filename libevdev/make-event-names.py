@@ -133,7 +133,10 @@ def print_lookup_table(bits):
 		print_lookup(bits, prefix[:-1].lower())
 	print("};")
 	print("")
-
+	print("static const struct name_entry prop_names[] = {")
+	print_lookup(bits, "input_prop")
+	print("};")
+	print("")
 
 def print_mapping_table(bits):
 	print("/* THIS FILE IS GENERATED, DO NOT EDIT */")

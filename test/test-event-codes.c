@@ -99,6 +99,38 @@ START_TEST(test_key_invalid)
 }
 END_TEST
 
+START_TEST(test_properties)
+{
+	struct prop {
+		int val;
+		const char *name;
+	} lut[] = {
+		{ INPUT_PROP_DIRECT, "INPUT_PROP_DIRECT" },
+		{ INPUT_PROP_POINTER, "INPUT_PROP_POINTER" },
+		{ INPUT_PROP_MAX, "INPUT_PROP_MAX" },
+		{ -1, NULL}
+	};
+	struct prop *p = lut;
+	while (p->val != -1) {
+		ck_assert_int_eq(libevdev_property_from_name(p->name), p->val);
+		p++;
+	}
+}
+END_TEST
+
+START_TEST(test_properties_invalid)
+{
+	ck_assert_int_eq(libevdev_property_from_name("EV_ABS"), -1);
+	ck_assert_int_eq(libevdev_property_from_name("INPUT_PROP"), -1);
+	ck_assert_int_eq(libevdev_property_from_name("INPUT_PROP_"), -1);
+	ck_assert_int_eq(libevdev_property_from_name("INPUT_PROP_FOO"), -1);
+
+	ck_assert_int_eq(libevdev_property_from_name_n("INPUT_PROP_POINTER", 11), -1);
+	ck_assert_int_eq(libevdev_property_from_name_n("INPUT_PROP_POINTER",
+						strlen("INPUT_PROP_POINTER") - 1), -1);
+}
+END_TEST
+
 Suite *
 event_code_suite(void)
 {
@@ -112,6 +144,11 @@ event_code_suite(void)
 	tc = tcase_create("key tests");
 	tcase_add_test(tc, test_key_codes);
 	tcase_add_test(tc, test_key_invalid);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("property tests");
+	tcase_add_test(tc, test_properties);
+	tcase_add_test(tc, test_properties_invalid);
 	suite_add_tcase(s, tc);
 
 	return s;

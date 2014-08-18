@@ -106,6 +106,8 @@ local:
 LIBEVDEV_1_3 {
 global:
 	libevdev_set_device_log_function;
+	libevdev_property_from_name;
+	libevdev_property_from_name_n;
 
 local:
 	*;

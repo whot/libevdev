@@ -141,3 +141,23 @@ libevdev_event_code_from_name_n(unsigned int type, const char *name, size_t len)
 
 	return entry ? (int)entry->value : -1;
 }
+
+LIBEVDEV_EXPORT int
+libevdev_property_from_name(const char *name)
+{
+	return libevdev_property_from_name_n(name, strlen(name));
+}
+
+LIBEVDEV_EXPORT int
+libevdev_property_from_name_n(const char *name, size_t len)
+{
+	struct name_lookup lookup;
+	const struct name_entry *entry;
+
+	lookup.name = name;
+	lookup.len = len;
+
+	entry = lookup_name(prop_names, ARRAY_LENGTH(prop_names), &lookup);
+
+	return entry ? (int)entry->value : -1;
+}
