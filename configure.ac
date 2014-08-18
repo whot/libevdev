@@ -125,6 +125,16 @@ AC_MSG_RESULT([$enable_gcov])
 
 AM_PATH_PYTHON([2.6])
 
+# nm to check for leaking symbols in the static library
+AC_PATH_PROG(NM, [nm])
+AM_CONDITIONAL(HAVE_NM, [test "x$NM" != "x"])
+if test "x$NM" == "x"; then
+	AC_MSG_WARN([nm not found - skipping symbol leak test])
+	have_nm="no"
+else
+	have_nm="yes"
+fi
+
 AC_CONFIG_FILES([Makefile
 		 libevdev/Makefile
 		 doc/Makefile
@@ -136,7 +146,8 @@ AC_CONFIG_FILES([Makefile
 AC_OUTPUT
 
 AC_MSG_RESULT([
-	       Build documentation	${have_doxygen}
-	       Build unit-tests		${HAVE_CHECK}
-	       Enable profiling		${enable_gcov}
+	       Build documentation		${have_doxygen}
+	       Build unit-tests			${HAVE_CHECK}
+	       Enable profiling			${enable_gcov}
+	       Static library symbol check	${have_nm}
 	       ])
