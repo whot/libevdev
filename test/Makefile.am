@@ -1,6 +1,6 @@
 if BUILD_TESTS
 run_tests = test-libevdev test-kernel
-build_tests = test-compile-pedantic test-link
+build_tests = test-compile-pedantic test-link test-static-link
 
 .NOTPARALLEL:
 
@@ -44,6 +44,11 @@ test_compile_pedantic_CFLAGS = $(AM_CPPFLAGS) -pedantic -Werror -std=c90
 test_link_SOURCES = test-link.c
 test_link_CFLAGS = -I$(top_srcdir)
 test_link_LDADD = $(top_builddir)/libevdev/libevdev.la
+
+test_static_link_SOURCES = test-link.c
+test_static_link_CFLAGS = -I$(top_srcdir)
+test_static_link_LDADD = $(top_builddir)/libevdev/libevdev.la
+test_static_link_LDFLAGS = -static
 
 test_kernel_SOURCES = \
 		      test-kernel.c \
