@@ -541,6 +541,20 @@ extern "C" {
  */
 
 /**
+ * @page static_linking Statically linking libevdev
+ *
+ * Statically linking libevdev.a is not recommended. Symbol visibility is
+ * difficult to control in a static library, so extra care must be taken to
+ * only use symbols that are explicitly exported. libevdev's API stability
+ * guarantee only applies to those symbols.
+ *
+ * If you do link libevdev statically, note that in addition to the exported
+ * symbols, libevdev reserves the <b>_libevdev_*</b> namespace. Do not use
+ * or create symbols with that prefix, they are subject to change at any
+ * time.
+ */
+
+/**
  * @page testing libevdev-internal test suite
  *
  * libevdev's internal test suite uses the
