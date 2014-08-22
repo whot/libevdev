@@ -185,7 +185,7 @@ main(int argc, char **argv)
 	} while (rc == LIBEVDEV_READ_STATUS_SYNC || rc == LIBEVDEV_READ_STATUS_SUCCESS || rc == -EAGAIN);
 
 	if (rc != LIBEVDEV_READ_STATUS_SUCCESS && rc != -EAGAIN)
-		fprintf(stderr, "Failed to handle events: %s\n", strerror(rc));
+		fprintf(stderr, "Failed to handle events: %s\n", strerror(-rc));
 
 	rc = 0;
 out:
