@@ -358,7 +358,7 @@ libevdev_uinput_destroy(struct libevdev_uinput *uinput_dev)
 	if (!uinput_dev)
 		return;
 
-	ioctl(uinput_dev->fd, UI_DEV_DESTROY, NULL);
+	(void)ioctl(uinput_dev->fd, UI_DEV_DESTROY, NULL);
 	if (uinput_dev->fd_is_managed)
 		close(uinput_dev->fd);
 	free(uinput_dev->syspath);
