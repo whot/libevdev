@@ -279,6 +279,7 @@ libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct li
 	int rc;
 	struct uinput_user_dev uidev;
 	struct libevdev_uinput *new_device;
+	int close_fd_on_error = (fd == LIBEVDEV_UINPUT_OPEN_MANAGED);
 
 	new_device = alloc_uinput_device(libevdev_get_name(dev));
 	if (!new_device)
@@ -346,6 +347,8 @@ libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct li
 error:
 	rc = -errno;
 	libevdev_uinput_destroy(new_device);
+	if (fd != -1 && close_fd_on_error)
+		close(fd);
 	return rc;
 }
 
