@@ -74,7 +74,7 @@ else
 	AC_MSG_WARN([check not found - skipping building unit tests])
 fi
 AM_CONDITIONAL(HAVE_VALGRIND, [test "x$VALGRIND" != "x"])
-AM_CONDITIONAL(BUILD_TESTS, [test "x$HAVE_CHECK" = "xyes"])
+AM_CONDITIONAL(ENABLE_RUNTIME_TESTS, [test "x$HAVE_CHECK" = "xyes"])
 
 with_cflags=""
 if test "x$GCC" = "xyes"; then
@@ -150,7 +150,7 @@ AC_MSG_RESULT([
 	       Libdir				${libdir}
 
 	       Build documentation		${have_doxygen}
-	       Build unit-tests			${HAVE_CHECK}
+	       Enable unit-tests		${HAVE_CHECK}
 	       Enable profiling			${enable_gcov}
 	       Static library symbol check	${have_nm}
 	       ])

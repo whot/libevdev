@@ -1,6 +1,6 @@
-if BUILD_TESTS
-run_tests = test-libevdev test-kernel
+if ENABLE_RUNTIME_TESTS
 build_tests = test-compile-pedantic test-link test-static-link
+run_tests = test-libevdev test-kernel
 
 .NOTPARALLEL:
 
