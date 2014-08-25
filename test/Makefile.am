@@ -1,10 +1,30 @@
-if ENABLE_RUNTIME_TESTS
 build_tests = test-compile-pedantic test-link test-static-link
+noinst_PROGRAMS = $(build_tests)
+
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/include -I$(top_builddir)/libevdev
+AM_LDFLAGS =
+
+test_compile_pedantic_SOURCES = test-compile-pedantic.c
+test_compile_pedantic_CFLAGS = $(AM_CPPFLAGS) -pedantic -Werror -std=c90
+
+test_link_SOURCES = test-link.c
+test_link_CFLAGS = -I$(top_srcdir)
+test_link_LDADD = $(top_builddir)/libevdev/libevdev.la
+
+test_static_link_SOURCES = test-link.c
+test_static_link_CFLAGS = -I$(top_srcdir)
+test_static_link_LDADD = $(top_builddir)/libevdev/libevdev.la
+test_static_link_LDFLAGS = $(AM_LDFLAGS) -static
+
+check_local_deps =
+clean_local_deps =
+
+if ENABLE_RUNTIME_TESTS
 run_tests = test-libevdev test-kernel
 
 .NOTPARALLEL:
 
-noinst_PROGRAMS = $(run_tests) $(build_tests)
+noinst_PROGRAMS += $(run_tests)
 
 TESTS = $(run_tests)
 
@@ -23,8 +43,8 @@ common_sources = $(libevdev_sources) \
 		 test-common.h
 
 # include builddir for event-names.h
-AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/include -I$(top_builddir)/libevdev $(CHECK_CFLAGS) $(GCOV_CFLAGS)
-AM_LDFLAGS = $(GCOV_LDFLAGS)
+AM_CPPFLAGS += $(CHECK_CFLAGS) $(GCOV_CFLAGS)
+AM_LDFLAGS += $(GCOV_LDFLAGS)
 
 test_libevdev_SOURCES = \
 			test-main.c \
@@ -39,25 +59,11 @@ test_libevdev_SOURCES = \
 
 test_libevdev_LDADD =  $(CHECK_LIBS)
 
-test_compile_pedantic_SOURCES = test-compile-pedantic.c
-test_compile_pedantic_CFLAGS = $(AM_CPPFLAGS) -pedantic -Werror -std=c90
-
-test_link_SOURCES = test-link.c
-test_link_CFLAGS = -I$(top_srcdir)
-test_link_LDADD = $(top_builddir)/libevdev/libevdev.la
-
-test_static_link_SOURCES = test-link.c
-test_static_link_CFLAGS = -I$(top_srcdir)
-test_static_link_LDADD = $(top_builddir)/libevdev/libevdev.la
-test_static_link_LDFLAGS = $(AM_LDFLAGS) -static
-
 test_kernel_SOURCES = \
 		      test-kernel.c \
 		      $(common_sources)
 test_kernel_CFLAGS = -I$(top_srcdir)
 test_kernel_LDADD = $(CHECK_LIBS)
-
-check_local_deps =
 
 if HAVE_VALGRIND
 VALGRIND_FLAGS=--leak-check=full \
@@ -100,6 +106,7 @@ gcov: gcov-report.txt
 	@cat gcov-report.txt
 
 check_local_deps += gcov
+clean_local_deps += gcov-clean
 
 else
 
@@ -112,12 +119,11 @@ gcov:
 gcov-clean:
 	@true
 
-endif
+endif # HAVE_VALGRIND
 
 .PHONY: gcov gcov-clean gcov-report.txt
 
-clean-local: gcov-clean
-	rm -f *.gcno *.gcda
+endif # ENABLE_RUNTIME_TESTS
 
 if HAVE_NM
 # Hack to check for leaking symbols in the static library.
@@ -138,7 +144,9 @@ static-symbol-leaks: test-static-link
 	)
 
 check_local_deps += static-symbol-leaks
-endif
+endif # HAVE_NM
 
 check-local: $(check_local_deps)
-endif
+
+clean-local: $(clean_local_deps)
+	rm -f *.gcno *.gcda
