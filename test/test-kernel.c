@@ -75,7 +75,7 @@ START_TEST(test_revoke)
 	dev_fd = libevdev_get_fd(dev);
 	ck_assert_int_ge(dev_fd, 0);
 	rc = ioctl(dev_fd, EVIOCREVOKE, NULL);
-	if (rc == -1 && errno == -EINVAL) {
+	if (rc == -1 && errno == EINVAL) {
 		fprintf(stderr, "WARNING: skipping EVIOCREVOKE test, not suported by current kernel\n");
 		goto out;
 	}
@@ -144,7 +144,7 @@ START_TEST(test_revoke_fail_after)
 	ck_assert_int_gt(fd, -1);
 
 	rc = ioctl(fd, EVIOCREVOKE, NULL);
-	if (rc == -1 && errno == -EINVAL) {
+	if (rc == -1 && errno == EINVAL) {
 		fprintf(stderr, "WARNING: skipping EVIOCREVOKE test, not suported by current kernel\n");
 		goto out;
 	}
