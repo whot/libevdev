@@ -146,6 +146,9 @@ AC_CONFIG_FILES([Makefile
 AC_OUTPUT
 
 AC_MSG_RESULT([
+	       Prefix				${prefix}
+	       Libdir				${libdir}
+
 	       Build documentation		${have_doxygen}
 	       Build unit-tests			${HAVE_CHECK}
 	       Enable profiling			${enable_gcov}
