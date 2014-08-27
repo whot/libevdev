@@ -1774,7 +1774,7 @@ int libevdev_disable_event_type(struct libevdev *dev, unsigned int type);
 /**
  * @ingroup kernel
  *
- * Forcibly enable an event type on this device, even if the underlying
+ * Forcibly enable an event code on this device, even if the underlying
  * device does not support it. While this cannot make the device actually
  * report such events, it will now return true for libevdev_has_event_code().
  *
@@ -1821,8 +1821,8 @@ int libevdev_enable_event_code(struct libevdev *dev, unsigned int type, unsigned
  * This is a local modification only affecting only this representation of
  * this device.
  *
- * Disabling EV_SYN will not work. Don't shoot yourself in the foot.
- * It hurts.
+ * Disabling codes of type EV_SYN will not work. Don't shoot yourself in the
+ * foot. It hurts.
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type to disable (EV_ABS, EV_KEY, ...)
