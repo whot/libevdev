@@ -60,6 +60,43 @@ START_TEST(test_next_event)
 }
 END_TEST
 
+START_TEST(test_next_event_invalid_fd)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+	struct input_event ev;
+
+	libevdev_set_log_function(test_logfunc_ignore_error, NULL);
+
+	dev = libevdev_new();
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, -EBADF);
+	libevdev_free(dev);
+
+	test_create_device(&uidev, &dev,
+			   EV_REL, REL_X,
+			   EV_REL, REL_Y,
+			   EV_KEY, BTN_LEFT,
+			   -1);
+
+	/* invalid (missing) flag */
+	rc = libevdev_next_event(dev, 0x10, &ev);
+	ck_assert_int_eq(rc, -EINVAL);
+
+	/* set an invalid fd */
+	rc = libevdev_change_fd(dev, -3);
+	ck_assert_int_eq(rc, 0);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+	ck_assert_int_eq(rc, -EBADF);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+	libevdev_free(dev);
+	uinput_device_free(uidev);
+}
+END_TEST
+
 START_TEST(test_syn_dropped_event)
 {
 	struct uinput_device* uidev;
@@ -339,6 +376,23 @@ START_TEST(test_has_event_pending)
 	libevdev_free(dev);
 	uinput_device_free(uidev);
 
+}
+END_TEST
+
+START_TEST(test_has_event_pending_invalid_fd)
+{
+	struct libevdev *dev;
+	int rc;
+
+	libevdev_set_log_function(test_logfunc_ignore_error, NULL);
+
+	dev = libevdev_new();
+	rc = libevdev_has_event_pending(dev);
+	ck_assert_int_eq(rc, -EBADF);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+	libevdev_free(dev);
 }
 END_TEST
 
@@ -2066,11 +2120,13 @@ libevdev_events(void)
 
 	TCase *tc = tcase_create("event polling");
 	tcase_add_test(tc, test_next_event);
+	tcase_add_test(tc, test_next_event_invalid_fd);
 	tcase_add_test(tc, test_syn_dropped_event);
 	tcase_add_test(tc, test_double_syn_dropped_event);
 	tcase_add_test(tc, test_event_type_filtered);
 	tcase_add_test(tc, test_event_code_filtered);
 	tcase_add_test(tc, test_has_event_pending);
+	tcase_add_test(tc, test_has_event_pending_invalid_fd);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("SYN_DROPPED deltas");
