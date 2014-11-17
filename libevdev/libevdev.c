@@ -999,7 +999,7 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 		return -EBADF;
 
 	if (!(flags & (LIBEVDEV_READ_FLAG_NORMAL|LIBEVDEV_READ_FLAG_SYNC|LIBEVDEV_READ_FLAG_FORCE_SYNC))) {
-		log_bug(dev, "invalid flags %#x\n.\n", flags);
+		log_bug(dev, "invalid flags %#x.\n", flags);
 		return -EINVAL;
 	}
 
