@@ -145,7 +145,7 @@ _libevdev_log_msg(const struct libevdev *dev,
 
 	if (dev && dev->log.device_handler) {
 		/**
-		 * if a global handler is set for a device does
+		 * if both global handler and device handler are set
 		 * we've set up the handlers wrong.  And that means we'll
 		 * likely get the printf args wrong and cause all sorts of
 		 * mayhem. Seppuku is called for.
