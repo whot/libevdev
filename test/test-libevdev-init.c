@@ -435,6 +435,39 @@ START_TEST(test_device_grab)
 }
 END_TEST
 
+START_TEST(test_device_grab_invalid_fd)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int rc;
+
+	libevdev_set_log_function(test_logfunc_ignore_error, NULL);
+
+	dev = libevdev_new();
+	rc = libevdev_grab(dev, 0);
+	ck_assert_int_eq(rc, -EBADF);
+	libevdev_free(dev);
+
+	test_create_device(&uidev, &dev,
+			   EV_SYN, SYN_REPORT,
+			   EV_REL, REL_X,
+			   EV_REL, REL_Y,
+			   EV_REL, REL_WHEEL,
+			   EV_KEY, BTN_LEFT,
+			   EV_KEY, BTN_MIDDLE,
+			   EV_KEY, BTN_RIGHT,
+			   -1);
+	libevdev_change_fd(dev, -2);
+	rc = libevdev_grab(dev, 0);
+	ck_assert_int_eq(rc, -EBADF);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_set_clock_id)
 {
 	struct uinput_device* uidev;
@@ -560,6 +593,7 @@ libevdev_init_test(void)
 
 	tc = tcase_create("device grab");
 	tcase_add_test(tc, test_device_grab);
+	tcase_add_test(tc, test_device_grab_invalid_fd);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("clock id");
