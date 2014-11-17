@@ -108,37 +108,37 @@ extern "C" {
  * finds them monitors the device to print the event.
  *
  * @code
-       struct libevdev *dev = NULL;
-       int fd;
-       int rc = 1;
-
-       fd = open("/dev/input/event0", O_RDONLY|O_NONBLOCK);
-       rc = libevdev_new_from_fd(fd, &dev);
-       if (rc < 0) {
-               fprintf(stderr, "Failed to init libevdev (%s)\n", strerror(-rc));
-               exit(1);
-       }
-       printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
-       printf("Input device ID: bus %#x vendor %#x product %#x\n",
-              libevdev_get_id_bustype(dev),
-              libevdev_get_id_vendor(dev),
-              libevdev_get_id_product(dev));
-       if (!libevdev_has_event_type(dev, EV_REL) ||
-           !libevdev_has_event_code(dev, EV_KEY, BTN_LEFT)) {
-               printf("This device does not look like a mouse\n");
-               exit(1);
-       }
-
-       do {
-               struct input_event ev;
-               rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
-               if (rc == 0)
-                       printf("Event: %s %s %d\n",
-                              libevdev_get_event_type_name(ev.type),
-                              libevdev_get_event_code_name(ev.type, ev.code),
-                              ev.value);
-       } while (rc == 1 || rc == 0 || rc == -EAGAIN);
-  @endcode
+ *      struct libevdev *dev = NULL;
+ *      int fd;
+ *      int rc = 1;
+ *
+ *      fd = open("/dev/input/event0", O_RDONLY|O_NONBLOCK);
+ *      rc = libevdev_new_from_fd(fd, &dev);
+ *      if (rc < 0) {
+ *              fprintf(stderr, "Failed to init libevdev (%s)\n", strerror(-rc));
+ *              exit(1);
+ *      }
+ *      printf("Input device name: \"%s\"\n", libevdev_get_name(dev));
+ *      printf("Input device ID: bus %#x vendor %#x product %#x\n",
+ *             libevdev_get_id_bustype(dev),
+ *             libevdev_get_id_vendor(dev),
+ *             libevdev_get_id_product(dev));
+ *      if (!libevdev_has_event_type(dev, EV_REL) ||
+ *          !libevdev_has_event_code(dev, EV_KEY, BTN_LEFT)) {
+ *              printf("This device does not look like a mouse\n");
+ *              exit(1);
+ *      }
+ *
+ *      do {
+ *              struct input_event ev;
+ *              rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+ *              if (rc == 0)
+ *                      printf("Event: %s %s %d\n",
+ *                             libevdev_get_event_type_name(ev.type),
+ *                             libevdev_get_event_code_name(ev.type, ev.code),
+ *                             ev.value);
+ *      } while (rc == 1 || rc == 0 || rc == -EAGAIN);
+ * @endcode
  *
  * A more complete example is available with the libevdev-events tool here:
  * http://cgit.freedesktop.org/libevdev/tree/tools/libevdev-events.c
@@ -173,17 +173,17 @@ extern "C" {
  * events. The number of events between SYN_REPORT events is arbitrary and
  * depends on the hardware. An example event sequence may look like this:
  * @code
-   EV_ABS   ABS_X        9
-   EV_ABS   ABS_Y        8
-   EV_SYN   SYN_REPORT   0
-   ------------------------
-   EV_ABS   ABS_X        10
-   EV_ABS   ABS_Y        10
-   EV_KEY   BTN_TOUCH    1
-   EV_SYN   SYN_REPORT   0
-   ------------------------
-   EV_ABS   ABS_X        11
-   EV_SYN   SYN_REPORT   0
+ *  EV_ABS   ABS_X        9
+ *  EV_ABS   ABS_Y        8
+ *  EV_SYN   SYN_REPORT   0
+ *  ------------------------
+ *  EV_ABS   ABS_X        10
+ *  EV_ABS   ABS_Y        10
+ *  EV_KEY   BTN_TOUCH    1
+ *  EV_SYN   SYN_REPORT   0
+ *  ------------------------
+ *  EV_ABS   ABS_X        11
+ *  EV_SYN   SYN_REPORT   0
  * @endcode
  *
  * Events are handed to the client buffer as they appear, the kernel adjusts
@@ -194,19 +194,19 @@ extern "C" {
  * the client that some events were lost. The above example event sequence
  * may look like this (note the missing/repeated events):
  * @code
-   EV_ABS   ABS_X        9
-   EV_ABS   ABS_Y        8
-   EV_SYN   SYN_REPORT   0
-   ------------------------
-   EV_ABS   ABS_X        10
-   EV_ABS   ABS_Y        10
-   EV_SYN   SYN_DROPPED  0
-   EV_ABS   ABS_Y        15
-   EV_SYN   SYN_REPORT   0
-   ------------------------
-   EV_ABS   ABS_X        11
-   EV_KEY   BTN_TOUCH    0
-   EV_SYN   SYN_REPORT   0
+ *  EV_ABS   ABS_X        9
+ *  EV_ABS   ABS_Y        8
+ *  EV_SYN   SYN_REPORT   0
+ *  ------------------------
+ *  EV_ABS   ABS_X        10
+ *  EV_ABS   ABS_Y        10
+ *  EV_SYN   SYN_DROPPED  0
+ *  EV_ABS   ABS_Y        15
+ *  EV_SYN   SYN_REPORT   0
+ *  ------------------------
+ *  EV_ABS   ABS_X        11
+ *  EV_KEY   BTN_TOUCH    0
+ *  EV_SYN   SYN_REPORT   0
  * @endcode
  *
  * A SYN_DROPPED event may be recieved at any time in the event sequence.
@@ -239,11 +239,11 @@ extern "C" {
  * active slot.
  * Thus, an event sequence from a slot-capable device may look like this:
  * @code
-   EV_ABS   ABS_MT_POSITION_Y   10
-   EV_ABS   ABS_MT_SLOT         1
-   EV_ABS   ABS_MT_POSITION_X   100
-   EV_ABS   ABS_MT_POSITION_Y   80
-   EV_SYN   SYN_REPORT          0
+ *  EV_ABS   ABS_MT_POSITION_Y   10
+ *  EV_ABS   ABS_MT_SLOT         1
+ *  EV_ABS   ABS_MT_POSITION_X   100
+ *  EV_ABS   ABS_MT_POSITION_Y   80
+ *  EV_SYN   SYN_REPORT          0
  * @endcode
  * Note the lack of ABS_MT_SLOT: the first ABS_MT_POSITION_Y applies to
  * a slot opened previously, and is the only axis that changed for that
@@ -266,16 +266,16 @@ extern "C" {
  *
  * An example event sequence for such a sync may look like this:
  * @code
-   EV_ABS   ABS_MT_SLOT         0
-   EV_ABS   ABS_MT_POSITION_Y   10
-   EV_ABS   ABS_MT_SLOT         1
-   EV_ABS   ABS_MT_POSITION_X   100
-   EV_ABS   ABS_MT_POSITION_Y   80
-   EV_ABS   ABS_MT_SLOT         2
-   EV_ABS   ABS_MT_POSITION_Y   8
-   EV_ABS   ABS_MT_PRESSURE     12
-   EV_ABS   ABS_MT_SLOT         1
-   EV_SYN   SYN_REPORT          0
+ *  EV_ABS   ABS_MT_SLOT         0
+ *  EV_ABS   ABS_MT_POSITION_Y   10
+ *  EV_ABS   ABS_MT_SLOT         1
+ *  EV_ABS   ABS_MT_POSITION_X   100
+ *  EV_ABS   ABS_MT_POSITION_Y   80
+ *  EV_ABS   ABS_MT_SLOT         2
+ *  EV_ABS   ABS_MT_POSITION_Y   8
+ *  EV_ABS   ABS_MT_PRESSURE     12
+ *  EV_ABS   ABS_MT_SLOT         1
+ *  EV_SYN   SYN_REPORT          0
  * @endcode
  * Note the terminating ABS_MT_SLOT event, this indicates that the kernel
  * currently has slot 1 active.
@@ -300,21 +300,21 @@ extern "C" {
  *
  * An example event sequence for such a sync may look like this:
  * @code
-   EV_ABS   ABS_MT_SLOT         0
-   EV_ABS   ABS_MT_TRACKING_ID  -1
-   EV_ABS   ABS_MT_SLOT         2
-   EV_ABS   ABS_MT_TRACKING_ID  -1
-   EV_SYN   SYN_REPORT          0
-   ------------------------
-   EV_ABS   ABS_MT_SLOT         1
-   EV_ABS   ABS_MT_POSITION_X   100
-   EV_ABS   ABS_MT_POSITION_Y   80
-   EV_ABS   ABS_MT_SLOT         2
-   EV_ABS   ABS_MT_TRACKING_ID  45
-   EV_ABS   ABS_MT_POSITION_Y   8
-   EV_ABS   ABS_MT_PRESSURE     12
-   EV_ABS   ABS_MT_SLOT         1
-   EV_SYN   SYN_REPORT          0
+ *  EV_ABS   ABS_MT_SLOT         0
+ *  EV_ABS   ABS_MT_TRACKING_ID  -1
+ *  EV_ABS   ABS_MT_SLOT         2
+ *  EV_ABS   ABS_MT_TRACKING_ID  -1
+ *  EV_SYN   SYN_REPORT          0
+ *  ------------------------
+ *  EV_ABS   ABS_MT_SLOT         1
+ *  EV_ABS   ABS_MT_POSITION_X   100
+ *  EV_ABS   ABS_MT_POSITION_Y   80
+ *  EV_ABS   ABS_MT_SLOT         2
+ *  EV_ABS   ABS_MT_TRACKING_ID  45
+ *  EV_ABS   ABS_MT_POSITION_Y   8
+ *  EV_ABS   ABS_MT_PRESSURE     12
+ *  EV_ABS   ABS_MT_SLOT         1
+ *  EV_SYN   SYN_REPORT          0
  * @endcode
  * Note how the touchpoint in slot 0 was terminated, the touchpoint in slot
  * 2 was terminated and then started with a new ABS_MT_TRACKING_ID. The touchpoint
@@ -326,46 +326,46 @@ extern "C" {
  * handles events again. The below example shows an example event sequence
  * and what libevdev sees in the case of a SYN_DROPPED event:
  * @code
-
-             kernel                  |              userspace
-                                     |
-   EV_ABS   ABS_MT_SLOT         0    |    EV_ABS   ABS_MT_SLOT         0
-   EV_ABS   ABS_MT_TRACKING_ID  -1   |    EV_ABS   ABS_MT_TRACKING_ID  -1
-   EV_SYN   SYN_REPORT          0    |    EV_SYN   SYN_REPORT          0
-   ------------------------          |    ------------------------
-   EV_ABS   ABS_MT_TRACKING_ID  30   |
-   EV_ABS   ABS_MT_POSITION_X   100  |
-   EV_ABS   ABS_MT_POSITION_Y   80   |
-   EV_SYN   SYN_REPORT          0    |           SYN_DROPPED
-   ------------------------          |
-   EV_ABS   ABS_MT_TRACKING_ID  -1   |
-   EV_SYN   SYN_REPORT          0    |
-   ------------------------          |    ------------------------
-   EV_ABS   ABS_MT_SLOT         1    |    EV_ABS   ABS_MT_SLOT         1
-   EV_ABS   ABS_MT_POSITION_X   90   |    EV_ABS   ABS_MT_POSITION_X   90
-   EV_ABS   ABS_MT_POSITION_Y   10   |    EV_ABS   ABS_MT_POSITION_Y   10
-   EV_SYN   SYN_REPORT          0    |    EV_SYN   SYN_REPORT          0
+ *
+ *            kernel                  |              userspace
+ *                                    |
+ *  EV_ABS   ABS_MT_SLOT         0    |    EV_ABS   ABS_MT_SLOT         0
+ *  EV_ABS   ABS_MT_TRACKING_ID  -1   |    EV_ABS   ABS_MT_TRACKING_ID  -1
+ *  EV_SYN   SYN_REPORT          0    |    EV_SYN   SYN_REPORT          0
+ *  ------------------------          |    ------------------------
+ *  EV_ABS   ABS_MT_TRACKING_ID  30   |
+ *  EV_ABS   ABS_MT_POSITION_X   100  |
+ *  EV_ABS   ABS_MT_POSITION_Y   80   |
+ *  EV_SYN   SYN_REPORT          0    |           SYN_DROPPED
+ *  ------------------------          |
+ *  EV_ABS   ABS_MT_TRACKING_ID  -1   |
+ *  EV_SYN   SYN_REPORT          0    |
+ *  ------------------------          |    ------------------------
+ *  EV_ABS   ABS_MT_SLOT         1    |    EV_ABS   ABS_MT_SLOT         1
+ *  EV_ABS   ABS_MT_POSITION_X   90   |    EV_ABS   ABS_MT_POSITION_X   90
+ *  EV_ABS   ABS_MT_POSITION_Y   10   |    EV_ABS   ABS_MT_POSITION_Y   10
+ *  EV_SYN   SYN_REPORT          0    |    EV_SYN   SYN_REPORT          0
  * @endcode
  * If such an event sequence occurs, libevdev will send all updated axes
  * during the sync process. Axis events may thus be generated for devices
  * without a currently valid ABS_MT_TRACKING_ID. Specifically for the above
  * example, the client would receive the following event sequence:
  * @code
-   EV_ABS   ABS_MT_SLOT         0       ← LIBEVDEV_READ_FLAG_NORMAL
-   EV_ABS   ABS_MT_TRACKING_ID  -1
-   EV_SYN   SYN_REPORT          0
-   ------------------------
-   EV_SYN   SYN_DROPPED         0       → LIBEVDEV_READ_STATUS_SYNC
-   ------------------------
-   EV_ABS   ABS_MT_POSITION_X   100     ← LIBEVDEV_READ_FLAG_SYNC
-   EV_ABS   ABS_MT_POSITION_Y   80
-   EV_SYN   SYN_REPORT          0
-   -----------------------------        → -EGAIN
-   EV_ABS   ABS_MT_SLOT         1       ← LIBEVDEV_READ_FLAG_NORMAL
-   EV_ABS   ABS_MT_POSITION_X   90
-   EV_ABS   ABS_MT_POSITION_Y   10
-   EV_SYN   SYN_REPORT          0
-   -------------------
+ *  EV_ABS   ABS_MT_SLOT         0       ← LIBEVDEV_READ_FLAG_NORMAL
+ *  EV_ABS   ABS_MT_TRACKING_ID  -1
+ *  EV_SYN   SYN_REPORT          0
+ *  ------------------------
+ *  EV_SYN   SYN_DROPPED         0       → LIBEVDEV_READ_STATUS_SYNC
+ *  ------------------------
+ *  EV_ABS   ABS_MT_POSITION_X   100     ← LIBEVDEV_READ_FLAG_SYNC
+ *  EV_ABS   ABS_MT_POSITION_Y   80
+ *  EV_SYN   SYN_REPORT          0
+ *  -----------------------------        → -EGAIN
+ *  EV_ABS   ABS_MT_SLOT         1       ← LIBEVDEV_READ_FLAG_NORMAL
+ *  EV_ABS   ABS_MT_POSITION_X   90
+ *  EV_ABS   ABS_MT_POSITION_Y   10
+ *  EV_SYN   SYN_REPORT          0
+ *  -------------------
  * @endcode
  * The axis events do not reflect the position of a current touch point, a
  * client must take care not to generate a new touch point based on those
@@ -388,19 +388,19 @@ extern "C" {
  * assume the buffer contains the following sequence:
  *
  * @code
-   EV_SYN   SYN_DROPPED
-   EV_ABS   ABS_X               1
-   EV_SYN   SYN_REPORT          0
-   EV_ABS   ABS_X               2
-   EV_SYN   SYN_REPORT          0
-   EV_ABS   ABS_X               3
-   EV_SYN   SYN_REPORT          0
-   EV_ABS   ABS_X               4
-   EV_SYN   SYN_REPORT          0
-   EV_ABS   ABS_X               5
-   EV_SYN   SYN_REPORT          0
-   EV_ABS   ABS_X               6
-   EV_SYN   SYN_REPORT          0
+ *  EV_SYN   SYN_DROPPED
+ *  EV_ABS   ABS_X               1
+ *  EV_SYN   SYN_REPORT          0
+ *  EV_ABS   ABS_X               2
+ *  EV_SYN   SYN_REPORT          0
+ *  EV_ABS   ABS_X               3
+ *  EV_SYN   SYN_REPORT          0
+ *  EV_ABS   ABS_X               4
+ *  EV_SYN   SYN_REPORT          0
+ *  EV_ABS   ABS_X               5
+ *  EV_SYN   SYN_REPORT          0
+ *  EV_ABS   ABS_X               6
+ *  EV_SYN   SYN_REPORT          0
  * @endcode
  * An ioctl at any time in this sequence will return a value of 6 for ABS_X.
  *
@@ -411,10 +411,10 @@ extern "C" {
  * avoid spurious cursor movements. In the above example, the event sequence
  * by libevdev is:
  * @code
-   EV_SYN   SYN_DROPPED
-   EV_ABS   ABS_X               6
-   EV_SYN   SYN_REPORT          0
-   @endcode
+ *  EV_SYN   SYN_DROPPED
+ *  EV_ABS   ABS_X               6
+ *  EV_SYN   SYN_REPORT          0
+ *  @endcode
  */
 
 /**
@@ -771,11 +771,11 @@ struct libevdev* libevdev_new(void);
  *
  * This is a shortcut for
  *
- @code
- int err;
- struct libevdev *dev = libevdev_new();
- err = libevdev_set_fd(dev, fd);
- @endcode
+ * @code
+ * int err;
+ * struct libevdev *dev = libevdev_new();
+ * err = libevdev_set_fd(dev, fd);
+ * @endcode
  *
  * @param fd A file descriptor to the device in O_RDWR or O_RDONLY mode.
  * @param[out] dev The newly initialized evdev device.
@@ -1001,13 +1001,13 @@ int libevdev_set_fd(struct libevdev* dev, int fd);
  * The example code below illustrates how to force a re-sync of the
  * library-internal state. Note that this code doesn't handle the events in
  * the caller, it merely forces an update of the internal library state.
- @code
-     struct input_event ev;
-     libevdev_change_fd(dev, new_fd);
-     libevdev_next_event(dev, LIBEVDEV_READ_FLAG_FORCE_SYNC, &ev);
-     while (libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev) == LIBEVDEV_READ_STATUS_SYNC)
-	                     ; // noop
- @endcode
+ * @code
+ *     struct input_event ev;
+ *     libevdev_change_fd(dev, new_fd);
+ *     libevdev_next_event(dev, LIBEVDEV_READ_FLAG_FORCE_SYNC, &ev);
+ *     while (libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev) == LIBEVDEV_READ_STATUS_SYNC)
+ *                             ; // noop
+ * @endcode
  *
  * The fd may be open in O_RDONLY or O_RDWR.
  *
@@ -1515,10 +1515,10 @@ int libevdev_set_event_value(struct libevdev *dev, unsigned int type, unsigned i
  *
  * Fetch the current value of the event type. This is a shortcut for
  *
- @code
-   if (libevdev_has_event_type(dev, t) && libevdev_has_event_code(dev, t, c))
-        val = libevdev_get_event_value(dev, t, c);
- @endcode
+ * @code
+ *   if (libevdev_has_event_type(dev, t) && libevdev_has_event_code(dev, t, c))
+ *        val = libevdev_get_event_value(dev, t, c);
+ * @endcode
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type for the code to query (EV_SYN, EV_REL, etc.)
@@ -1592,12 +1592,12 @@ int libevdev_set_slot_value(struct libevdev *dev, unsigned int slot, unsigned in
  *
  * Fetch the current value of the code for the given slot. This is a shortcut for
  *
- @code
-   if (libevdev_has_event_type(dev, EV_ABS) &&
-       libevdev_has_event_code(dev, EV_ABS, c) &&
-       slot < device->number_of_slots)
-       val = libevdev_get_slot_value(dev, slot, c);
- @endcode
+ * @code
+ *   if (libevdev_has_event_type(dev, EV_ABS) &&
+ *       libevdev_has_event_code(dev, EV_ABS, c) &&
+ *       slot < device->number_of_slots)
+ *       val = libevdev_get_slot_value(dev, slot, c);
+ * @endcode
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param slot The numerical slot number, must be smaller than the total number
@@ -1882,11 +1882,11 @@ int libevdev_kernel_set_led_value(struct libevdev *dev, unsigned int code, enum 
  * of LED codes and values to set them to, terminated by a -1. For example, to
  * switch the NumLock LED on but the CapsLock LED off, use:
  *
- @code
-     libevdev_kernel_set_led_values(dev, LED_NUML, LIBEVDEV_LED_ON,
-                                         LED_CAPSL, LIBEVDEV_LED_OFF,
-                                         -1);
- @endcode
+ * @code
+ *     libevdev_kernel_set_led_values(dev, LED_NUML, LIBEVDEV_LED_ON,
+ *                                         LED_CAPSL, LIBEVDEV_LED_OFF,
+ *                                         -1);
+ * @endcode
  *
  * If any LED code or value is invalid, this function returns -EINVAL and no
  * LEDs are modified.
