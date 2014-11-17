@@ -961,6 +961,44 @@ START_TEST(test_device_kernel_change_axis_invalid)
 }
 END_TEST
 
+START_TEST(test_device_kernel_set_abs_invalid_fd)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	struct input_absinfo abs[2];
+	struct input_absinfo a;
+	int rc;
+
+	libevdev_set_log_function(test_logfunc_ignore_error, NULL);
+
+	memset(abs, 0, sizeof(abs));
+	abs[0].value = ABS_X;
+	abs[0].maximum = 1000;
+
+	abs[1].value = ABS_Y;
+	abs[1].maximum = 1000;
+
+	dev = libevdev_new();
+	rc = libevdev_kernel_set_abs_info(dev, ABS_X, &a);
+	ck_assert_int_eq(rc, -EBADF);
+	libevdev_free(dev);
+
+	test_create_abs_device(&uidev, &dev,
+			       2, abs,
+			       EV_SYN,
+			       -1);
+
+	libevdev_change_fd(dev, -2);
+	rc = libevdev_kernel_set_abs_info(dev, ABS_X, &a);
+	ck_assert_int_eq(rc, -EBADF);
+
+	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
+
+	uinput_device_free(uidev);
+	libevdev_free(dev);
+}
+END_TEST
+
 START_TEST(test_led_valid)
 {
 	struct uinput_device* uidev;
@@ -1153,6 +1191,7 @@ libevdev_has_event_test(void)
 	tcase_add_test(tc, test_device_disable_bit_invalid);
 	tcase_add_test(tc, test_device_kernel_change_axis);
 	tcase_add_test(tc, test_device_kernel_change_axis_invalid);
+	tcase_add_test(tc, test_device_kernel_set_abs_invalid_fd);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("led manipulation");
