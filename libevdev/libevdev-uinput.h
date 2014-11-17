@@ -40,12 +40,16 @@ struct libevdev_uinput;
  *
  @code
  int err;
- int new_fd;
+ int fd, new_fd, uifd;
  struct libevdev *dev;
  struct libevdev_uinput *uidev;
  struct input_event ev[2];
 
- err = libevdev_new_from_fd(&dev, fd);
+ fd = open("/dev/input/event0", O_RDONLY);
+ if (fd < 0)
+     return err;
+
+ err = libevdev_new_from_fd(fd, &dev);
  if (err != 0)
      return err;
 
@@ -66,7 +70,9 @@ struct libevdev_uinput;
      return err;
 
  libevdev_uinput_destroy(uidev);
+ libevdev_free(dev);
  close(uifd);
+ close(fd);
 
  @endcode
  *
@@ -80,12 +86,12 @@ struct libevdev_uinput;
  dev = libevdev_new();
  libevdev_set_name(dev, "test device");
  libevdev_enable_event_type(dev, EV_REL);
- libevdev_enable_event_code(dev, EV_REL, REL_X);
- libevdev_enable_event_code(dev, EV_REL, REL_Y);
+ libevdev_enable_event_code(dev, EV_REL, REL_X, NULL);
+ libevdev_enable_event_code(dev, EV_REL, REL_Y, NULL);
  libevdev_enable_event_type(dev, EV_KEY);
- libevdev_enable_event_code(dev, EV_KEY, BTN_LEFT);
- libevdev_enable_event_code(dev, EV_KEY, BTN_MIDDLE);
- libevdev_enable_event_code(dev, EV_KEY, BTN_RIGHT);
+ libevdev_enable_event_code(dev, EV_KEY, BTN_LEFT, NULL);
+ libevdev_enable_event_code(dev, EV_KEY, BTN_MIDDLE, NULL);
+ libevdev_enable_event_code(dev, EV_KEY, BTN_RIGHT, NULL);
 
  err = libevdev_uinput_create_from_device(dev,
                                           LIBEVDEV_UINPUT_OPEN_MANAGED,
