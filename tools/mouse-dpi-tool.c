@@ -183,6 +183,24 @@ print_summary(struct measurements *m)
 	}
 }
 
+static inline const char*
+bustype(int bustype)
+{
+	const char *bus;
+
+	switch(bustype) {
+		case BUS_PCI: bus = "pci"; break;
+		case BUS_ISAPNP: bus = "isapnp"; break;
+		case BUS_USB: bus = "usb"; break;
+		case BUS_HIL: bus = "hil"; break;
+		case BUS_BLUETOOTH: bus = "bluetooth"; break;
+		case BUS_VIRTUAL: bus = "virtual"; break;
+		default: bus = "unknown bus type"; break;
+	}
+
+	return bus;
+}
+
 int
 main (int argc, char **argv) {
 	int rc;
@@ -227,6 +245,16 @@ main (int argc, char **argv) {
 	printf("\n");
 
 	print_summary(&measurements);
+
+	printf("\n");
+	printf("Entry for hwdb match (replace XXX with the resolution in DPI):\n"
+	       "mouse:%s:v%4xp%4x:name:%s:\n"
+	       " MOUSE_DPI=XXX@%d\n",
+	       bustype(libevdev_get_id_bustype(dev)),
+	       libevdev_get_id_vendor(dev),
+	       libevdev_get_id_product(dev),
+	       libevdev_get_name(dev),
+	       (int)measurements.frequency);
 
 	libevdev_free(dev);
 	close(fd);
