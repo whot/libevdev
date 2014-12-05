@@ -248,7 +248,7 @@ main (int argc, char **argv) {
 
 	printf("\n");
 	printf("Entry for hwdb match (replace XXX with the resolution in DPI):\n"
-	       "mouse:%s:v%4xp%4x:name:%s:\n"
+	       "mouse:%s:v%04xp%04x:name:%s:\n"
 	       " MOUSE_DPI=XXX@%d\n",
 	       bustype(libevdev_get_id_bustype(dev)),
 	       libevdev_get_id_vendor(dev),
