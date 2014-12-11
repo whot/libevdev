@@ -181,6 +181,9 @@ print_summary(struct measurements *m)
 		printf("%8dmm	%8.2fin	%8ddpi\n",
 		       (int)(inch * 25.4), inch, res);
 	}
+	printf("If your resolution is not in the list, calculate it with:\n"
+	       "\tresolution=%d/inches, or\n"
+	       "\tresolution=%d/(mm * 25.4)\n", m->distance, m->distance);
 }
 
 static inline const char*
@@ -236,7 +239,7 @@ main (int argc, char **argv) {
 	libevdev_grab(dev, LIBEVDEV_UNGRAB);
 
 	printf("Mouse %s on %s\n", libevdev_get_name(dev), path);
-	printf("Move the device along the x-axis.\n");
+	printf("Move the device 250mm/10in or more along the x-axis.\n");
 	printf("Pause 3 seconds before movement to reset, Ctrl+C to exit.\n");
 	setbuf(stdout, NULL);
 
