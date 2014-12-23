@@ -1,4 +1,5 @@
 libevdev-events
 touchpad-edge-detector
 mouse-dpi-tool
+mouse-wheel-tool
 libevdev-tweak-device

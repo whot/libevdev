@@ -2,6 +2,7 @@ noinst_PROGRAMS = libevdev-events
 bin_PROGRAMS = \
 	       touchpad-edge-detector \
 	       mouse-dpi-tool \
+	       mouse-wheel-tool \
 	       libevdev-tweak-device
 
 AM_CPPFLAGS = $(GCC_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/include -I$(top_srcdir)/libevdev
@@ -15,6 +16,9 @@ touchpad_edge_detector_LDADD = $(libevdev_ldadd)
 
 mouse_dpi_tool_SOURCES = mouse-dpi-tool.c
 mouse_dpi_tool_LDADD = $(libevdev_ldadd)
+
+mouse_wheel_tool_SOURCES = mouse-wheel-tool.c
+mouse_wheel_tool_LDADD = $(libevdev_ldadd)
 
 libevdev_tweak_device_SOURCES = libevdev-tweak-device.c
 libevdev_tweak_device_LDADD = $(libevdev_ldadd)
