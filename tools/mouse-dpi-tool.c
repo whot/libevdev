@@ -210,7 +210,7 @@ main (int argc, char **argv) {
 	int fd;
 	const char *path;
 	struct libevdev *dev;
-	struct measurements measurements = {0};
+	struct measurements measurements = {0, 0, 0};
 
 	if (argc < 2)
 		return usage();
