@@ -82,8 +82,13 @@ def print_map(bits):
 	print("};")
 	print("")
 
+	print("#if __clang__")
+	print("#pragma clang diagnostic push")
+	print("#pragma clang diagnostic ignored \"-Winitializer-overrides\"")
+	print("#else")
 	print("#pragma GCC diagnostic push")
 	print("#pragma GCC diagnostic ignored \"-Woverride-init\"")
+	print("#endif")
 	print("static const int ev_max[EV_MAX + 1] = {")
 	print("	[0 ... EV_MAX] = -1,")
 	for prefix in prefixes:
@@ -91,7 +96,11 @@ def print_map(bits):
 			continue
 		print("	[EV_%s] = %s_MAX," % (prefix[:-1], prefix[:-1]))
 	print("};")
+	print("#if __clang__")
+	print("#pragma clang diagnostic pop /* \"-Winitializer-overrides\" */")
+	print("#else")
 	print("#pragma GCC diagnostic pop /* \"-Woverride-init\" */")
+	print("#endif");
 	print("")
 
 def print_python_map(bits):
