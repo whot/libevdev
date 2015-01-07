@@ -51,8 +51,10 @@ static int
 usage(void) {
 	printf("Usage: %s /dev/input/event0\n", program_invocation_short_name);
 	printf("\n");
-	printf("This tool reads relative events from the kernel and calculates\n "
-	       "the distance covered and frequency of the incoming events.\n");
+	printf("This tool reads relative events from the kernel and calculates\n"
+	       "the distance covered and maximum frequency of the incoming events.\n"
+	       "Some mouse devices provide dynamic frequencies, it is\n"
+	       "recommended to measure multiple times to obtain the highest value.\n");
 	return 1;
 }
 
