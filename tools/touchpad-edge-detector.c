@@ -169,6 +169,13 @@ int main (int argc, char **argv) {
 	}
 	libevdev_grab(dev, LIBEVDEV_UNGRAB);
 
+	if (!libevdev_has_event_code(dev, EV_ABS, ABS_X) ||
+	    !libevdev_has_event_code(dev, EV_ABS, ABS_Y)) {
+		fprintf(stderr, "Error: this device does not have abs axes\n");
+		rc = EXIT_FAILURE;
+		goto out;
+	}
+
 	dim.left = INT_MAX;
 	dim.right = INT_MIN;
 	dim.top = INT_MAX;
@@ -188,6 +195,7 @@ int main (int argc, char **argv) {
 
 	printf("\n");
 
+out:
 	libevdev_free(dev);
 	close(fd);
 
