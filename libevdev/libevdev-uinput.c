@@ -358,9 +358,11 @@ libevdev_uinput_destroy(struct libevdev_uinput *uinput_dev)
 	if (!uinput_dev)
 		return;
 
-	(void)ioctl(uinput_dev->fd, UI_DEV_DESTROY, NULL);
-	if (uinput_dev->fd_is_managed)
-		close(uinput_dev->fd);
+	if (uinput_dev->fd >= 0) {
+		(void)ioctl(uinput_dev->fd, UI_DEV_DESTROY, NULL);
+		if (uinput_dev->fd_is_managed)
+			close(uinput_dev->fd);
+	}
 	free(uinput_dev->syspath);
 	free(uinput_dev->devnode);
 	free(uinput_dev->name);
