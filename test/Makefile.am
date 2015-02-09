@@ -5,7 +5,7 @@ AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/include -I$(top_builddir)/libevdev
 AM_LDFLAGS =
 
 test_compile_pedantic_SOURCES = test-compile-pedantic.c
-test_compile_pedantic_CFLAGS = $(AM_CPPFLAGS) -pedantic -Werror -std=c90
+test_compile_pedantic_CFLAGS = $(AM_CPPFLAGS) -pedantic -Werror -std=c89
 
 test_link_SOURCES = test-link.c
 test_link_CFLAGS = -I$(top_srcdir)
