@@ -533,7 +533,6 @@ START_TEST(test_syn_delta_mt)
 	abs[3].value = ABS_MT_POSITION_Y;
 	abs[3].maximum = 1000;
 
-
 	abs[4].value = ABS_MT_SLOT;
 	abs[4].maximum = 1;
 	abs[5].value = ABS_MT_TRACKING_ID;
@@ -647,7 +646,6 @@ START_TEST(test_syn_delta_mt_reset_slot)
 	abs[2].maximum = 1000;
 	abs[3].value = ABS_MT_POSITION_Y;
 	abs[3].maximum = 1000;
-
 
 	abs[4].value = ABS_MT_SLOT;
 	abs[4].maximum = 1;
@@ -1109,7 +1107,6 @@ START_TEST(test_syn_delta_late_sync)
 		}
 	}
 
-
 	/* Now we basically re-do the exact same test, just with the
 	   tracking ID order inverted */
 
@@ -1192,7 +1189,6 @@ START_TEST(test_syn_delta_late_sync)
 				break;
 		}
 	}
-
 
 	uinput_device_free(uidev);
 	libevdev_free(dev);
@@ -1499,7 +1495,6 @@ START_TEST(test_event_values_invalid)
 	ck_assert_int_eq(value, 0xab);
 	ck_assert_int_eq(libevdev_fetch_event_value(dev, EV_REL, REL_Z, &value), 0);
 	ck_assert_int_eq(value, 0xab);
-
 
 	uinput_device_free(uidev);
 	libevdev_free(dev);
@@ -2168,4 +2163,3 @@ libevdev_events(void)
 
 	return s;
 }
-

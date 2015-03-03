@@ -298,4 +298,3 @@ event_name_suite(void)
 
 	return s;
 }
-

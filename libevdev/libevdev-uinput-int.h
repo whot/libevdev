@@ -20,7 +20,6 @@
  * OF THIS SOFTWARE.
  */
 
-
 struct libevdev_uinput {
 	int fd; /**< file descriptor to uinput */
 	int fd_is_managed; /**< do we need to close it? */

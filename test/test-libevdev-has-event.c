@@ -262,7 +262,6 @@ START_TEST(test_input_props)
 	rc = libevdev_new_from_fd(uinput_device_get_fd(uidev), &dev);
 	ck_assert_msg(rc == 0, "Failed to create device: %s", strerror(-rc));
 
-
 	for (i = 0; i < INPUT_PROP_CNT; i++) {
 		if (i == INPUT_PROP_DIRECT || i == INPUT_PROP_BUTTONPAD)
 			ck_assert_int_eq(libevdev_has_property(dev, i), 1);
@@ -576,7 +575,6 @@ START_TEST(test_device_get_abs_info)
 
 	uidev = uinput_device_new(TEST_DEVICE_NAME);
 	ck_assert(uidev != NULL);
-
 
 	abs.minimum = 0;
 	abs.maximum = 1000;
@@ -1202,4 +1200,3 @@ libevdev_has_event_test(void)
 
 	return s;
 }
-

@@ -181,7 +181,6 @@ queue_peek(struct libevdev *dev, size_t idx, struct input_event *ev)
 	return 0;
 }
 
-
 /**
  * Shift the first n elements into ev and return the number of elements
  * shifted.
@@ -293,7 +292,6 @@ queue_set_num_elements(struct libevdev *dev, size_t nelem)
 			max = libevdev_event_type_get_max(type); \
 		break;
 
-
 static inline int
 type_to_mask_const(const struct libevdev *dev, unsigned int type, const unsigned long **mask)
 {
@@ -342,4 +340,3 @@ type_to_mask(struct libevdev *dev, unsigned int type, unsigned long **mask)
 
 #undef max_mask
 #endif
-

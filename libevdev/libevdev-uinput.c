@@ -271,8 +271,6 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 	return uinput_dev->devnode ? 0 : -1;
 }
 
-
-
 LIBEVDEV_EXPORT int
 libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct libevdev_uinput** uinput_dev)
 {

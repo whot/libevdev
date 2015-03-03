@@ -32,7 +32,6 @@
 
 #include "test-common-uinput.h"
 
-
 int test_create_device(struct uinput_device **uidev,
 		       struct libevdev **dev,
 		       ...);

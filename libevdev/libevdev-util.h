@@ -45,7 +45,6 @@
 		_a > _b ? _a : _b; \
 		})
 
-
 static inline bool
 startswith(const char *str, size_t len, const char *prefix, size_t plen)
 {

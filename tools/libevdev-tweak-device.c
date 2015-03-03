@@ -206,7 +206,6 @@ set_led(struct libevdev *dev)
 		return;
 	}
 
-
 	rc = libevdev_kernel_set_led_value(dev, led, state);
 	if (rc != 0)
 		fprintf(stderr,

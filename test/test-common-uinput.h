@@ -25,7 +25,6 @@
 
 #define DEFAULT_IDS NULL
 
-
 struct uinput_device* uinput_device_new(const char *name);
 int uinput_device_new_with_events(struct uinput_device **dev, const char *name, const struct input_id *ids, ...);
 int uinput_device_new_with_events_v(struct uinput_device **dev, const char *name, const struct input_id *ids, va_list args);

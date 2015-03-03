@@ -529,7 +529,6 @@ START_TEST(test_set_clock_id_invalid_fd)
 }
 END_TEST
 
-
 START_TEST(test_clock_id_events)
 {
 	struct uinput_device* uidev;

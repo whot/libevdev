@@ -160,7 +160,6 @@ _libevdev_log_msg(const struct libevdev *dev,
 	else if (unlikely(log_data.device_handler))
 		abort(); /* Seppuku, see above */
 
-
 	va_start(args, format);
 	if (dev && dev->log.device_handler)
 		dev->log.device_handler(dev, priority, dev->log.userdata, file, line, func, format, args);
@@ -682,7 +681,6 @@ sync_mt_state(struct libevdev *dev, int create_events)
 				set_bit(slot_update, AXISBIT(slot, ABS_MT_SLOT));
 			}
 
-
 		}
 	}
 
@@ -1050,7 +1048,6 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 			goto out;
 		}
 
-
 		if (queue_shift(dev, ev) != 0)
 			return -EAGAIN;
 
@@ -1135,7 +1132,6 @@ LIBEVDEV_EXPORT void libevdev_set_##field(struct libevdev *dev, const char *fiel
 STRING_SETTER(name)
 STRING_SETTER(phys)
 STRING_SETTER(uniq)
-
 
 #define PRODUCT_GETTER(name) \
 LIBEVDEV_EXPORT int libevdev_get_id_##name(const struct libevdev *dev) \

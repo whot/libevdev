@@ -357,4 +357,3 @@ queue_suite(void)
 
 	return s;
 }
-
