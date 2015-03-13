@@ -75,6 +75,7 @@ else
 fi
 AM_CONDITIONAL(HAVE_VALGRIND, [test "x$VALGRIND" != "x"])
 AM_CONDITIONAL(ENABLE_RUNTIME_TESTS, [test "x$HAVE_CHECK" = "xyes"])
+AM_CONDITIONAL(ENABLE_STATIC_LINK_TEST, [test "x$enable_static" = "xyes"])
 
 with_cflags=""
 if test "x$GCC" = "xyes"; then
@@ -128,12 +129,20 @@ AM_PATH_PYTHON([2.6])
 # nm to check for leaking symbols in the static library
 AC_PATH_PROG(NM, [nm])
 AM_CONDITIONAL(HAVE_NM, [test "x$NM" != "x"])
-if test "x$NM" == "x"; then
-	AC_MSG_WARN([nm not found - skipping symbol leak test])
-	have_nm="no"
+if test "x$enable_static" = "xno"; then
+	static_symbol_leaks_test="no - static build disabled"
 else
-	have_nm="yes"
+	if test "x$NM" = "x"; then
+		AC_MSG_WARN([nm not found - skipping symbol leak test])
+		have_nm="no"
+		static_symbol_leaks_test="no - nm not found"
+	else
+		have_nm="yes"
+		static_symbol_leaks_test="yes"
+	fi
 fi
+
+AM_CONDITIONAL(ENABLE_STATIC_SYMBOL_LEAKS_TEST, [test "x$static_symbol_leaks_test" = "xyes"])
 
 AC_CONFIG_FILES([Makefile
 		 libevdev/Makefile
@@ -152,5 +161,5 @@ AC_MSG_RESULT([
 	       Build documentation		${have_doxygen}
 	       Enable unit-tests		${HAVE_CHECK}
 	       Enable profiling			${enable_gcov}
-	       Static library symbol check	${have_nm}
+	       Static library symbol check	${static_symbol_leaks_test}
 	       ])

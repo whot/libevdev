@@ -1,4 +1,9 @@
-build_tests = test-compile-pedantic test-link test-static-link
+build_tests = test-compile-pedantic test-link
+
+if ENABLE_STATIC_LINK_TEST
+build_tests += test-static-link
+endif
+
 noinst_PROGRAMS = $(build_tests)
 
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/include -I$(top_builddir)/libevdev
@@ -125,7 +130,7 @@ endif # HAVE_VALGRIND
 
 endif # ENABLE_RUNTIME_TESTS
 
-if HAVE_NM
+if ENABLE_STATIC_SYMBOL_LEAKS_TEST
 # Hack to check for leaking symbols in the static library.
 # See https://bugs.freedesktop.org/show_bug.cgi?id=82785
 # Note the spaces in the expressions! After the first grep, each line
