@@ -70,7 +70,7 @@ init_event_queue(struct libevdev *dev)
 	/* count the number of axes, keys, etc. to get a better idea at how
 	   many events per EV_SYN we could possibly get. That's the max we
 	   may get during SYN_DROPPED too. Use double that, just so we have
-	   room for events while syncing an event.
+	   room for events while syncing a device.
 	 */
 	for (type = EV_KEY; type < EV_MAX; type++) {
 		int max = libevdev_event_type_get_max(type);
