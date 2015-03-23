@@ -84,7 +84,7 @@ init_event_queue(struct libevdev *dev)
 	if (nslots > 1) {
 		int num_mt_axes = 0;
 
-		for (code = ABS_MT_SLOT; code < ABS_MAX; code++) {
+		for (code = ABS_MT_SLOT; code <= ABS_MAX; code++) {
 			if (libevdev_has_event_code(dev, EV_ABS, code))
 				num_mt_axes++;
 		}
