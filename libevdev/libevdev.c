@@ -989,6 +989,10 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 {
 	int rc = LIBEVDEV_READ_STATUS_SUCCESS;
 	enum event_filter_status filter_status;
+	const unsigned int valid_flags = LIBEVDEV_READ_FLAG_NORMAL |
+					 LIBEVDEV_READ_FLAG_SYNC |
+					 LIBEVDEV_READ_FLAG_FORCE_SYNC |
+					 LIBEVDEV_READ_FLAG_BLOCKING;
 
 	if (!dev->initialized) {
 		log_bug(dev, "device not initialized. call libevdev_set_fd() first\n");
@@ -996,7 +1000,7 @@ libevdev_next_event(struct libevdev *dev, unsigned int flags, struct input_event
 	} else if (dev->fd < 0)
 		return -EBADF;
 
-	if (!(flags & (LIBEVDEV_READ_FLAG_NORMAL|LIBEVDEV_READ_FLAG_SYNC|LIBEVDEV_READ_FLAG_FORCE_SYNC))) {
+	if ((flags & valid_flags) == 0) {
 		log_bug(dev, "invalid flags %#x.\n", flags);
 		return -EINVAL;
 	}

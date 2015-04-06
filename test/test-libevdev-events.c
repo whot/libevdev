@@ -97,6 +97,38 @@ START_TEST(test_next_event_invalid_fd)
 }
 END_TEST
 
+START_TEST(test_next_event_blocking)
+{
+	struct uinput_device* uidev;
+	struct libevdev *dev;
+	int fd, flags;
+	int rc;
+	struct input_event ev;
+
+	test_create_device(&uidev, &dev,
+			   EV_REL, REL_X,
+			   EV_REL, REL_Y,
+			   EV_KEY, BTN_LEFT,
+			   -1);
+
+	fd = libevdev_get_fd(dev);
+	flags = fcntl(fd, F_GETFL) & ~O_NONBLOCK;
+	rc = fcntl(fd, F_SETFL, flags);
+	ck_assert_int_eq(rc, 0);
+
+	uinput_device_event(uidev, EV_KEY, BTN_LEFT, 1);
+	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
+	rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_BLOCKING, &ev);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	ck_assert_int_eq(ev.type, EV_KEY);
+	ck_assert_int_eq(ev.code, BTN_LEFT);
+	ck_assert_int_eq(ev.value, 1);
+
+	libevdev_free(dev);
+	uinput_device_free(uidev);
+}
+END_TEST
+
 START_TEST(test_syn_dropped_event)
 {
 	struct uinput_device* uidev;
@@ -2116,6 +2148,7 @@ libevdev_events(void)
 	TCase *tc = tcase_create("event polling");
 	tcase_add_test(tc, test_next_event);
 	tcase_add_test(tc, test_next_event_invalid_fd);
+	tcase_add_test(tc, test_next_event_blocking);
 	tcase_add_test(tc, test_syn_dropped_event);
 	tcase_add_test(tc, test_double_syn_dropped_event);
 	tcase_add_test(tc, test_event_type_filtered);
