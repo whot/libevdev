@@ -185,7 +185,7 @@ print_summary(struct measurements *m)
 	}
 	printf("If your resolution is not in the list, calculate it with:\n"
 	       "\tresolution=%d/inches, or\n"
-	       "\tresolution=%d/(mm * 25.4)\n", m->distance, m->distance);
+	       "\tresolution=%d * 25.4/mm\n", m->distance, m->distance);
 }
 
 static inline const char*
