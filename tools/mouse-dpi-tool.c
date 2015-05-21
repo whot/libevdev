@@ -44,7 +44,7 @@
 struct measurements {
 	int distance;
 	double frequency;
-	uint32_t ms;
+	uint64_t us;
 };
 
 static int
@@ -58,16 +58,16 @@ usage(void) {
 	return 1;
 }
 
-static inline uint32_t
-tv2ms(const struct timeval *tv)
+static inline uint64_t
+tv2us(const struct timeval *tv)
 {
-	return tv->tv_sec * 1000 + tv->tv_usec/1000;
+	return tv->tv_sec * 1000000 + tv->tv_usec;
 }
 
 static inline double
 get_frequency(double last, double current)
 {
-	return 1000.0/(current - last);
+	return 1000000.0/(current - last);
 }
 
 static int
@@ -98,17 +98,17 @@ static int
 handle_event(struct measurements *m, const struct input_event *ev)
 {
 	if (ev->type == EV_SYN) {
-		const int idle_reset = 3000; /* ms */
-		uint32_t last_millis = m->ms;
+		const int idle_reset = 3000000; /* us */
+		uint64_t last_us = m->us;
 
-		m->ms = tv2ms(&ev->time);
+		m->us = tv2us(&ev->time);
 
 		/* reset after pause */
-		if (last_millis + idle_reset < m->ms) {
+		if (last_us + idle_reset < m->us) {
 			m->frequency = 0.0;
 			m->distance = 0;
 		} else {
-			double freq = get_frequency(last_millis, m->ms);
+			double freq = get_frequency(last_us, m->us);
 			m->frequency = max(freq, m->frequency);
 			return print_current_values(m);
 		}
