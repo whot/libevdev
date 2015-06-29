@@ -203,7 +203,7 @@ set_led(struct libevdev *dev)
 		fprintf(stderr,
 			"Device '%s' doesn't have %s\n",
 			libevdev_get_name(dev),
-			libevdev_event_code_get_name(EV_LED, axis));
+			libevdev_event_code_get_name(EV_LED, led));
 		return;
 	}
 
