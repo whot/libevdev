@@ -37,13 +37,6 @@
 
 #include "libevdev.h"
 
-static unsigned int changes; /* bitmask of changes */
-static struct input_absinfo absinfo;
-static int axis;
-static int led;
-static int led_state = -1;
-const char *path;
-
 static void
 usage(void)
 {
@@ -53,6 +46,13 @@ usage(void)
 	       "\tEnable or disable the named LED\n",
 	       program_invocation_short_name, program_invocation_short_name);
 }
+
+enum mode {
+	MODE_NONE = 0,
+	MODE_ABS,
+	MODE_LED,
+	MODE_HELP,
+};
 
 enum opts {
 	OPT_ABS = 1 << 0,
@@ -68,7 +68,8 @@ enum opts {
 };
 
 static int
-parse_options(int argc, char **argv)
+parse_options_abs(int argc, char **argv, unsigned int *changes,
+		  int *axis, struct input_absinfo *absinfo)
 {
 	int rc = 1;
 	int c;
@@ -80,15 +81,114 @@ parse_options(int argc, char **argv)
 		{ "fuzz", 1, 0, OPT_FUZZ },
 		{ "flat", 1, 0, OPT_FLAT },
 		{ "res", 1, 0, OPT_RES },
-		{ "led", 1, 0, OPT_LED },
-		{ "on", 0, 0, OPT_ON },
-		{ "off", 0, 0, OPT_OFF },
-		{ "help", 0, 0, OPT_HELP },
 		{ NULL, 0, 0, 0 },
 	};
 
 	if (argc < 2)
 		goto error;
+
+	optind = 1;
+	while (1) {
+		c = getopt_long(argc, argv, "h", opts, &option_index);
+		if (c == -1)
+			break;
+
+		switch (c) {
+			case OPT_ABS:
+				*axis = libevdev_event_code_from_name(EV_ABS,
+								     optarg);
+				if (*axis == -1)
+					goto error;
+				break;
+			case OPT_MIN:
+				absinfo->minimum = atoi(optarg);
+				break;
+			case OPT_MAX:
+				absinfo->maximum = atoi(optarg);
+				break;
+			case OPT_FUZZ:
+				absinfo->fuzz = atoi(optarg);
+				break;
+			case OPT_FLAT:
+				absinfo->flat = atoi(optarg);
+				break;
+			case OPT_RES:
+				absinfo->resolution = atoi(optarg);
+				break;
+			default:
+				goto error;
+		}
+		*changes |= c;
+	}
+	rc = 0;
+error:
+	return rc;
+}
+
+static int
+parse_options_led(int argc, char **argv, int *led, int *led_state)
+{
+	int rc = 1;
+	int c;
+	int option_index = 0;
+	static struct option opts[] = {
+		{ "led", 1, 0, OPT_LED },
+		{ "on", 0, 0, OPT_ON },
+		{ "off", 0, 0, OPT_OFF },
+		{ NULL, 0, 0, 0 },
+	};
+
+	if (argc < 2)
+		goto error;
+
+	optind = 1;
+	while (1) {
+		c = getopt_long(argc, argv, "h", opts, &option_index);
+		if (c == -1)
+			break;
+
+		switch (c) {
+			case OPT_LED:
+				*led = libevdev_event_code_from_name(EV_LED,
+								     optarg);
+				if (*led == -1)
+					goto error;
+				break;
+			case OPT_ON:
+				if (*led_state != -1)
+					goto error;
+				*led_state = 1;
+				break;
+			case OPT_OFF:
+				if (*led_state != -1)
+					goto error;
+				*led_state = 0;
+				break;
+			default:
+				goto error;
+		}
+	}
+
+	rc = 0;
+error:
+	return rc;
+}
+
+static enum mode
+parse_options_mode(int argc, char **argv, const char **path)
+{
+	int c;
+	int option_index = 0;
+	static const struct option opts[] = {
+		{ "abs", 1, 0, OPT_ABS },
+		{ "led", 1, 0, OPT_LED },
+		{ "help", 0, 0, OPT_HELP },
+		{ NULL, 0, 0, 0 },
+	};
+	enum mode mode = MODE_NONE;
+
+	if (argc < 2)
+		return mode;
 
 	while (1) {
 		c = getopt_long(argc, argv, "h", opts, &option_index);
@@ -98,67 +198,30 @@ parse_options(int argc, char **argv)
 		switch (c) {
 			case 'h':
 			case OPT_HELP:
-				goto error;
+				mode = MODE_HELP;
+				break;
 			case OPT_ABS:
-				if (changes & OPT_LED)
-					goto error;
-
-				axis = libevdev_event_code_from_name(EV_ABS,
-								     optarg);
-				if (axis == -1)
-					goto error;
+				mode = MODE_ABS;
 				break;
 			case OPT_LED:
-				if (changes & OPT_ABS)
-					goto error;
-
-				led = libevdev_event_code_from_name(EV_LED,
-								    optarg);
-				if (led == -1)
-					goto error;
-				break;
-			case OPT_MIN:
-				absinfo.minimum = atoi(optarg);
-				break;
-			case OPT_MAX:
-				absinfo.maximum = atoi(optarg);
-				break;
-			case OPT_FUZZ:
-				absinfo.fuzz = atoi(optarg);
-				break;
-			case OPT_FLAT:
-				absinfo.flat = atoi(optarg);
-				break;
-			case OPT_RES:
-				absinfo.resolution = atoi(optarg);
-				break;
-			case OPT_ON:
-				if (led_state != -1)
-					goto error;
-				led_state = 1;
-				break;
-			case OPT_OFF:
-				if (led_state != -1)
-					goto error;
-				led_state = 0;
+				mode = MODE_LED;
 				break;
 			default:
-				goto error;
+				break;
 		}
-		changes |= c;
 	}
 
 	if (optind >= argc)
-		goto error;
-	path = argv[optind];
+		return MODE_NONE;
 
-	rc = 0;
-error:
-	return rc;
+	*path = argv[optind];
+
+	return mode;
 }
 
 static void
-set_abs(struct libevdev *dev)
+set_abs(struct libevdev *dev, unsigned int changes,
+	unsigned int axis, struct input_absinfo *absinfo)
 {
 	int rc;
 	struct input_absinfo abs;
@@ -174,15 +237,15 @@ set_abs(struct libevdev *dev)
 
 	abs = *a;
 	if (changes & OPT_MIN)
-		abs.minimum = absinfo.minimum;
+		abs.minimum = absinfo->minimum;
 	if (changes & OPT_MAX)
-		abs.maximum = absinfo.maximum;
+		abs.maximum = absinfo->maximum;
 	if (changes & OPT_FUZZ)
-		abs.fuzz = absinfo.fuzz;
+		abs.fuzz = absinfo->fuzz;
 	if (changes & OPT_FLAT)
-		abs.flat = absinfo.flat;
+		abs.flat = absinfo->flat;
 	if (changes & OPT_RES)
-		abs.resolution = absinfo.resolution;
+		abs.resolution = absinfo->resolution;
 
 	rc = libevdev_kernel_set_abs_info(dev, axis, &abs);
 	if (rc != 0)
@@ -193,7 +256,7 @@ set_abs(struct libevdev *dev)
 }
 
 static void
-set_led(struct libevdev *dev)
+set_led(struct libevdev *dev, unsigned int led, int led_state)
 {
 	int rc;
 	enum libevdev_led_value state =
@@ -221,12 +284,37 @@ main(int argc, char **argv)
 	struct libevdev *dev = NULL;
 	int fd = -1;
 	int rc = 1;
+	enum mode mode;
+	const char *path;
+	struct input_absinfo absinfo;
+	int axis;
+	int led;
+	int led_state = -1;
+	unsigned int changes; /* bitmask of changes */
 
-	rc = parse_options(argc, argv);
-	if (rc != 0 || !path) {
-		usage();
-		goto out;
+	mode = parse_options_mode(argc, argv, &path);
+	switch (mode) {
+		case MODE_HELP:
+			rc = EXIT_SUCCESS;
+			/* fallthrough */
+		case MODE_NONE:
+			usage();
+			goto out;
+		case MODE_ABS:
+			rc = parse_options_abs(argc, argv, &changes, &axis,
+					       &absinfo);
+			break;
+		case MODE_LED:
+			rc = parse_options_led(argc, argv, &led, &led_state);
+			break;
+		default:
+			fprintf(stderr,
+				"++?????++ Out of Cheese Error. Redo From Start.\n");
+			goto out;
 	}
+
+	if (rc != EXIT_SUCCESS)
+		goto out;
 
 	fd = open(path, O_RDWR);
 	if (fd < 0) {
@@ -240,13 +328,16 @@ main(int argc, char **argv)
 		goto out;
 	}
 
-	if (changes & OPT_ABS)
-		set_abs(dev);
-	else if (changes & OPT_LED)
-		set_led(dev);
-	else
-		fprintf(stderr,
-			"++?????++ Out of Cheese Error. Redo From Start.\n");
+	switch (mode) {
+		case MODE_ABS:
+			set_abs(dev, changes, axis, &absinfo);
+			break;
+		case MODE_LED:
+			set_led(dev, led, led_state);
+			break;
+		default:
+			break;
+	}
 
 out:
 	libevdev_free(dev);
