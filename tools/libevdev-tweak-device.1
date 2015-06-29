@@ -5,6 +5,8 @@ libevdev-tweak-device \- modify an evdev kernel device
 .B libevdev-tweak-device
 --abs ABS_X [--min a] [--max b] [--res c] [--fuzz d] [--flat e]
 /dev/input/eventX
+.B libevdev-tweak-device
+--resolution res[,yres] /dev/input/eventX
 .PP
 .B libevdev-tweak-device
 --led LED_NUML --on|--off /dev/input/eventX
@@ -41,6 +43,14 @@ Set the absinfo fuzz to the value v
 .B --flat v
 Set the absinfo flat to the value v
 .PP
+.SS Changing the x/y resolution
+.TP 8
+.B --resolution res[,yres]
+Changes the resolution of the ABS_X, ABS_MT_POSITION_X, ABS_Y, and
+ABS_MT_POSITION_Y axis to the given resolution. If only one resolution value
+is provided, both x and y axis are set to the same resolution, otherwise the
+first resolution value is applied to the x axes and the second value to the
+y axes.
 .SS Toggling LEDs
 .TP 8
 .B --led led

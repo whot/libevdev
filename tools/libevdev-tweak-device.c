@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include <getopt.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,15 +43,20 @@ usage(void)
 {
 	printf("%s --abs <axis> [--min min] [--max max] [--res res] [--fuzz fuzz] [--flat flat] /dev/input/eventXYZ\n"
 	       "\tChange the absinfo struct for the named axis\n"
+	       "%s --resolution res[,yres] /dev/input/eventXYZ\n"
+	       "\tChange the x/y resolution on the given device\n"
 	       "%s --led <led> --on|--off /dev/input/eventXYZ\n"
 	       "\tEnable or disable the named LED\n",
-	       program_invocation_short_name, program_invocation_short_name);
+	       program_invocation_short_name,
+	       program_invocation_short_name,
+	       program_invocation_short_name);
 }
 
 enum mode {
 	MODE_NONE = 0,
 	MODE_ABS,
 	MODE_LED,
+	MODE_RESOLUTION,
 	MODE_HELP,
 };
 
@@ -64,8 +70,29 @@ enum opts {
 	OPT_LED = 1 << 6,
 	OPT_ON = 1 << 7,
 	OPT_OFF = 1 << 8,
-	OPT_HELP = 1 << 9,
+	OPT_RESOLUTION = 1 << 9,
+	OPT_HELP = 1 << 10,
 };
+
+static bool
+parse_resolution_argument(const char *arg, int *xres, int *yres)
+{
+	int matched;
+
+	matched = sscanf(arg, "%d,%d", xres, yres);
+
+	switch(matched) {
+		case 2:
+			break;
+		case 1:
+			*yres = *xres;
+			break;
+		default:
+			return false;
+	}
+
+	return true;
+}
 
 static int
 parse_options_abs(int argc, char **argv, unsigned int *changes,
@@ -174,6 +201,42 @@ error:
 	return rc;
 }
 
+static int
+parse_options_resolution(int argc, char **argv, int *xres, int *yres)
+{
+	int rc = 1;
+	int c;
+	int option_index = 0;
+	static struct option opts[] = {
+		{ "resolution", 1, 0, OPT_RESOLUTION },
+		{ NULL, 0, 0, 0 },
+	};
+
+	if (argc < 2)
+		goto error;
+
+	optind = 1;
+	while (1) {
+		c = getopt_long(argc, argv, "h", opts, &option_index);
+		if (c == -1)
+			break;
+
+		switch (c) {
+			case OPT_RESOLUTION:
+				if (!parse_resolution_argument(optarg,
+							       xres, yres))
+					goto error;
+				break;
+			default:
+				goto error;
+		}
+	}
+
+	rc = 0;
+error:
+	return rc;
+}
+
 static enum mode
 parse_options_mode(int argc, char **argv, const char **path)
 {
@@ -182,6 +245,7 @@ parse_options_mode(int argc, char **argv, const char **path)
 	static const struct option opts[] = {
 		{ "abs", 1, 0, OPT_ABS },
 		{ "led", 1, 0, OPT_LED },
+		{ "resolution", 1, 0, OPT_RESOLUTION },
 		{ "help", 0, 0, OPT_HELP },
 		{ NULL, 0, 0, 0 },
 	};
@@ -205,6 +269,9 @@ parse_options_mode(int argc, char **argv, const char **path)
 				break;
 			case OPT_LED:
 				mode = MODE_LED;
+				break;
+			case OPT_RESOLUTION:
+				mode = MODE_RESOLUTION;
 				break;
 			default:
 				break;
@@ -278,6 +345,24 @@ set_led(struct libevdev *dev, unsigned int led, int led_state)
 			strerror(-rc));
 }
 
+static void
+set_resolution(struct libevdev *dev, int xres, int yres)
+{
+	struct input_absinfo abs;
+
+	abs.resolution = xres;
+	if (libevdev_has_event_code(dev, EV_ABS, ABS_X))
+		set_abs(dev, OPT_RES, ABS_X, &abs);
+	if (libevdev_has_event_code(dev, EV_ABS, ABS_MT_POSITION_X))
+		set_abs(dev, OPT_RES, ABS_MT_POSITION_X, &abs);
+
+	abs.resolution = yres;
+	if (libevdev_has_event_code(dev, EV_ABS, ABS_Y))
+		set_abs(dev, OPT_RES, ABS_Y, &abs);
+	if (libevdev_has_event_code(dev, EV_ABS, ABS_MT_POSITION_Y))
+		set_abs(dev, OPT_RES, ABS_MT_POSITION_Y, &abs);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -291,6 +376,7 @@ main(int argc, char **argv)
 	int led;
 	int led_state = -1;
 	unsigned int changes; /* bitmask of changes */
+	int xres, yres;
 
 	mode = parse_options_mode(argc, argv, &path);
 	switch (mode) {
@@ -306,6 +392,10 @@ main(int argc, char **argv)
 			break;
 		case MODE_LED:
 			rc = parse_options_led(argc, argv, &led, &led_state);
+			break;
+		case MODE_RESOLUTION:
+			rc = parse_options_resolution(argc, argv, &xres,
+						      &yres);
 			break;
 		default:
 			fprintf(stderr,
@@ -334,6 +424,9 @@ main(int argc, char **argv)
 			break;
 		case MODE_LED:
 			set_led(dev, led, led_state);
+			break;
+		case MODE_RESOLUTION:
+			set_resolution(dev, xres, yres);
 			break;
 		default:
 			break;
