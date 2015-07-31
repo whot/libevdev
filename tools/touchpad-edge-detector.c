@@ -136,6 +136,85 @@ mainloop(struct libevdev *dev, struct dimensions *dim) {
 	return 0;
 }
 
+static inline void
+pid_vid_matchstr(struct libevdev *dev, char *match, size_t sz)
+{
+	snprintf(match, sz, "input:b%04Xv%04Xp%04X",
+		libevdev_get_id_bustype(dev),
+		libevdev_get_id_vendor(dev),
+		libevdev_get_id_product(dev));
+}
+
+static inline void
+dmi_matchstr(struct libevdev *dev, char *match, size_t sz)
+{
+	char modalias[PATH_MAX];
+	FILE *fp;
+
+	fp = fopen("/sys/class/dmi/id/modalias", "r");
+	if (!fp || fgets(modalias, sizeof(modalias), fp) == NULL) {
+		sprintf(match, "ERROR READING DMI MODALIAS");
+		if (fp)
+			fclose(fp);
+		return;
+	}
+
+	fclose(fp);
+
+	modalias[strlen(modalias) - 1] = '\0'; /* drop \n */
+	snprintf(match, sz, "name:%s:%s", libevdev_get_name(dev), modalias);
+
+	return;
+}
+
+static void
+print_udev_override_rule(struct libevdev *dev, const struct dimensions *dim) {
+	const struct input_absinfo *x, *y;
+	char match[PATH_MAX];
+	int w, h;
+
+	x = libevdev_get_abs_info(dev, ABS_X);
+	y = libevdev_get_abs_info(dev, ABS_Y);
+	w = x->maximum - x->minimum;
+	h = y->maximum - y->minimum;
+
+	if (x->resolution && y->resolution) {
+		printf("Touchpad size as listed by the kernel: %dx%dmm\n",
+		       w/x->resolution, h/y->resolution);
+	} else {
+		printf("Touchpad has no resolution, size unknown\n");
+	}
+
+	printf("Calculate resolution as:\n");
+	printf("	x axis: %d/<width in mm>\n", w);
+	printf("	y axis: %d/<height in mm>\n", h);
+	printf("\n");
+	printf("Suggested udev rule:\n");
+
+	switch(libevdev_get_id_bustype(dev)) {
+	case BUS_USB:
+	case BUS_BLUETOOTH:
+		pid_vid_matchstr(dev, match, sizeof(match));
+		break;
+	default:
+		dmi_matchstr(dev, match, sizeof(match));
+		break;
+	}
+
+	printf("# <Laptop model description goes here>\n"
+	       "evdev:%s*\n"
+	       " EVDEV_ABS_01=%d:%d:<x resolution>\n"
+	       " EVDEV_ABS_02=%d:%d:<y resolution>\n",
+	       match,
+	       dim->left, dim->right,
+	       dim->top, dim->bottom);
+	if (libevdev_has_event_code(dev, EV_ABS, ABS_MT_POSITION_X))
+		printf(" EVDEV_ABS_35=%d:%d:<x resolution>\n"
+		       " EVDEV_ABS_36=%d:%d:<y resolution>\n",
+		       dim->left, dim->right,
+		       dim->top, dim->bottom);
+}
+
 int main (int argc, char **argv) {
 	int rc;
 	int fd;
@@ -192,8 +271,9 @@ int main (int argc, char **argv) {
 	setbuf(stdout, NULL);
 
 	rc = mainloop(dev, &dim);
+	printf("\n\n");
 
-	printf("\n");
+	print_udev_override_rule(dev, &dim);
 
 out:
 	libevdev_free(dev);
