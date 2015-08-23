@@ -25,6 +25,7 @@
 #include <poll.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -124,6 +125,26 @@ libevdev_dflt_log_func(enum libevdev_log_priority priority,
 		fprintf(stderr, "%s:%d:", file, line);
 	fprintf(stderr, "%s: ", func);
 	vfprintf(stderr, format, args);
+}
+
+static void
+fix_invalid_absinfo(const struct libevdev *dev,
+		    int axis,
+		    struct input_absinfo* abs_info)
+{
+	/*
+	 * The reported absinfo for ABS_MT_TRACKING_ID is sometimes
+	 * uninitialized for certain mtk-soc, due to init code mangling
+	 * in the vendor kernel.
+	 */
+	if (axis == ABS_MT_TRACKING_ID &&
+	    abs_info->maximum == abs_info->minimum) {
+		abs_info->minimum = -1;
+		abs_info->maximum = 0xFFFF;
+		log_bug(dev,
+			"Device \"%s\" has invalid ABS_MT_TRACKING_ID range",
+			dev->name);
+	}
 }
 
 /*
@@ -430,6 +451,8 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 			rc = ioctl(fd, EVIOCGABS(i), &abs_info);
 			if (rc < 0)
 				goto out;
+
+			fix_invalid_absinfo(dev, i, &abs_info);
 
 			dev->abs_info[i] = abs_info;
 		}
