@@ -238,7 +238,7 @@ error:
 }
 
 static enum mode
-parse_options_mode(int argc, char **argv, const char **path)
+parse_options_mode(int argc, char **argv)
 {
 	int c;
 	int option_index = 0;
@@ -254,7 +254,7 @@ parse_options_mode(int argc, char **argv, const char **path)
 	if (argc < 2)
 		return mode;
 
-	while (1) {
+	while (mode == MODE_NONE) {
 		c = getopt_long(argc, argv, "h", opts, &option_index);
 		if (c == -1)
 			break;
@@ -278,10 +278,8 @@ parse_options_mode(int argc, char **argv, const char **path)
 		}
 	}
 
-	if (optind >= argc)
+	if (optind >= argc && mode != MODE_HELP)
 		return MODE_NONE;
-
-	*path = argv[optind];
 
 	return mode;
 }
@@ -368,7 +366,7 @@ main(int argc, char **argv)
 {
 	struct libevdev *dev = NULL;
 	int fd = -1;
-	int rc = 1;
+	int rc = EXIT_FAILURE;
 	enum mode mode;
 	const char *path;
 	struct input_absinfo absinfo;
@@ -379,7 +377,7 @@ main(int argc, char **argv)
 	int xres = 0,
 	    yres = 0;
 
-	mode = parse_options_mode(argc, argv, &path);
+	mode = parse_options_mode(argc, argv);
 	switch (mode) {
 		case MODE_HELP:
 			rc = EXIT_SUCCESS;
@@ -407,8 +405,17 @@ main(int argc, char **argv)
 	if (rc != EXIT_SUCCESS)
 		goto out;
 
+	if (optind >= argc) {
+		rc = EXIT_FAILURE;
+		usage();
+		goto out;
+	}
+
+	path = argv[optind];
+
 	fd = open(path, O_RDWR);
 	if (fd < 0) {
+		rc = EXIT_FAILURE;
 		perror("Failed to open device");
 		goto out;
 	}
