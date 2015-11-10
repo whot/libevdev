@@ -203,8 +203,8 @@ print_udev_override_rule(struct libevdev *dev, const struct dimensions *dim) {
 
 	printf("# <Laptop model description goes here>\n"
 	       "evdev:%s*\n"
-	       " EVDEV_ABS_01=%d:%d:<x resolution>\n"
-	       " EVDEV_ABS_02=%d:%d:<y resolution>\n",
+	       " EVDEV_ABS_00=%d:%d:<x resolution>\n"
+	       " EVDEV_ABS_01=%d:%d:<y resolution>\n",
 	       match,
 	       dim->left, dim->right,
 	       dim->top, dim->bottom);
