@@ -68,3 +68,6 @@ texinfo.tex
 .vimdir
 ylwrap
 # 	Application Specific Files
+*.trs
+*.log
+*.sig
