@@ -78,7 +78,8 @@ extern "C" {
  *
  * libevdev does not handle the file descriptors directly, it merely uses
  * them. The caller is responsible for opening the file descriptors, setting
- * them to O_NONBLOCK and handling permissions.
+ * them to O_NONBLOCK and handling permissions. A caller should drain any
+ * events pending on the file descriptor before passing it to libevdev.
  *
  * Where does libevdev sit?
  * ========================
@@ -973,6 +974,15 @@ int libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab);
  * you need to re-read a device, use libevdev_free() and libevdev_new(). If
  * you need to change the fd after closing and re-opening the same device, use
  * libevdev_change_fd().
+ *
+ * A caller should ensure that any events currently pending on the fd are
+ * drained before the file descriptor is passed to libevdev for
+ * initialization. Due to how the kernel's ioctl handling works, the initial
+ * device state will reflect the current device state *after* applying all
+ * events currently pending on the fd. Thus, if the fd is not drained, the
+ * state visible to the caller will be inconsistent with the events
+ * immediately available on the device. This does not affect state-less
+ * events like EV_REL.
  *
  * Unless otherwise specified, libevdev function behavior is undefined until
  * a successfull call to libevdev_set_fd().
