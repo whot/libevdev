@@ -225,18 +225,18 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 			continue;
 		}
 
-		if (stat(buf, &st) == -1)
-			continue;
-
-		/* created before UI_DEV_CREATE, or after it finished */
-		if (st.st_ctime < uinput_dev->ctime[0] ||
-		    st.st_ctime > uinput_dev->ctime[1])
-			continue;
-
 		/* created within time frame */
 		fd = open(buf, O_RDONLY);
 		if (fd < 0)
 			continue;
+
+		/* created before UI_DEV_CREATE, or after it finished */
+		if (fstat(fd, &st) == -1 ||
+		    st.st_ctime < uinput_dev->ctime[0] ||
+		    st.st_ctime > uinput_dev->ctime[1]) {
+			close(fd);
+			continue;
+		}
 
 		len = read(fd, buf, sizeof(buf));
 		close(fd);
