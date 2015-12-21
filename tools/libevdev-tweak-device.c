@@ -372,11 +372,12 @@ main(int argc, char **argv)
 	enum mode mode;
 	const char *path;
 	struct input_absinfo absinfo;
-	int axis;
-	int led;
+	int axis = -1;
+	int led = -1;
 	int led_state = -1;
-	unsigned int changes; /* bitmask of changes */
-	int xres, yres;
+	unsigned int changes = 0; /* bitmask of changes */
+	int xres = 0,
+	    yres = 0;
 
 	mode = parse_options_mode(argc, argv, &path);
 	switch (mode) {
