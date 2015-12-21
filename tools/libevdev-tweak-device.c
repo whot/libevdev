@@ -435,7 +435,8 @@ main(int argc, char **argv)
 
 out:
 	libevdev_free(dev);
-	close(fd);
+	if (fd != -1)
+		close(fd);
 
 	return rc;
 }
