@@ -113,7 +113,7 @@ uinput_device_free(struct uinput_device *dev)
 		return;
 
 	if (dev->uinput_fd != -1) {
-		ioctl(dev->uinput_fd, UI_DEV_DESTROY, NULL);
+		(void)ioctl(dev->uinput_fd, UI_DEV_DESTROY, NULL);
 		close(dev->uinput_fd);
 	}
 	if (dev->dev_fd != -1)
