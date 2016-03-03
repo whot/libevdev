@@ -32,14 +32,14 @@
 
 #include "test-common-uinput.h"
 
-int test_create_device(struct uinput_device **uidev,
-		       struct libevdev **dev,
-		       ...);
-int test_create_abs_device(struct uinput_device **uidev,
-		           struct libevdev **dev,
-			   int nabs,
-			   const struct input_absinfo *abs,
-			   ...);
+void test_create_device(struct uinput_device **uidev,
+			struct libevdev **dev,
+			...);
+void test_create_abs_device(struct uinput_device **uidev,
+			    struct libevdev **dev,
+			    int nabs,
+			    const struct input_absinfo *abs,
+			    ...);
 
 void test_logfunc_abort_on_error(enum libevdev_log_priority priority,
 				 void *data,

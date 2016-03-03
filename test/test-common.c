@@ -46,9 +46,9 @@ void test_logfunc_ignore_error(enum libevdev_log_priority priority,
 {
 }
 
-int test_create_device(struct uinput_device **uidev_return,
-		       struct libevdev **dev_return,
-		       ...)
+void test_create_device(struct uinput_device **uidev_return,
+			struct libevdev **dev_return,
+			...)
 {
 	int rc, fd;
 	struct uinput_device *uidev;
@@ -71,15 +71,13 @@ int test_create_device(struct uinput_device **uidev_return,
 
 	*uidev_return = uidev;
 	*dev_return = dev;
-
-	return rc == 0 ? rc : -errno;
 }
 
-int test_create_abs_device(struct uinput_device **uidev_return,
-			   struct libevdev **dev_return,
-			   int nabs,
-			   const struct input_absinfo *abs,
-			   ...)
+void test_create_abs_device(struct uinput_device **uidev_return,
+			    struct libevdev **dev_return,
+			    int nabs,
+			    const struct input_absinfo *abs,
+			    ...)
 {
 	int rc, fd;
 	struct uinput_device *uidev;
@@ -117,6 +115,4 @@ int test_create_abs_device(struct uinput_device **uidev_return,
 
 	*uidev_return = uidev;
 	*dev_return = dev;
-
-	return rc == 0 ? rc : -errno;
 }

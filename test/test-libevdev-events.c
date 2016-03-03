@@ -1748,10 +1748,10 @@ START_TEST(test_mt_tracking_id_discard)
 	abs[5].value = ABS_MT_TRACKING_ID;
 	abs[5].maximum = 500;
 
-	rc = test_create_abs_device(&uidev, &dev,
-				    6, abs,
-				    EV_SYN, SYN_REPORT,
-				    -1);
+	test_create_abs_device(&uidev, &dev,
+			       6, abs,
+			       EV_SYN, SYN_REPORT,
+			       -1);
 
 	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 1);
 	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 1);
@@ -1831,10 +1831,10 @@ START_TEST(test_mt_tracking_id_discard_neg_1)
 	abs[5].value = ABS_MT_TRACKING_ID;
 	abs[5].maximum = 500;
 
-	rc = test_create_abs_device(&uidev, &dev,
-				    6, abs,
-				    EV_SYN, SYN_REPORT,
-				    -1);
+	test_create_abs_device(&uidev, &dev,
+			       6, abs,
+			       EV_SYN, SYN_REPORT,
+			       -1);
 	uinput_device_event(uidev, EV_ABS, ABS_MT_SLOT, 1);
 	uinput_device_event(uidev, EV_ABS, ABS_MT_TRACKING_ID, 1);
 	uinput_device_event(uidev, EV_SYN, SYN_REPORT, 0);
