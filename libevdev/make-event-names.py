@@ -202,13 +202,12 @@ def parse(fp):
 	return bits
 
 def usage(prog):
-	print("Usage: %s /path/to/linux/input.h" % prog)
+	print("Usage: cat <files> | %s" % prog)
 
 if __name__ == "__main__":
-	if len(sys.argv) != 2:
+	if len(sys.argv) != 1:
 		usage(sys.argv[0])
 		sys.exit(2)
 
-	with open(sys.argv[1]) as f:
-		bits = parse(f)
-		print_mapping_table(bits)
+	bits = parse(sys.stdin)
+	print_mapping_table(bits)

@@ -125,6 +125,7 @@ AC_SUBST([GCOV_LDFLAGS])
 AC_MSG_RESULT([$enable_gcov])
 
 AM_PATH_PYTHON([2.6])
+AC_PATH_PROG(CAT, [cat])
 
 # nm to check for leaking symbols in the static library
 AC_PATH_PROG(NM, [nm])
