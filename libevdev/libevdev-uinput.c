@@ -62,6 +62,19 @@ alloc_uinput_device(const char *name)
 	return uinput_dev;
 }
 
+static inline int
+set_abs(const struct libevdev *dev, int fd, unsigned int code)
+{
+	const struct input_absinfo *abs = libevdev_get_abs_info(dev, code);
+	struct uinput_abs_setup abs_setup = {0};
+	int rc;
+
+	abs_setup.code = code;
+	abs_setup.absinfo = *abs;
+	rc = ioctl(fd, UI_ABS_SETUP, &abs_setup);
+	return rc;
+}
+
 static int
 set_evbits(const struct libevdev *dev, int fd, struct uinput_user_dev *uidev)
 {
@@ -113,13 +126,21 @@ set_evbits(const struct libevdev *dev, int fd, struct uinput_user_dev *uidev)
 				goto out;
 
 			if (type == EV_ABS) {
-				const struct input_absinfo *abs = libevdev_get_abs_info(dev, code);
-				uidev->absmin[code] = abs->minimum;
-				uidev->absmax[code] = abs->maximum;
-				uidev->absfuzz[code] = abs->fuzz;
-				uidev->absflat[code] = abs->flat;
-				/* uinput has no resolution in the device struct, this needs
-				 * to be fixed in the kernel */
+				if (uidev == NULL) {
+					rc = set_abs(dev, fd, code);
+					if (rc != 0)
+						goto out;
+				} else {
+					const struct input_absinfo *abs =
+						libevdev_get_abs_info(dev, code);
+
+					uidev->absmin[code] = abs->minimum;
+					uidev->absmax[code] = abs->maximum;
+					uidev->absfuzz[code] = abs->fuzz;
+					uidev->absflat[code] = abs->flat;
+					/* uinput has no resolution in the
+					 * device struct */
+				}
 			}
 		}
 
@@ -272,8 +293,8 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 }
 
 static int
-uinput_create(const struct libevdev *dev, int fd,
-	      struct libevdev_uinput *new_device)
+uinput_create_write(const struct libevdev *dev, int fd,
+		    struct libevdev_uinput *new_device)
 {
 	int rc;
 	struct uinput_user_dev uidev;
@@ -305,12 +326,40 @@ error:
 	return -errno;
 }
 
+static int
+uinput_create_DEV_SETUP(const struct libevdev *dev, int fd,
+			struct libevdev_uinput *new_device)
+{
+	int rc;
+	struct uinput_setup setup;
+
+	if (set_evbits(dev, fd, NULL) != 0)
+		goto error;
+	if (set_props(dev, fd) != 0)
+		goto error;
+
+	memset(&setup, 0, sizeof(setup));
+	strncpy(setup.name, libevdev_get_name(dev), UINPUT_MAX_NAME_SIZE - 1);
+	setup.id.vendor = libevdev_get_id_vendor(dev);
+	setup.id.product = libevdev_get_id_product(dev);
+	setup.id.bustype = libevdev_get_id_bustype(dev);
+	setup.id.version = libevdev_get_id_version(dev);
+	setup.ff_effects_max = libevdev_has_event_type(dev, EV_FF) ? 10 : 0;
+
+	rc = ioctl(fd, UI_DEV_SETUP, &setup);
+	if (rc == 0)
+		errno = 0;
+error:
+	return -errno;
+}
+
 LIBEVDEV_EXPORT int
 libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct libevdev_uinput** uinput_dev)
 {
 	int rc;
 	struct libevdev_uinput *new_device;
 	int close_fd_on_error = (fd == LIBEVDEV_UINPUT_OPEN_MANAGED);
+	unsigned int uinput_version = 0;
 
 	new_device = alloc_uinput_device(libevdev_get_name(dev));
 	if (!new_device)
@@ -328,7 +377,12 @@ libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct li
 		goto error;
 	}
 
-	rc = uinput_create(dev, fd, new_device);
+	if (ioctl(fd, UI_GET_VERSION, &uinput_version) == 0 &&
+	    uinput_version >= 5)
+		rc = uinput_create_DEV_SETUP(dev, fd, new_device);
+	else
+		rc = uinput_create_write(dev, fd, new_device);
+
 	if (rc != 0)
 		goto error;
 
