@@ -271,29 +271,12 @@ fetch_syspath_and_devnode(struct libevdev_uinput *uinput_dev)
 	return uinput_dev->devnode ? 0 : -1;
 }
 
-LIBEVDEV_EXPORT int
-libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct libevdev_uinput** uinput_dev)
+static int
+uinput_create(const struct libevdev *dev, int fd,
+	      struct libevdev_uinput *new_device)
 {
 	int rc;
 	struct uinput_user_dev uidev;
-	struct libevdev_uinput *new_device;
-	int close_fd_on_error = (fd == LIBEVDEV_UINPUT_OPEN_MANAGED);
-
-	new_device = alloc_uinput_device(libevdev_get_name(dev));
-	if (!new_device)
-		return -ENOMEM;
-
-	if (fd == LIBEVDEV_UINPUT_OPEN_MANAGED) {
-		fd = open("/dev/uinput", O_RDWR|O_CLOEXEC);
-		if (fd < 0)
-			goto error;
-
-		new_device->fd_is_managed = 1;
-	} else if (fd < 0) {
-		log_bug(NULL, "Invalid fd %d\n", fd);
-		errno = EBADF;
-		goto error;
-	}
 
 	memset(&uidev, 0, sizeof(uidev));
 
@@ -315,6 +298,39 @@ libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct li
 		errno = EINVAL;
 		goto error;
 	}
+
+	errno = 0;
+
+error:
+	return -errno;
+}
+
+LIBEVDEV_EXPORT int
+libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct libevdev_uinput** uinput_dev)
+{
+	int rc;
+	struct libevdev_uinput *new_device;
+	int close_fd_on_error = (fd == LIBEVDEV_UINPUT_OPEN_MANAGED);
+
+	new_device = alloc_uinput_device(libevdev_get_name(dev));
+	if (!new_device)
+		return -ENOMEM;
+
+	if (fd == LIBEVDEV_UINPUT_OPEN_MANAGED) {
+		fd = open("/dev/uinput", O_RDWR|O_CLOEXEC);
+		if (fd < 0)
+			goto error;
+
+		new_device->fd_is_managed = 1;
+	} else if (fd < 0) {
+		log_bug(NULL, "Invalid fd %d\n", fd);
+		errno = EBADF;
+		goto error;
+	}
+
+	rc = uinput_create(dev, fd, new_device);
+	if (rc != 0)
+		goto error;
 
 	/* ctime notes time before/after ioctl to help us filter out devices
 	   when traversing /sys/devices/virtual/input to find the device
