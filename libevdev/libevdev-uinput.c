@@ -130,7 +130,7 @@ out:
 }
 
 static int
-set_props(const struct libevdev *dev, int fd, struct uinput_user_dev *uidev)
+set_props(const struct libevdev *dev, int fd)
 {
 	unsigned int prop;
 	int rc = 0;
@@ -305,7 +305,7 @@ libevdev_uinput_create_from_device(const struct libevdev *dev, int fd, struct li
 
 	if (set_evbits(dev, fd, &uidev) != 0)
 		goto error;
-	if (set_props(dev, fd, &uidev) != 0)
+	if (set_props(dev, fd) != 0)
 		goto error;
 
 	rc = write(fd, &uidev, sizeof(uidev));
