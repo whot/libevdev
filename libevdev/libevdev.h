@@ -528,6 +528,8 @@ extern "C" {
  * <dt>EVIOCREVOKE:</dt>
  * <dd>currently not supported, see
  * http://lists.freedesktop.org/archives/input-tools/2014-January/000688.html</dd>
+ * <dt>EVIOCGMASK/EVIOCGSMASK:</dt>
+ * <dd>supported, see libevdev_disable_event_code()
  * </dl>
  *
  */
@@ -1840,6 +1842,9 @@ int libevdev_enable_event_code(struct libevdev *dev, unsigned int type, unsigned
  *
  * Disabling codes of type EV_SYN will not work. Don't shoot yourself in the
  * foot. It hurts.
+ *
+ * libevdev may transparently use the EVIOCSMASK ioctl if available. This
+ * ioctl disables delivery of that event type in the kernel.
  *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param type The event type to disable (EV_ABS, EV_KEY, ...)

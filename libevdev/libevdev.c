@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <poll.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <limits.h>
 #include <unistd.h>
@@ -1455,6 +1456,35 @@ libevdev_disable_event_type(struct libevdev *dev, unsigned int type)
 	return 0;
 }
 
+static inline int
+set_event_mask(struct libevdev *dev, int type, unsigned int code, bool enable)
+{
+	unsigned long m[NLONGS(KEY_CNT)] = {0};
+	struct input_mask mask = {
+		mask.type = type,
+		mask.codes_size = sizeof(m),
+		mask.codes_ptr = (uint64_t)m,
+	};
+	int rc;
+
+	rc = ioctl(dev->fd, EVIOCGMASK, &mask);
+	if (rc == -1)
+		return -errno;
+
+	if (enable) {
+		if (bit_is_set(m, code))
+			return 0;
+		set_bit(m, code);
+	} else {
+		if (!bit_is_set(m, code))
+			return 0;
+		clear_bit(m, code);
+	}
+
+	rc = ioctl(dev->fd, EVIOCSMASK, &mask);
+	return rc != -1 ? 0 : -errno;
+}
+
 LIBEVDEV_EXPORT int
 libevdev_enable_event_code(struct libevdev *dev, unsigned int type,
 			   unsigned int code, const void *data)
@@ -1494,6 +1524,9 @@ libevdev_enable_event_code(struct libevdev *dev, unsigned int type,
 		dev->rep_values[code] = *value;
 	}
 
+	if (dev->initialized)
+		set_event_mask(dev, type, code, true);
+
 	return 0;
 }
 
@@ -1512,6 +1545,9 @@ libevdev_disable_event_code(struct libevdev *dev, unsigned int type, unsigned in
 		return -1;
 
 	clear_bit(mask, code);
+
+	if (dev->initialized)
+		set_event_mask(dev, type, code, false);
 
 	return 0;
 }
