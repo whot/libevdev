@@ -1798,7 +1798,7 @@ int libevdev_disable_event_type(struct libevdev *dev, unsigned int type);
  * The last argument depends on the type and code:
  * - If type is EV_ABS, data must be a pointer to a struct input_absinfo
  *   containing the data for this axis.
- * - If type is EV_REP, daat must be a pointer to a int containing the data
+ * - If type is EV_REP, data must be a pointer to a int containing the data
  *   for this axis
  * - For all other types, the argument must be NULL.
  *
