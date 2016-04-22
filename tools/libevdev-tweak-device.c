@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include <getopt.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -94,6 +95,40 @@ parse_resolution_argument(const char *arg, int *xres, int *yres)
 	return true;
 }
 
+static inline bool
+safe_atoi(const char *str, int *val)
+{
+        char *endptr;
+        long v;
+
+        v = strtol(str, &endptr, 10);
+        if (str == endptr)
+                return false;
+        if (*str != '\0' && *endptr != '\0')
+                return false;
+
+        if (v > INT_MAX || v < INT_MIN)
+                return false;
+
+        *val = v;
+        return true;
+}
+
+static int
+parse_event_code(int type, const char *str)
+{
+	int code;
+
+	code = libevdev_event_code_from_name(type, str);
+	if (code != -1)
+		return code;
+
+	if (safe_atoi(str, &code))
+		return code;
+
+	return -1;
+}
+
 static int
 parse_options_abs(int argc, char **argv, unsigned int *changes,
 		  int *axis, struct input_absinfo *absinfo)
@@ -122,8 +157,7 @@ parse_options_abs(int argc, char **argv, unsigned int *changes,
 
 		switch (c) {
 			case OPT_ABS:
-				*axis = libevdev_event_code_from_name(EV_ABS,
-								     optarg);
+				*axis = parse_event_code(EV_ABS, optarg);
 				if (*axis == -1)
 					goto error;
 				break;
@@ -176,8 +210,7 @@ parse_options_led(int argc, char **argv, int *led, int *led_state)
 
 		switch (c) {
 			case OPT_LED:
-				*led = libevdev_event_code_from_name(EV_LED,
-								     optarg);
+				*led = parse_event_code(EV_LED, optarg);
 				if (*led == -1)
 					goto error;
 				break;
