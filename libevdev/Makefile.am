@@ -12,7 +12,7 @@ libevdev_la_SOURCES = \
                    libevdev.c \
                    libevdev-names.c \
 		   ../include/linux/input-event-codes.h \
-		   ../include/linux/input.h
+		   ../include/linux/input.h \
 		   ../include/linux/uinput.h
 
 libevdev_la_LDFLAGS = \
