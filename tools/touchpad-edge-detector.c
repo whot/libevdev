@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <math.h>
 #include <poll.h>
 #include <signal.h>
 #include <stdint.h>
@@ -43,15 +44,20 @@
 
 static int
 usage(void) {
-	printf("Usage: %s /dev/input/event0\n", program_invocation_short_name);
+	printf("Usage: %s 12x34 /dev/input/event0\n", program_invocation_short_name);
 	printf("\n");
 	printf("This tool reads the touchpad events from the kernel and calculates\n "
-	       "the minimum and maximum for the x and y coordinates, respectively.\n");
+	       "the minimum and maximum for the x and y coordinates, respectively.\n"
+	       "The first argument is the physical size of the touchpad in mm.\n");
 	return 1;
 }
 
 struct dimensions {
 	int top, bottom, left, right;
+};
+
+struct size {
+	int w, h;
 };
 
 static int
@@ -168,15 +174,20 @@ dmi_matchstr(struct libevdev *dev, char *match, size_t sz)
 }
 
 static void
-print_udev_override_rule(struct libevdev *dev, const struct dimensions *dim) {
+print_udev_override_rule(struct libevdev *dev,
+			 const struct dimensions *dim,
+			 const struct size *size) {
 	const struct input_absinfo *x, *y;
 	char match[PATH_MAX];
 	int w, h;
+	int xres, yres;
 
 	x = libevdev_get_abs_info(dev, ABS_X);
 	y = libevdev_get_abs_info(dev, ABS_Y);
 	w = x->maximum - x->minimum;
 	h = y->maximum - y->minimum;
+	xres = round((double)w/size->w);
+	yres = round((double)h/size->h);
 
 	if (x->resolution && y->resolution) {
 		printf("Touchpad size as listed by the kernel: %dx%dmm\n",
@@ -185,9 +196,8 @@ print_udev_override_rule(struct libevdev *dev, const struct dimensions *dim) {
 		printf("Touchpad has no resolution, size unknown\n");
 	}
 
-	printf("Calculate resolution as:\n");
-	printf("	x axis: %d/<width in mm>\n", w);
-	printf("	y axis: %d/<height in mm>\n", h);
+	printf("User-specified touchpad size: %dx%dmm\n", size->w, size->h);
+	printf("Calculated ranges: %d/%d\n", w, h);
 	printf("\n");
 	printf("Suggested udev rule:\n");
 
@@ -203,16 +213,16 @@ print_udev_override_rule(struct libevdev *dev, const struct dimensions *dim) {
 
 	printf("# <Laptop model description goes here>\n"
 	       "evdev:%s*\n"
-	       " EVDEV_ABS_00=%d:%d:<x resolution>\n"
-	       " EVDEV_ABS_01=%d:%d:<y resolution>\n",
+	       " EVDEV_ABS_00=%d:%d:%d\n"
+	       " EVDEV_ABS_01=%d:%d:%d\n",
 	       match,
-	       dim->left, dim->right,
-	       dim->top, dim->bottom);
+	       dim->left, dim->right, xres,
+	       dim->top, dim->bottom, yres);
 	if (libevdev_has_event_code(dev, EV_ABS, ABS_MT_POSITION_X))
-		printf(" EVDEV_ABS_35=%d:%d:<x resolution>\n"
-		       " EVDEV_ABS_36=%d:%d:<y resolution>\n",
-		       dim->left, dim->right,
-		       dim->top, dim->bottom);
+		printf(" EVDEV_ABS_35=%d:%d:%d\n"
+		       " EVDEV_ABS_36=%d:%d:%d\n",
+		       dim->left, dim->right, xres,
+		       dim->top, dim->bottom, yres);
 }
 
 int main (int argc, char **argv) {
@@ -221,11 +231,16 @@ int main (int argc, char **argv) {
 	const char *path;
 	struct libevdev *dev;
 	struct dimensions dim;
+	struct size size;
 
-	if (argc < 2)
+	if (argc < 3)
 		return usage();
 
-	path = argv[1];
+	if (sscanf(argv[1], "%dx%d", &size.w, &size.h) != 2 ||
+	    size.w <= 0 || size.h <= 0)
+		return usage();
+
+	path = argv[2];
 	if (path[0] == '-')
 		return usage();
 
@@ -273,7 +288,7 @@ int main (int argc, char **argv) {
 	rc = mainloop(dev, &dim);
 	printf("\n\n");
 
-	print_udev_override_rule(dev, &dim);
+	print_udev_override_rule(dev, &dim, &size);
 
 out:
 	libevdev_free(dev);

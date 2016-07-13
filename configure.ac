@@ -66,6 +66,8 @@ if test "x$lt_cv_prog_gnu_ld" = "xyes"; then
 fi
 AC_SUBST([GNU_LD_FLAGS], $with_ldflags)
 
+AC_CHECK_LIB([m], [round])
+
 PKG_PROG_PKG_CONFIG()
 PKG_CHECK_MODULES(CHECK, [check >= 0.9.9], [HAVE_CHECK="yes"], [HAVE_CHECK="no"])
 if test "x$HAVE_CHECK" = "xyes"; then
