@@ -240,6 +240,14 @@ int main (int argc, char **argv) {
 	    size.w <= 0 || size.h <= 0)
 		return usage();
 
+	if (size.w < 30 || size.h < 30) {
+		fprintf(stderr,
+			"%dx%dmm is too small for a touchpad.\n"
+			"Please specify the touchpad size in mm.\n",
+			size.w, size.h);
+		return 1;
+	}
+
 	path = argv[2];
 	if (path[0] == '-')
 		return usage();
