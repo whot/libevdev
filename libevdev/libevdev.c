@@ -979,6 +979,9 @@ sanitize_event(const struct libevdev *dev,
 	       struct input_event *ev,
 	       enum SyncState sync_state)
 {
+	if (!libevdev_has_event_code(dev, ev->type, ev->code))
+		return EVENT_FILTER_DISCARD;
+
 	if (unlikely(dev->num_slots > -1 &&
 		     libevdev_event_is_code(ev, EV_ABS, ABS_MT_SLOT) &&
 		     (ev->value < 0 || ev->value >= dev->num_slots))) {
