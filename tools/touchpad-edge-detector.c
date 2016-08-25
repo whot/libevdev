@@ -184,8 +184,8 @@ print_udev_override_rule(struct libevdev *dev,
 
 	x = libevdev_get_abs_info(dev, ABS_X);
 	y = libevdev_get_abs_info(dev, ABS_Y);
-	w = x->maximum - x->minimum;
-	h = y->maximum - y->minimum;
+	w = dim->right - dim->left;
+	h = dim->bottom - dim->top;
 	xres = round((double)w/size->w);
 	yres = round((double)h/size->h);
 
