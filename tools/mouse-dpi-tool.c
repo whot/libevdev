@@ -65,7 +65,7 @@ tv2us(const struct timeval *tv)
 }
 
 static inline double
-get_frequency(double last, double current)
+get_frequency(uint64_t last, uint64_t current)
 {
 	return 1000000.0/(current - last);
 }
