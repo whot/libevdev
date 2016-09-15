@@ -190,8 +190,10 @@ print_udev_override_rule(struct libevdev *dev,
 	yres = round((double)h/size->h);
 
 	if (x->resolution && y->resolution) {
+		int width = x->maximum - x->minimum,
+		    height = y->maximum - y->minimum;
 		printf("Touchpad size as listed by the kernel: %dx%dmm\n",
-		       w/x->resolution, h/y->resolution);
+		       width/x->resolution, height/y->resolution);
 	} else {
 		printf("Touchpad has no resolution, size unknown\n");
 	}
