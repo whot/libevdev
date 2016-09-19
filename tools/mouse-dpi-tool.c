@@ -44,6 +44,9 @@
 struct measurements {
 	int distance;
 	double max_frequency;
+	double *frequencies;
+	size_t frequencies_sz;
+	size_t nfrequencies;
 	uint64_t us;
 };
 
@@ -68,6 +71,21 @@ static inline double
 get_frequency(uint64_t last, uint64_t current)
 {
 	return 1000000.0/(current - last);
+}
+
+static inline void
+push_frequency(struct measurements *m, double freq)
+{
+	if (m->nfrequencies == m->frequencies_sz) {
+		m->frequencies_sz += 100;
+		m->frequencies = realloc(m->frequencies,
+					 m->frequencies_sz * sizeof *m->frequencies);
+		if (!m->frequencies)
+			abort();
+	}
+
+	m->frequencies[m->nfrequencies] = freq;
+	m->nfrequencies++;
 }
 
 static int
@@ -109,8 +127,8 @@ handle_event(struct measurements *m, const struct input_event *ev)
 			m->distance = 0;
 		} else {
 			double freq = get_frequency(last_us, m->us);
-			if (freq < 1200)
-				m->max_frequency = max(freq, m->max_frequency);
+			push_frequency(m, freq);
+			m->max_frequency = max(freq, m->max_frequency);
 			return print_current_values(m);
 		}
 
@@ -166,12 +184,29 @@ mainloop(struct libevdev *dev, struct measurements *m) {
 	return 0;
 }
 
+static inline double
+mean_frequency(struct measurements *m)
+{
+	int idx;
+
+	idx = m->nfrequencies/2;
+	return m->frequencies[idx];
+}
+
 static void
 print_summary(struct measurements *m)
 {
 	int res;
+	int max_freq = (int)m->max_frequency,
+	    mean_freq = (int)mean_frequency(m);
 
-	printf("Estimated sampling frequency: %dHz\n", (int)m->max_frequency);
+	printf("Estimated sampling frequency: %dHz (mean %dHz)\n",
+	       max_freq, mean_freq);
+
+	if (max_freq > mean_freq * 1.3)
+		printf("WARNING: Max frequency is more than 30%% higher "
+		       "than mean frequency. Manual verification required!\n");
+
 	printf("To calculate resolution, measure physical distance covered\n"
 	       "and look up the matching resolution in the table below\n");
 
@@ -213,7 +248,7 @@ main (int argc, char **argv) {
 	int fd;
 	const char *path;
 	struct libevdev *dev;
-	struct measurements measurements = {0, 0, 0};
+	struct measurements measurements = {0};
 
 	if (argc < 2)
 		return usage();
