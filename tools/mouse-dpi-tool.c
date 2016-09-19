@@ -43,7 +43,7 @@
 
 struct measurements {
 	int distance;
-	double frequency;
+	double max_frequency;
 	uint64_t us;
 };
 
@@ -89,7 +89,7 @@ print_current_values(const struct measurements *m)
 	progress = (progress + 1) % 4;
 
 	printf("\rCovered distance in device units: %8d at frequency %3.1fHz 	%c",
-	       abs(m->distance), m->frequency, status);
+	       abs(m->distance), m->max_frequency, status);
 
 	return 0;
 }
@@ -105,11 +105,12 @@ handle_event(struct measurements *m, const struct input_event *ev)
 
 		/* reset after pause */
 		if (last_us + idle_reset < m->us) {
-			m->frequency = 0.0;
+			m->max_frequency = 0.0;
 			m->distance = 0;
 		} else {
 			double freq = get_frequency(last_us, m->us);
-			m->frequency = max(freq, m->frequency);
+			if (freq < 1200)
+				m->max_frequency = max(freq, m->max_frequency);
 			return print_current_values(m);
 		}
 
@@ -170,7 +171,7 @@ print_summary(struct measurements *m)
 {
 	int res;
 
-	printf("Estimated sampling frequency: %dHz\n", (int)m->frequency);
+	printf("Estimated sampling frequency: %dHz\n", (int)m->max_frequency);
 	printf("To calculate resolution, measure physical distance covered\n"
 	       "and look up the matching resolution in the table below\n");
 
@@ -259,7 +260,7 @@ main (int argc, char **argv) {
 	       libevdev_get_id_vendor(dev),
 	       libevdev_get_id_product(dev),
 	       libevdev_get_name(dev),
-	       (int)measurements.frequency);
+	       (int)measurements.max_frequency);
 
 	libevdev_free(dev);
 	close(fd);
