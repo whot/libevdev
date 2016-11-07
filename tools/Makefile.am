@@ -1,6 +1,7 @@
 noinst_PROGRAMS = libevdev-events
 bin_PROGRAMS = \
 	       touchpad-edge-detector \
+	       touchscreen-emulator \
 	       mouse-dpi-tool \
 	       libevdev-tweak-device
 
@@ -12,6 +13,9 @@ libevdev_events_LDADD = $(libevdev_ldadd)
 
 touchpad_edge_detector_SOURCES = touchpad-edge-detector.c
 touchpad_edge_detector_LDADD = $(libevdev_ldadd)
+
+touchscreen_emulator_SOURCES = touchscreen-emulator.c
+touchscreen_emulator_LDADD = $(libevdev_ldadd)
 
 mouse_dpi_tool_SOURCES = mouse-dpi-tool.c
 mouse_dpi_tool_LDADD = $(libevdev_ldadd)
