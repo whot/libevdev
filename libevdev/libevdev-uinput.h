@@ -54,7 +54,7 @@ struct libevdev_uinput;
  *     return err;
  *
  * uifd = open("/dev/uinput", O_RDWR);
- * if (uidev < 0)
+ * if (uifd < 0)
  *     return -errno;
  *
  * err = libevdev_uinput_create_from_device(dev, uifd, &uidev);
