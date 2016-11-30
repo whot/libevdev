@@ -31,7 +31,9 @@ run_tests = test-libevdev test-kernel
 
 noinst_PROGRAMS += $(run_tests)
 
+if RUN_TESTS
 TESTS = $(run_tests)
+endif
 
 libevdev_sources = $(top_srcdir)/libevdev/libevdev.c \
 		   $(top_srcdir)/libevdev/libevdev.h \

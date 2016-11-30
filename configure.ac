@@ -79,6 +79,11 @@ AM_CONDITIONAL(HAVE_VALGRIND, [test "x$VALGRIND" != "x"])
 AM_CONDITIONAL(ENABLE_RUNTIME_TESTS, [test "x$HAVE_CHECK" = "xyes"])
 AM_CONDITIONAL(ENABLE_STATIC_LINK_TEST, [test "x$enable_static" = "xyes"])
 
+AC_ARG_ENABLE([test-run],
+	       AS_HELP_STRING([--enable-test-run], [For internal use only]),
+	       [run_tests="$enableval"], [run_tests="yes"])
+AM_CONDITIONAL(RUN_TESTS, [test "x$run_tests" = "xyes"])
+
 with_cflags=""
 if test "x$GCC" = "xyes"; then
 	CC_CHECK_FLAGS_APPEND([with_cflags], [CFLAGS], [\
@@ -163,6 +168,7 @@ AC_MSG_RESULT([
 
 	       Build documentation		${have_doxygen}
 	       Enable unit-tests		${HAVE_CHECK}
+	       Run unit-tests			${run_tests}
 	       Enable profiling			${enable_gcov}
 	       Static library symbol check	${static_symbol_leaks_test}
 	       ])
