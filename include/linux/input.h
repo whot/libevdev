@@ -179,7 +179,7 @@ struct input_mask {
  * The default event mask for a client has all bits set, i.e. all events
  * are forwarded to the client. If the kernel is queried for an unknown
  * event type or if the receive buffer is larger than the number of
- * event codes known to the kernel, the kernel returns all zeroes for those
+ * event codes known to the kernel, the kernel may return zeroes for those
  * codes.
  *
  * At maximum, codes_size bytes are copied.
@@ -202,7 +202,7 @@ struct input_mask {
  * is unknown to the kernel, or if the number of event codes specified in
  * the mask is bigger than what is known to the kernel, the ioctl is still
  * accepted and applied. However, any unknown codes are left untouched and
- * stay cleared. That means, the kernel always filters unknown codes
+ * may be cleared. That means, the kernel always filters unknown codes
  * regardless of what the client requests.  If the new mask doesn't cover
  * all known event-codes, all remaining codes are automatically cleared and
  * thus filtered.
@@ -245,6 +245,8 @@ struct input_mask {
 #define BUS_ATARI		0x1B
 #define BUS_SPI			0x1C
 #define BUS_RMI			0x1D
+#define BUS_CEC			0x1E
+#define BUS_INTEL_ISHTP		0x1F
 
 /*
  * MT_TOOL types
