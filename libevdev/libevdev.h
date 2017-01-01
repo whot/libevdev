@@ -655,9 +655,9 @@ extern "C" {
 /**
  * @defgroup bits Querying device capabilities
  *
- * Abstraction functions to handle device capabilities, specificially
+ * Abstraction functions to handle device capabilities, specifically
  * device properties such as the name of the device and the bits
- * representing the events suppported by this device.
+ * representing the events supported by this device.
  *
  * The logical state returned may lag behind the physical state of the device.
  * libevdev queries the device state on libevdev_set_fd() and then relies on
@@ -681,14 +681,14 @@ extern "C" {
  * The Linux kernel requires all axes on a device to have a semantic
  * meaning, matching the axis names in linux/input.h. Some devices merely
  * export a number of axes beyond the available axis list. For those
- * devices, the multitouch information is invalid. Specfically, if a device
+ * devices, the multitouch information is invalid. Specifically, if a device
  * provides the ABS_MT_SLOT axis AND also the (ABS_MT_SLOT - 1) axis, the
  * device is not treated as multitouch device. No slot information is
  * available and the ABS_MT axis range for these devices is treated as all
  * other EV_ABS axes.
  *
  * Note that because of limitations in the kernel API, such fake multitouch
- * devices can not be reliably synched after a SYN_DROPPED event. libevdev
+ * devices can not be reliably synced after a SYN_DROPPED event. libevdev
  * ignores all ABS_MT axis values during the sync process and instead
  * relies on the device to send the current axis value with the first event
  * after SYN_DROPPED.
@@ -959,7 +959,7 @@ enum libevdev_grab_mode {
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param grab If true, grab the device. Otherwise ungrab the device.
  *
- * @return 0 if the device was successfull grabbed or ungrabbed, or a
+ * @return 0 if the device was successfully grabbed or ungrabbed, or a
  * negative errno in case of failure.
  */
 int libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab);
@@ -985,7 +985,7 @@ int libevdev_grab(struct libevdev *dev, enum libevdev_grab_mode grab);
  * events like EV_REL.
  *
  * Unless otherwise specified, libevdev function behavior is undefined until
- * a successfull call to libevdev_set_fd().
+ * a successful call to libevdev_set_fd().
  *
  * @param dev The evdev device
  * @param fd The file descriptor for the device
