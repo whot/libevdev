@@ -1,6 +1,7 @@
 lib_LTLIBRARIES=libevdev.la
 
-AM_CPPFLAGS = $(GCC_CFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)
+AM_CPPFLAGS = $(GCC_CFLAGS) $(GCOV_CFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)
+AM_LDFLAGS = $(GCOV_LDFLAGS)
 
 libevdev_la_SOURCES = \
                    libevdev.h \
@@ -16,6 +17,7 @@ libevdev_la_SOURCES = \
 		   ../include/linux/uinput.h
 
 libevdev_la_LDFLAGS = \
+        $(AM_LDFLAGS) \
 	-version-info $(LIBEVDEV_LT_VERSION) \
 	-Wl,--version-script="$(srcdir)/libevdev.sym" \
 	$(GNU_LD_FLAGS)
@@ -33,3 +35,6 @@ EXTRA_DIST = make-event-names.py libevdev.sym
 CLEANFILES = event-names.h
 BUILT_SOURCES = event-names.h
 
+if GCOV_ENABLED
+CLEANFILES += *.gcno
+endif

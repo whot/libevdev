@@ -32,7 +32,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_USE_SYSTEM_EXTENSIONS
 
-AM_INIT_AUTOMAKE([1.11 foreign no-dist-gzip dist-xz])
+AM_INIT_AUTOMAKE([1.11 foreign no-dist-gzip dist-xz subdir-objects])
 
 # Before making a release, the LIBEVDEV_LT_VERSION string should be
 # modified.
