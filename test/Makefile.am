@@ -126,7 +126,7 @@ gcov:
 gcov-clean:
 	@true
 
-endif # HAVE_VALGRIND
+endif # GCOV_ENABLED
 
 .PHONY: gcov gcov-clean gcov-report.txt
 
