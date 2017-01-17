@@ -193,8 +193,26 @@ mean_frequency(struct measurements *m)
 	return m->frequencies[idx];
 }
 
+static inline const char*
+bustype(int bustype)
+{
+	const char *bus;
+
+	switch(bustype) {
+		case BUS_PCI: bus = "pci"; break;
+		case BUS_ISAPNP: bus = "isapnp"; break;
+		case BUS_USB: bus = "usb"; break;
+		case BUS_HIL: bus = "hil"; break;
+		case BUS_BLUETOOTH: bus = "bluetooth"; break;
+		case BUS_VIRTUAL: bus = "virtual"; break;
+		default: bus = "unknown bus type"; break;
+	}
+
+	return bus;
+}
+
 static void
-print_summary(struct measurements *m)
+print_summary(struct libevdev *dev, struct measurements *m)
 {
 	int res;
 	int max_freq = (int)m->max_frequency,
@@ -222,24 +240,16 @@ print_summary(struct measurements *m)
 	printf("If your resolution is not in the list, calculate it with:\n"
 	       "\tresolution=%d/inches, or\n"
 	       "\tresolution=%d * 25.4/mm\n", m->distance, m->distance);
-}
 
-static inline const char*
-bustype(int bustype)
-{
-	const char *bus;
-
-	switch(bustype) {
-		case BUS_PCI: bus = "pci"; break;
-		case BUS_ISAPNP: bus = "isapnp"; break;
-		case BUS_USB: bus = "usb"; break;
-		case BUS_HIL: bus = "hil"; break;
-		case BUS_BLUETOOTH: bus = "bluetooth"; break;
-		case BUS_VIRTUAL: bus = "virtual"; break;
-		default: bus = "unknown bus type"; break;
-	}
-
-	return bus;
+	printf("\n");
+	printf("Entry for hwdb match (replace XXX with the resolution in DPI):\n"
+	       "mouse:%s:v%04xp%04x:name:%s:\n"
+	       " MOUSE_DPI=XXX@%d\n",
+	       bustype(libevdev_get_id_bustype(dev)),
+	       libevdev_get_id_vendor(dev),
+	       libevdev_get_id_product(dev),
+	       libevdev_get_name(dev),
+	       (int)m->max_frequency);
 }
 
 int
@@ -285,17 +295,7 @@ main (int argc, char **argv) {
 
 	printf("\n");
 
-	print_summary(&measurements);
-
-	printf("\n");
-	printf("Entry for hwdb match (replace XXX with the resolution in DPI):\n"
-	       "mouse:%s:v%04xp%04x:name:%s:\n"
-	       " MOUSE_DPI=XXX@%d\n",
-	       bustype(libevdev_get_id_bustype(dev)),
-	       libevdev_get_id_vendor(dev),
-	       libevdev_get_id_product(dev),
-	       libevdev_get_name(dev),
-	       (int)measurements.max_frequency);
+	print_summary(dev, &measurements);
 
 	libevdev_free(dev);
 	close(fd);
