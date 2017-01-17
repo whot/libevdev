@@ -215,8 +215,15 @@ static void
 print_summary(struct libevdev *dev, struct measurements *m)
 {
 	int res;
-	int max_freq = (int)m->max_frequency,
-	    mean_freq = (int)mean_frequency(m);
+	int max_freq, mean_freq;
+
+	if (m->nfrequencies == 0) {
+		fprintf(stderr, "Error: no matching events received.\n");
+		return;
+	}
+
+	max_freq = (int)m->max_frequency;
+	mean_freq = (int)mean_frequency(m);
 
 	printf("Estimated sampling frequency: %dHz (mean %dHz)\n",
 	       max_freq, mean_freq);
