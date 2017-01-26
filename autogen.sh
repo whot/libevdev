@@ -9,4 +9,4 @@ cd "$srcdir"
 autoreconf -fvi || exit $?
 
 cd "$olddir"
-test -n "$NOCONFIGURE" || "$srcdir"/configure "$@"
+test -n "$NOCONFIGURE" || exec "$srcdir"/configure "$@"
