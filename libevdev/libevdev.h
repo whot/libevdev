@@ -39,8 +39,18 @@ extern "C" {
  * the \ref ioctls through type-safe interfaces and provides functions to change
  * the appearance of the device.
  *
+ * Development
+ * ===========
+ * The git repository is available here:
+ *
+ *   - git://git.freedesktop.org/git/libevdev
+ *
+ * The git web interface is available here:
+ *
+ *   - http://cgit.freedesktop.org/libevdev/
+ *
  * Development of libevdev is discussed on
- * [input-tools@lists.freedesktop.org](http://lists.freedesktop.org/mailman/listinfo/input-tools)
+ * [input-tools@lists.freedesktop.org](http://lists.freedesktop.org/mailman/listinfo/input-tools).
  * Please submit patches, questions or general comments there.
  *
  * Handling events and SYN_DROPPED
