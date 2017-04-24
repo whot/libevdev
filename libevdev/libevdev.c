@@ -494,7 +494,7 @@ libevdev_set_fd(struct libevdev* dev, int fd)
 			goto out;
 		}
 
-	    sync_mt_state(dev, 0);
+		sync_mt_state(dev, 0);
 	}
 
 	rc = init_event_queue(dev);
