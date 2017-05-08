@@ -22,9 +22,11 @@
 
 #include <config.h>
 #include <check.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/ptrace.h>
+#include <sys/resource.h>
 #include <sys/wait.h>
 #include <libevdev/libevdev.h>
 
@@ -68,10 +70,14 @@ is_debugger_attached(void)
 
 int main(int argc, char **argv)
 {
+	const struct rlimit corelimit = {0, 0};
 	int failed;
 
 	if (is_debugger_attached())
 		setenv("CK_FORK", "no", 0);
+
+	if (setrlimit(RLIMIT_CORE, &corelimit) != 0)
+		perror("WARNING: Core dumps not disabled. Reason");
 
 	libevdev_set_log_function(test_logfunc_abort_on_error, NULL);
 
