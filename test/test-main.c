@@ -68,7 +68,7 @@ is_debugger_attached(void)
 	return rc;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
 	const struct rlimit corelimit = {0, 0};
 	int failed;
