@@ -33,9 +33,6 @@ START_TEST(test_queue_alloc)
 	rc = queue_alloc(&dev, 0);
 	ck_assert_int_eq(rc, -ENOMEM);
 
-	rc = queue_alloc(&dev, ULONG_MAX);
-	ck_assert_int_eq(rc, -ENOMEM);
-
 	rc = queue_alloc(&dev, 100);
 	ck_assert_int_eq(rc, 0);
 
