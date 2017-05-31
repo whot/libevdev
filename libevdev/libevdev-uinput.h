@@ -186,10 +186,15 @@ int libevdev_uinput_get_fd(const struct libevdev_uinput *uinput_dev);
  * ioctl not available, libevdev makes an educated guess.
  * The UI_GET_SYSNAME ioctl is available since Linux 3.15.
  *
+ * The syspath returned is the one of the input node itself
+ * (e.g. /sys/devices/virtual/input/input123), not the syspath of the device
+ * node returned with libevdev_uinput_get_devnode().
+ *
  * @note This function may return NULL if UI_GET_SYSNAME is not available.
  * In that case, libevdev uses ctime and the device name to guess devices.
  * To avoid false positives, wait at least wait at least 1.5s between
  * creating devices that have the same name.
+ *
  * @param uinput_dev A previously created uinput device.
  * @return The syspath for this device, including the preceding /sys
  *
