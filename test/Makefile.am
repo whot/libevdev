@@ -56,6 +56,7 @@ test_libevdev_SOURCES = \
 			$(common_sources)
 
 test_libevdev_LDADD = $(CHECK_LIBS) $(top_builddir)/libevdev/libevdev.la
+test_libevdev_LDFLAGS = -no-install
 
 test_kernel_SOURCES = \
 		      test-kernel.c \
