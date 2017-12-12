@@ -966,6 +966,10 @@ enum libevdev_grab_mode {
  * Grabbing an already grabbed device, or ungrabbing an ungrabbed device is
  * a noop and always succeeds.
  *
+ * A grab is an operation tied to a file descriptor, not a device. If a
+ * client changes the file descriptor with libevdev_change_fd(), it must
+ * also re-issue a grab with libevdev_grab().
+ *
  * @param dev The evdev device, already initialized with libevdev_set_fd()
  * @param grab If true, grab the device. Otherwise ungrab the device.
  *
@@ -1033,6 +1037,9 @@ int libevdev_set_fd(struct libevdev* dev, int fd);
  * @endcode
  *
  * The fd may be open in O_RDONLY or O_RDWR.
+ *
+ * After changing the fd, the device is assumed ungrabbed and a caller must
+ * call libevdev_grab() again.
  *
  * It is an error to call this function before calling libevdev_set_fd().
  *

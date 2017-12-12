@@ -311,6 +311,7 @@ libevdev_change_fd(struct libevdev *dev, int fd)
 		return -1;
 	}
 	dev->fd = fd;
+	dev->grabbed = LIBEVDEV_UNGRAB;
 	return 0;
 }
 

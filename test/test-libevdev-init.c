@@ -468,6 +468,93 @@ START_TEST(test_device_grab_invalid_fd)
 }
 END_TEST
 
+START_TEST(test_device_grab_change_fd)
+{
+	struct libevdev_uinput *uidev;
+	struct libevdev *dev, *other;
+	struct input_event e;
+	int rc;
+	int other_fd;
+	int dev_fd;
+
+	dev = libevdev_new();
+	libevdev_set_name(dev, "libevdev test device");
+	libevdev_enable_event_code(dev, EV_REL, REL_X, NULL);
+	libevdev_enable_event_code(dev, EV_REL, REL_Y, NULL);
+	libevdev_enable_event_code(dev, EV_KEY, BTN_LEFT, NULL);
+
+	rc = libevdev_uinput_create_from_device(dev,
+						LIBEVDEV_UINPUT_OPEN_MANAGED,
+						&uidev);
+	ck_assert_int_eq(rc, 0);
+	libevdev_free(dev);
+
+	dev_fd = open(libevdev_uinput_get_devnode(uidev),
+		      O_RDONLY|O_NONBLOCK);
+	ck_assert_int_ne(dev_fd, -1);
+	rc = libevdev_new_from_fd(dev_fd, &dev);
+	ck_assert_int_eq(rc, 0);
+
+	other_fd = open(libevdev_uinput_get_devnode(uidev),
+			O_RDONLY|O_NONBLOCK);
+	ck_assert_int_ne(other_fd, -1);
+	rc = libevdev_new_from_fd(other_fd, &other);
+	ck_assert_int_eq(rc, 0);
+
+	/* check we're getting the events before the grab */
+	libevdev_uinput_write_event(uidev, EV_REL, REL_X, -1);
+	libevdev_uinput_write_event(uidev, EV_SYN, SYN_REPORT, 0);
+	rc = libevdev_next_event(other, LIBEVDEV_READ_FLAG_NORMAL, &e);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	rc = libevdev_next_event(other, LIBEVDEV_READ_FLAG_NORMAL, &e);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	rc = libevdev_next_event(other, LIBEVDEV_READ_FLAG_NORMAL, &e);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	/* no events after the grab */
+	rc = libevdev_grab(dev, LIBEVDEV_GRAB);
+	ck_assert_int_eq(rc, 0);
+	libevdev_uinput_write_event(uidev, EV_REL, REL_X, -1);
+	libevdev_uinput_write_event(uidev, EV_SYN, SYN_REPORT, 0);
+	rc = libevdev_grab(dev, LIBEVDEV_GRAB);
+	ck_assert_int_eq(rc, 0);
+	rc = libevdev_next_event(other, LIBEVDEV_READ_FLAG_NORMAL, &e);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	/* swapping the fd removes the grab */
+	close(dev_fd);
+	dev_fd = open(libevdev_uinput_get_devnode(uidev),
+		      O_RDONLY|O_NONBLOCK);
+	ck_assert_int_ne(dev_fd, -1);
+	rc = libevdev_change_fd(dev, dev_fd);
+	ck_assert_int_eq(rc, 0);
+
+	/* check we're getting the events again */
+	libevdev_uinput_write_event(uidev, EV_REL, REL_X, -1);
+	libevdev_uinput_write_event(uidev, EV_SYN, SYN_REPORT, 0);
+	rc = libevdev_next_event(other, LIBEVDEV_READ_FLAG_NORMAL, &e);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	rc = libevdev_next_event(other, LIBEVDEV_READ_FLAG_NORMAL, &e);
+	ck_assert_int_eq(rc, LIBEVDEV_READ_STATUS_SUCCESS);
+	rc = libevdev_next_event(other, LIBEVDEV_READ_FLAG_NORMAL, &e);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	/* no events after the grab */
+	rc = libevdev_grab(dev, LIBEVDEV_GRAB);
+	ck_assert_int_eq(rc, 0);
+	libevdev_uinput_write_event(uidev, EV_REL, REL_X, -1);
+	libevdev_uinput_write_event(uidev, EV_SYN, SYN_REPORT, 0);
+	rc = libevdev_next_event(other, LIBEVDEV_READ_FLAG_NORMAL, &e);
+	ck_assert_int_eq(rc, -EAGAIN);
+
+	libevdev_uinput_destroy(uidev);
+	libevdev_free(dev);
+	libevdev_free(other);
+	close(dev_fd);
+	close(other_fd);
+}
+END_TEST
+
 START_TEST(test_set_clock_id)
 {
 	struct uinput_device* uidev;
@@ -625,6 +712,7 @@ libevdev_init_test(void)
 	tc = tcase_create("device grab");
 	tcase_add_test(tc, test_device_grab);
 	tcase_add_test(tc, test_device_grab_invalid_fd);
+	tcase_add_test(tc, test_device_grab_change_fd);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("clock id");
