@@ -61,12 +61,6 @@ usage(void) {
 	return 1;
 }
 
-static inline uint64_t
-tv2us(const struct timeval *tv)
-{
-	return tv->tv_sec * 1000000 + tv->tv_usec;
-}
-
 static inline double
 get_frequency(uint64_t last, uint64_t current)
 {
@@ -119,7 +113,7 @@ handle_event(struct measurements *m, const struct input_event *ev)
 		const int idle_reset = 3000000; /* us */
 		uint64_t last_us = m->us;
 
-		m->us = tv2us(&ev->time);
+		m->us = ev->input_event_sec * 1000000 + ev->input_event_usec;
 
 		/* reset after pause */
 		if (last_us + idle_reset < m->us) {

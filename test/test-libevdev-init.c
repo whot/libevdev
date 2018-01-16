@@ -662,19 +662,19 @@ START_TEST(test_clock_id_events)
 	ck_assert_int_eq(ev1.code, ev2.code);
 	ck_assert_int_eq(ev1.value, ev2.value);
 
-	t1 = ev1.time.tv_sec * 1000000LL + ev1.time.tv_usec;
-	t2 = ev2.time.tv_sec * 1000000LL + ev2.time.tv_usec;
+	t1 = ev1.input_event_sec * 1000000LL + ev1.input_event_usec;
+	t2 = ev2.input_event_sec * 1000000LL + ev2.input_event_usec;
 	ck_assert_int_ne(t1, t2);
 
-	ck_assert_int_ge(ev1.time.tv_sec, t1_real.tv_sec);
-	ck_assert_int_ge(ev1.time.tv_usec, t1_real.tv_nsec/1000);
-	ck_assert_int_le(ev1.time.tv_sec, t2_real.tv_sec);
-	ck_assert_int_le(ev1.time.tv_usec, t2_real.tv_nsec/1000);
+	ck_assert_int_ge(ev1.input_event_sec, t1_real.tv_sec);
+	ck_assert_int_ge(ev1.input_event_usec, t1_real.tv_nsec/1000);
+	ck_assert_int_le(ev1.input_event_sec, t2_real.tv_sec);
+	ck_assert_int_le(ev1.input_event_usec, t2_real.tv_nsec/1000);
 
-	ck_assert_int_ge(ev2.time.tv_sec, t1_mono.tv_sec);
-	ck_assert_int_ge(ev2.time.tv_usec, t1_mono.tv_nsec/1000);
-	ck_assert_int_le(ev2.time.tv_sec, t2_mono.tv_sec);
-	ck_assert_int_le(ev2.time.tv_usec, t2_mono.tv_nsec/1000);
+	ck_assert_int_ge(ev2.input_event_sec, t1_mono.tv_sec);
+	ck_assert_int_ge(ev2.input_event_usec, t1_mono.tv_nsec/1000);
+	ck_assert_int_le(ev2.input_event_sec, t2_mono.tv_sec);
+	ck_assert_int_le(ev2.input_event_usec, t2_mono.tv_nsec/1000);
 
 	uinput_device_free(uidev);
 	libevdev_free(dev);

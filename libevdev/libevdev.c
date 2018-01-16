@@ -525,7 +525,8 @@ libevdev_get_fd(const struct libevdev* dev)
 static inline void
 init_event(struct libevdev *dev, struct input_event *ev, int type, int code, int value)
 {
-	ev->time = dev->last_event_time;
+	ev->input_event_sec = dev->last_event_time.tv_sec;
+	ev->input_event_usec = dev->last_event_time.tv_usec;
 	ev->type = type;
 	ev->code = code;
 	ev->value = value;
@@ -967,7 +968,8 @@ update_state(struct libevdev *dev, const struct input_event *e)
 			break;
 	}
 
-	dev->last_event_time = e->time;
+	dev->last_event_time.tv_sec = e->input_event_sec;
+	dev->last_event_time.tv_usec = e->input_event_usec;
 
 	return rc;
 }

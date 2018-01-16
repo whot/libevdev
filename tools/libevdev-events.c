@@ -112,13 +112,13 @@ print_event(struct input_event *ev)
 {
 	if (ev->type == EV_SYN)
 		printf("Event: time %ld.%06ld, ++++++++++++++++++++ %s +++++++++++++++\n",
-				ev->time.tv_sec,
-				ev->time.tv_usec,
+				ev->input_event_sec,
+				ev->input_event_usec,
 				libevdev_event_type_get_name(ev->type));
 	else
 		printf("Event: time %ld.%06ld, type %d (%s), code %d (%s), value %d\n",
-			ev->time.tv_sec,
-			ev->time.tv_usec,
+			ev->input_event_sec,
+			ev->input_event_usec,
 			ev->type,
 			libevdev_event_type_get_name(ev->type),
 			ev->code,
