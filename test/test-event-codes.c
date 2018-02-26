@@ -72,7 +72,7 @@ START_TEST(test_key_codes)
 	ck_assert_int_eq(libevdev_event_code_from_name(EV_KEY, "KEY_0"), KEY_0);
 	ck_assert_int_eq(libevdev_event_code_from_name(EV_FF, "FF_GAIN"), FF_GAIN);
 	ck_assert_int_eq(libevdev_event_code_from_name(EV_FF_STATUS, "FF_STATUS_MAX"), FF_STATUS_MAX);
-	ck_assert_int_eq(libevdev_event_code_from_name(EV_SW, "SW_MAX"), SW_MAX);
+	ck_assert_int_eq(libevdev_event_code_from_name(EV_SW, "SW_PEN_INSERTED"), SW_PEN_INSERTED);
 
 	ck_assert_int_eq(libevdev_event_code_from_name_n(EV_ABS, "ABS_YXZ", 5), ABS_Y);
 }

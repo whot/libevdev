@@ -36,6 +36,7 @@ blacklist = [
 		"BTN_DIGI",
 		"BTN_WHEEL",
 		"BTN_TRIGGER_HAPPY",
+		"SW_MAX",
 		"REP_MAX",
 ]
 
