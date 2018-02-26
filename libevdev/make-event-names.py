@@ -103,18 +103,6 @@ def print_map(bits):
 	print("#endif");
 	print("")
 
-def print_python_map(bits):
-	print("map = {")
-
-	for val, name in list(getattr(bits, "ev").items()):
-		name = name[3:]
-		if name == "REP" or name == "PWR"  or name == "FF_STATUS"  or name == "MAX":
-			continue
-		print("	%d : %s_map," % (val, name.lower()))
-
-	print("}")
-	print("")
-
 def print_lookup(bits, prefix):
 	if not hasattr(bits, prefix):
 		return
