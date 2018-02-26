@@ -35,7 +35,8 @@ blacklist = [
 		"BTN_GAMEPAD",
 		"BTN_DIGI",
 		"BTN_WHEEL",
-		"BTN_TRIGGER_HAPPY"
+		"BTN_TRIGGER_HAPPY",
+		"REP_MAX",
 ]
 
 btn_additional = [

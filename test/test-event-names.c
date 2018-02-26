@@ -143,6 +143,15 @@ START_TEST(test_code_snd_name)
 }
 END_TEST
 
+START_TEST(test_code_rep_name)
+{
+	ck_assert_str_eq(libevdev_event_code_get_name(EV_REP, REP_DELAY), "REP_DELAY");
+	ck_assert_str_eq(libevdev_event_code_get_name(EV_REP, REP_PERIOD), "REP_PERIOD");
+	ck_assert_str_eq(libevdev_event_code_get_name(EV_REP, REP_MAX), "REP_PERIOD");
+
+}
+END_TEST
+
 START_TEST(test_code_msc_name)
 {
 	/* pick out a few only */
@@ -281,6 +290,7 @@ event_name_suite(void)
 	tcase_add_test(tc, test_code_key_name);
 	tcase_add_test(tc, test_code_led_name);
 	tcase_add_test(tc, test_code_snd_name);
+	tcase_add_test(tc, test_code_rep_name);
 	tcase_add_test(tc, test_code_msc_name);
 	tcase_add_test(tc, test_code_sw_name);
 	tcase_add_test(tc, test_code_ff_name);
