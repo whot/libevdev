@@ -167,6 +167,11 @@ int main(int argc, char **argv)
 	TCase *tc;
 	int failed;
 
+	if (getuid() != 0) {
+		fprintf(stderr, "This test needs to run as root\n");
+		return 77;
+	}
+
 	s = suite_create("kernel tests");
 
 	tc = tcase_create("EVIOCREVOKE");

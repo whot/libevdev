@@ -73,6 +73,11 @@ int main(void)
 	const struct rlimit corelimit = {0, 0};
 	int failed;
 
+	if (getuid() != 0) {
+		fprintf(stderr, "This test needs to run as root\n");
+		return 77;
+	}
+
 	if (is_debugger_attached())
 		setenv("CK_FORK", "no", 0);
 
