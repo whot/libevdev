@@ -43,11 +43,7 @@ extern "C" {
  * ===========
  * The git repository is available here:
  *
- *   - git://git.freedesktop.org/git/libevdev
- *
- * The git web interface is available here:
- *
- *   - http://cgit.freedesktop.org/libevdev/
+ *   - https://gitlab.freedesktop.org/libevdev/libevdev
  *
  * Development of libevdev is discussed on
  * [input-tools@lists.freedesktop.org](http://lists.freedesktop.org/mailman/listinfo/input-tools).
@@ -152,7 +148,7 @@ extern "C" {
  * @endcode
  *
  * A more complete example is available with the libevdev-events tool here:
- * http://cgit.freedesktop.org/libevdev/tree/tools/libevdev-events.c
+ * https://gitlab.freedesktop.org/libevdev/libevdev/blob/master/tools/libevdev-events.c
  *
  * Backwards compatibility with older kernel
  * =========================================
@@ -167,8 +163,8 @@ extern "C" {
  *
  * Reporting bugs
  * ==============
- * Please report bugs in the freedesktop.org bugzilla under the libevdev product:
- * https://bugs.freedesktop.org/enter_bug.cgi?product=libevdev
+ * Please report bugs in the freedesktop.org GitLab:
+ * https://gitlab.freedesktop.org/libevdev/libevdev/issues/
  */
 
 /**
